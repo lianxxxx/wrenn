@@ -8,11 +8,11 @@ Check off each box as you go. Claude: read this file at the start of every sessi
 
 ## Phase 0: Setup
 
-- [ ] Create `motion-app` folder (rename to `wrenn` later if you want)
-- [ ] Add `CLAUDE.md` and `ROADMAP.md`
-- [ ] `git init` and first commit
+- [x] Create `motion-app` folder (rename to `wrenn` later if you want)
+- [x] Add `CLAUDE.md` and `ROADMAP.md`
+- [x] `git init` and first commit
 - [ ] Add project to Orca
-- [ ] Push to a new GitHub repo (can stay private until launch)
+- [x] Push to a new GitHub repo (can stay private until launch)
 
 ## Phase 0.5: Install skills and tools
 
