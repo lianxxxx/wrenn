@@ -11,7 +11,7 @@ Check off each box as you go. Claude: read this file at the start of every sessi
 - [x] Create `motion-app` folder (rename to `wrenn` later if you want)
 - [x] Add `CLAUDE.md` and `ROADMAP.md`
 - [x] `git init` and first commit
-- [ ] Add project to Orca
+- [x] Add project to Orca
 - [x] Push to a new GitHub repo (can stay private until launch)
 
 ## Phase 0.5: Install skills and tools
@@ -23,7 +23,7 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
   `/plugin install superpowers@superpowers-marketplace`
   Then restart Claude Code. Do NOT install Ponytail in this repo (it conflicts with Superpowers' tests and structure)
 
-- [ ] Impeccable (design rules, anti-slop, `/impeccable audit`, `/impeccable critique`)
+- [x] Impeccable (design rules, anti-slop, `/impeccable audit`, `/impeccable critique`)
   `npx -y skills add pbakaus/impeccable --skill impeccable --agent claude-code`
 - [ ] Taste skill (premium, adjustable design direction, motion-first)
   `npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend`
