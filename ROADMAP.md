@@ -27,8 +27,8 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
   `npx -y skills add pbakaus/impeccable --skill impeccable --agent claude-code`
 - [x] Taste skill (premium, adjustable design direction, motion-first)
   `npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend`
-- [ ] Emil Kowalski skills (animation and micro-interaction craft, animation review)
-  `npx skills add emilkowalski/skill --skill emil-design-eng` (verify repo name on GitHub)
+- [x] Emil Kowalski skills (animation and micro-interaction craft, animation review)
+  `npx skills add emilkowalski/skills --skill emil-design-eng --skill review-animations --agent claude-code`
 - [ ] Playwright (testing the app and landing page; also usable by the render engine)
   `npm i -D @playwright/test` then `npx playwright install chromium`
 - [ ] img2threejs (turn the logo/mascot image into an interactive Three.js model for the landing page hero). Repo: hoainho/img2threejs (MIT, Python). Note: result is an approximation, best on clear, simple shapes
