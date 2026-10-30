@@ -18,7 +18,7 @@ Check off each box as you go. Claude: read this file at the start of every sessi
 
 Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets them. Check each repo's README for the latest install command before running.
 
-- [ ] Superpowers (senior engineer workflow: brainstorm, plan, worktrees, TDD, review). Install this FIRST
+- [x] Superpowers (senior engineer workflow: brainstorm, plan, worktrees, TDD, review). Install this FIRST
   `/plugin marketplace add obra/superpowers-marketplace`
   `/plugin install superpowers@superpowers-marketplace`
   Then restart Claude Code. Do NOT install Ponytail in this repo (it conflicts with Superpowers' tests and structure)
