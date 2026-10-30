@@ -29,16 +29,12 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
   `npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend`
 - [x] Emil Kowalski skills (animation and micro-interaction craft, animation review)
   `npx skills add emilkowalski/skills --skill emil-design-eng --skill review-animations --agent claude-code`
-- [ ] Playwright (testing the app and landing page; also usable by the render engine)
-  `npm i -D @playwright/test` then `npx playwright install chromium`
-- [ ] img2threejs (turn the logo/mascot image into an interactive Three.js model for the landing page hero). Repo: hoainho/img2threejs (MIT, Python). Note: result is an approximation, best on clear, simple shapes
-- [ ] React Bits (animated React components for the landing page) from reactbits.dev, copy only the ones you use
-- [ ] Optional: awesome-design-md, as a FORMAT reference only to write Wrenn's own `DESIGN.md`. Do not copy another brand's design
+Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (they need the app, the mascot, or `DESIGN.md` first). They're moved to the step where they're used, so Claude will remind you there.
 
 ## Phase 1: Brand
 
-- [ ] Check availability: domain (wrenn.app, getwrenn.com), GitHub org/name, TikTok, IG, X handles
-- [ ] Grab a "wren" domain variation too (optional, for redirect)
+- [x] Domain: no paid domain. Use a subdomain of Lian's portfolio, `wrenn.leyanne.com` (set up later in Phase 6)
+- [ ] Optional: check GitHub org/name, TikTok, IG, X handles
 - [ ] Collect inspo (logos, colors, motion brands you like)
 - [ ] **Lian generates the images herself** (Claude does NOT generate these):
   - [ ] Wren mascot (the bird)
@@ -47,12 +43,15 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
 - [ ] Pick brand colors (primary, accent, neutrals, dark mode)
 - [ ] Pick fonts (display + body)
 - [ ] Write Wrenn's own `DESIGN.md` at the repo root (colors, fonts, spacing, components, do's and don'ts) so agents use exact values instead of guessing
+  Optional format reference: VoltAgent/awesome-design-md (read only, no install). Do not copy another brand's design
 
 ## Phase 2: Design
 
 - [ ] Design tokens in code (Tailwind theme: colors, fonts, spacing, radius)
+- [ ] Install Playwright in `web/` (once `web/` is set up): `npm i -D @playwright/test` then `npx playwright install chromium`
 - [ ] Landing page layout: hero, how it works ("Tap. Render. Post."), demo video, download, footer
-- [ ] Landing page motion: React Bits components + interactive 3D logo/mascot (img2threejs) in the hero. Keep it purposeful, not everything moving
+- [ ] Install Python + img2threejs (needs the finished mascot). Repo: hoainho/img2threejs (Apache-2.0). Check its README for a project-only install so worktrees get it. Note: result is an approximation, best on clear, simple shapes
+- [ ] Landing page motion: React Bits components (no install: copy only the ones you use from reactbits.dev) + interactive 3D logo/mascot (img2threejs) in the hero. Keep it purposeful, not everything moving
 - [ ] Run `/impeccable critique` and Emil's animation review on the landing page
 - [ ] App screens:
   - [ ] Setup screen (detect Claude Code, optional ElevenLabs key)
@@ -73,6 +72,7 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
 - [ ] Render engine proof of concept: 5s HTML animation to MP4 (`desktop/engine/`)
 - [ ] Local audio: Web Audio music + SFX, merged into MP4
 - [ ] Electron + Vite + React app shell (`desktop/`)
+- [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
 - [ ] Setup screen: detect Claude Code installed
 - [ ] First template: feature walkthrough
 - [ ] Size picker + length picker
