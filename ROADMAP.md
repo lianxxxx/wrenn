@@ -25,7 +25,7 @@ Install at the repo root and COMMIT `.claude/skills` so every Orca worktree gets
 
 - [x] Impeccable (design rules, anti-slop, `/impeccable audit`, `/impeccable critique`)
   `npx -y skills add pbakaus/impeccable --skill impeccable --agent claude-code`
-- [ ] Taste skill (premium, adjustable design direction, motion-first)
+- [x] Taste skill (premium, adjustable design direction, motion-first)
   `npx skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend`
 - [ ] Emil Kowalski skills (animation and micro-interaction craft, animation review)
   `npx skills add emilkowalski/skill --skill emil-design-eng` (verify repo name on GitHub)
