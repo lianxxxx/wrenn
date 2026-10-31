@@ -27,6 +27,9 @@ dist-electron/
 release/
 build/
 
+# Private inspo (other people's work, never pushed)
+inspo/
+
 # Render output
 *.mp4
 

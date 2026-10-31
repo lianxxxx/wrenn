@@ -60,6 +60,7 @@ motion-app/
 ## Design skills and tools
 
 - `DESIGN.md` (repo root, once written) is the source of truth for colors, fonts, spacing. Always follow it.
+- Inspo lives in `inspo/INSPO.md` (gitignored, so worktrees don't have it). Read it from the main checkout: `C:\Users\Leyanne\Desktop\Projects\wrenn\inspo\INSPO.md`. Use it for direction, never copy another brand's design.
 - Impeccable: design rules and audits. Use `/impeccable audit` and `/impeccable critique` before calling UI work done.
 - Taste skill: overall design direction for UI and landing page.
 - Emil Kowalski skills: any animation or micro-interaction work, plus animation review.
