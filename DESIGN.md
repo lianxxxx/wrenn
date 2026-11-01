@@ -13,6 +13,7 @@ colors:
   sky: "#8ECAE6"
   teal: "#219EBC"
   golden: "#E0B800"
+  sky-soft: "#DCEFF8"
   line: "#E8DDCB"
 typography:
   display:
@@ -87,20 +88,14 @@ components:
     typography: "{typography.button}"
     rounded: "{rounded.pill}"
     padding: "10px 22px"
-  pill-label:
-    backgroundColor: "transparent"
-    textColor: "{colors.navy}"
-    typography: "{typography.label}"
-    rounded: "{rounded.pill}"
-    padding: "4px 14px"
   card:
     backgroundColor: "{colors.sky}"
     textColor: "{colors.navy}"
     rounded: "{rounded.lg}"
     padding: "28px 22px"
   navbar:
-    backgroundColor: "{colors.navy}"
-    textColor: "{colors.cream}"
+    backgroundColor: "{colors.cream}"
+    textColor: "{colors.navy}"
     typography: "{typography.label}"
     rounded: "{rounded.lg}"
 ---
@@ -121,7 +116,7 @@ Signature elements:
 - **Blob words:** key words sit on their own color blobs that look painted with a marker or highlighter: bumpy hand-made edges, tight around the word, barely tilted.
 - **Soft organic edges:** clouds, scallops, blobs. Almost no hard straight section edges.
 - **Hand-drawn accents, used sparingly:** a wobbly circle on the active nav item, small sparkle or "pop" lines.
-- **Simple centered sections:** pill label, big headline, one short line, one button.
+- **Simple centered sections:** big headline, one short line, one button. No eyebrow labels.
 
 ## Colors
 
@@ -142,6 +137,8 @@ Two colors do the main work. Six more are for blobs, cards and highlights.
 | lemon | `#F3DA2E` | light | navy |
 | lime | `#82B51F` | light | navy |
 | sky | `#8ECAE6` | light | navy |
+
+**Sky soft `#DCEFF8`:** the hero card background and soft cloud tints. Not a blob color.
 
 **Golden `#E0B800`:** the mascot's beak and music note on light backgrounds (lemon is too faint on cream).
 
@@ -164,37 +161,36 @@ Headlines are navy. To add color to a headline, make one word orange or put it o
 
 ## Layout
 
-- **Every landing section follows one pattern:** pill label, big Bubblegum headline, one short Figtree line, one button. Centered. Nothing else unless the section needs cards or a demo.
-- **Hero:** centered blob headline, short sub, one button, soft clouds floating in the background, and the product (app window or a 9:16 video frame) peeking up from the bottom with small "pop" lines.
-- **Cards:** tilted and overlapping like a fanned hand of cards (about -7°, 1°, 7°), each a different blob color. Not a stiff grid.
-- **Navbar:** links inside a navy cloud-shaped tab that dips down from the top, CTA at the end.
-- **Footer:** navy, scalloped cloud top edge, simple link columns, giant "wrenn" wordmark across the bottom with the mascot perched on the letters.
+- **Every landing section follows one pattern:** big Bubblegum headline, one short Figtree line, one button. **No eyebrow** (no small pill or label above the headline; Lian removed them). Centered by default. **Exceptions (inspo: Little Bloom):** "From photos to video" is a split section (left-aligned headline, two staggered frames with the mascot perched on one, a column of white feature cards on the right). "Made for every feed" sits on a full-width sky-soft band with a cloud-shaped top edge, left-aligned headline, frames at staggered heights with marker-blob sticker labels on their bottom edge, mascot perched on the first. Nothing else unless the section needs cards or a demo.
+- **Hero:** sits inside one rounded card (`rounded 28px`, background `sky-soft #DCEFF8`) with a small gap of page background around it. **Only the hero gets a card**; every other section sits directly on the page background, so it doesn't get too much. Inside: centered navy Bubblegum headline with **one blob only, on "render."** (teal, white text). Lian compared all blobs, no blobs and one blob in red, lemon, lime and teal, and picked this. Short sub, one button, white clouds floating in the background, and the product (a 9:16 video frame) peeking up from the bottom edge of the card with small "pop" lines.
+- **Cards:** one row like a fanned hand of cards (inspo: Detach). The middle card is straight and in front, the side cards overlap behind it. **On phones** the side cards tilt outward (-8° and 8°) at **staggered heights**: the left card a bit higher, the right card lower. **On desktop** both side cards tilt the same way, clockwise (about 6°). On phones they **stay in a row** and the side cards get cut off by the screen edge (never stack them). On desktop (inspo: Little Bloom) the cards are bigger, the side cards sit **higher** and the middle card sits **lower**, still in front. Each card a different blob color. Not a stiff grid.
+- **Navbar:** lives inside the hero card. Logo (bird + "wrenn") on the left. On the right, links inside a big cream cloud that hangs from the top and is flush with the card's right edge (4 large uneven bumps along the bottom, a round lobe on the left). Navy links, navy Download button with no shadow.
+- **Footer:** navy, with round cloud bumps rising from its top edge (the shared `CloudEdge`, same shape as the "Made for every feed" band, never small hanging scallops), simple link columns, giant "wrenn" wordmark across the bottom with the mascot perched on the letters.
 - Generous vertical spacing between sections (`3xl`). Max content width about 1160px. Phone-first: everything must work at 360px wide with 16px side padding.
 
 ## Elevation & Depth
 
 Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
-- **Buttons:** a solid offset shadow `0 4px 0 rgba(2, 48, 71, 0.25)`, like a sticker or a pressable key. No blur. Remove it on the navbar button.
+- **Buttons:** flat, no shadow (Lian removed it from both the hero and navbar buttons). A small press-down on click (`translate-y 2px`) is fine.
 - **Cards:** one soft shadow `0 10px 30px rgba(0, 0, 0, 0.08)`.
 - No glassmorphism, no glows, no gradients.
 
 ## Shapes
 
 - **Blobs (marker highlight):** a rounded shape with uneven corners (e.g. `45% 38% 42% 40% / 50% 46% 54% 50%`), roughened by an SVG noise filter (`feTurbulence` fractalNoise, baseFrequency `0.035`, numOctaves `2`, then `feDisplacementMap` scale `14`) so the edges look bumpy and hand-painted. Apply the filter to the color shape only, never the text. Use a different noise seed for neighbouring blobs. Tilt between -1.5° and 1.5°. Reference: `web/src/app/page.tsx` (`Blobs`, `MarkerFilters`).
-- **Scallop / cloud edge:** a row of circles for section dividers and the footer top. Never a hard straight edge between two colored sections.
+- **Cloud edge:** round, uneven bumps rising up from the top of a colored block (component `CloudEdge` in `web/src/components/cloud-edge.tsx`). Used on the "Made for every feed" band and the footer. Not small, even, hanging scallops. Never a hard straight edge between two colored sections.
 - **Clouds:** soft, light tint (e.g. `#DCEFF8` on cream), floating in the hero background.
-- **W brush:** thick rounded zig-zag in light sky, at low opacity. **Only once on the whole site**, behind one section.
+- **W brush:** many thick, rounded strokes zig-zagging, **behind the button area, reaching up to the sub** (not behind the headline, about 640px wide, never wider than the screen; the rounded ends must show in full, never clipped), overlapping like a big crayon scribble (inspo: brush-stroke bg, shape only). Light sky at low opacity. Used in **two places only** (component `Scribble`): behind the FAQ list (stretched to cover every question, not the headline or sub) and behind the Download button.
 - **Hand-drawn circle:** wobbly, not a perfect oval. **Active nav item only.** Can draw itself in.
-- Buttons and pill labels are full pills (`rounded.pill`). Cards use `rounded.lg`.
+- Buttons are full pills (`rounded.pill`). Cards use `rounded.lg`.
 
 ## Components
 
-- **Primary button:** navy, cream text, Bubblegum, pill, offset shadow. On a navy background it flips to cream with navy text (`button-on-dark`).
+- **Primary button:** navy, cream text, Bubblegum, pill, no shadow. On a navy background it flips to cream with navy text (`button-on-dark`).
 - **Ghost button:** transparent, 2px navy border, navy text.
-- **Pill label:** 2px navy border, Figtree 600, sits above section headlines ("How it works").
 - **Blob word:** one word per blob, Bubblegum, padding about `0.08em 0.4em 0.14em`, marker-highlight shape (see Shapes), text color by the blob rules in Colors.
 - **Card:** blob color background, Bubblegum title, Figtree description, `rounded.lg`, tilted in a fanned group.
-- **Navbar:** navy cloud tab, cream Figtree links, hand-drawn circle on the active link, `button-on-dark` CTA.
+- **Navbar:** cream cloud inside the hero card, navy Figtree links, hand-drawn circle on the active link, navy Download button (no shadow).
 - **Mascot:** navy body, golden beak and note, 6-color tail. App icon version: bird on a cream blob in a navy squircle, no note.
 
 **Motion** (follow the Emil Kowalski skills for craft):
@@ -212,10 +208,11 @@ Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
 - Keep text big and readable on mute in videos, and away from the corners.
 
 **Don't**
+- Eyebrow labels (small pills or text above a section headline). The headline stands alone.
 - Pure black text, gradients between brand colors, glassmorphism.
 - Red and orange right next to each other.
 - White text on sky, lemon, lime or orange.
 - Bubblegum for paragraphs, fake bold on Bubblegum, ALL CAPS headlines, or a third font.
 - Smooth ovals, perfect pills or circles as blobs (they look digital, not hand-made), blobs on every heading, or more than 3 blob colors in one line.
-- The W brush more than once, or the hand-drawn circle anywhere except the active nav item.
+- The W brush anywhere except the FAQ list and the Download button, or the hand-drawn circle anywhere except the active nav item.
 - Copying any inspo site's layout, illustrations or colors 1:1.
