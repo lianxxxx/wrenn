@@ -13,25 +13,50 @@ const colors = [
   { name: "golden", hex: "#E0B800", className: "bg-golden" },
 ];
 
-// Uneven blob corners and tilts, from DESIGN.md Shapes
+// Marker-highlight blobs: a rounded shape roughened by an SVG noise filter,
+// so the edges look hand-painted while the text stays sharp.
 const blobShapes = [
-  { borderRadius: "58% 42% 52% 48% / 55% 48% 52% 45%", transform: "rotate(-3deg)" },
-  { borderRadius: "40% 60% 48% 52% / 52% 44% 56% 48%", transform: "rotate(2deg)" },
-  { borderRadius: "60% 40% 45% 55% / 48% 60% 40% 52%", transform: "rotate(-1.5deg)" },
-  { borderRadius: "48% 52% 58% 42% / 58% 42% 50% 50%", transform: "rotate(2.5deg)" },
+  { borderRadius: "45% 38% 42% 40% / 50% 46% 54% 50%", transform: "rotate(-1.5deg)" },
+  { borderRadius: "38% 45% 40% 42% / 46% 54% 48% 52%", transform: "rotate(1deg)" },
+  { borderRadius: "42% 40% 46% 38% / 54% 48% 50% 46%", transform: "rotate(-0.5deg)" },
+  { borderRadius: "40% 42% 38% 45% / 48% 52% 46% 54%", transform: "rotate(1.5deg)" },
 ];
 
-type BlobWord = { word: string; className: string };
+const MARKER_FILTERS = 4;
+
+// One filter per seed, so neighbouring blobs get different bumps
+function MarkerFilters() {
+  return (
+    <svg width="0" height="0" className="absolute" aria-hidden>
+      {Array.from({ length: MARKER_FILTERS }, (_, i) => (
+        <filter key={i} id={`marker-${i}`} x="-20%" y="-30%" width="140%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed={i + 3} />
+          <feDisplacementMap in="SourceGraphic" scale="14" />
+        </filter>
+      ))}
+    </svg>
+  );
+}
+
+type BlobWord = { word: string; bg: string; text: string };
 
 function Blobs({ words }: { words: BlobWord[] }) {
   return (
-    <div className="flex flex-wrap justify-center gap-x-3 gap-y-2">
+    <div className="flex flex-wrap justify-center gap-x-3 gap-y-3">
       {words.map((w, i) => (
         <span
           key={w.word}
-          className={`font-display text-5xl leading-tight px-[0.45em] pt-[0.1em] pb-[0.18em] ${w.className}`}
-          style={blobShapes[i % blobShapes.length]}
+          className={`relative isolate font-display text-5xl leading-tight px-[0.4em] pt-[0.08em] pb-[0.14em] ${w.text}`}
+          style={{ transform: blobShapes[i % blobShapes.length].transform }}
         >
+          <span
+            aria-hidden
+            className={`absolute -inset-1 -z-10 ${w.bg}`}
+            style={{
+              borderRadius: blobShapes[i % blobShapes.length].borderRadius,
+              filter: `url(#marker-${i % MARKER_FILTERS})`,
+            }}
+          />
           {w.word}
         </span>
       ))}
@@ -53,6 +78,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-3xl px-md py-2xl text-center">
+      <MarkerFilters />
       <header className="flex flex-col items-center gap-sm">
         <h1 className="font-display text-8xl leading-none">wrenn</h1>
         <p className="font-display text-3xl text-orange">No prompts. Just render.</p>
@@ -90,29 +116,29 @@ export default function Home() {
           <p className="text-sm text-navy-body">Light background, mostly light blobs</p>
           <Blobs
             words={[
-              { word: "No", className: "bg-sky text-navy" },
-              { word: "prompts.", className: "bg-orange text-navy" },
-              { word: "Just", className: "bg-red text-white" },
-              { word: "render.", className: "bg-lime text-navy" },
+              { word: "No", bg: "bg-sky", text: "text-navy" },
+              { word: "prompts.", bg: "bg-orange", text: "text-navy" },
+              { word: "Just", bg: "bg-red", text: "text-white" },
+              { word: "render.", bg: "bg-lime", text: "text-navy" },
             ]}
           />
           <p className="text-sm text-navy-body">Light background, alternating dark and light</p>
           <Blobs
             words={[
-              { word: "No", className: "bg-teal text-white" },
-              { word: "prompts.", className: "bg-orange text-navy" },
-              { word: "Just", className: "bg-red text-white" },
-              { word: "render.", className: "bg-lime text-navy" },
+              { word: "No", bg: "bg-teal", text: "text-white" },
+              { word: "prompts.", bg: "bg-orange", text: "text-navy" },
+              { word: "Just", bg: "bg-red", text: "text-white" },
+              { word: "render.", bg: "bg-lime", text: "text-navy" },
             ]}
           />
           <div className="flex flex-col gap-lg rounded-lg bg-navy p-xl">
             <p className="text-sm text-cream">Dark background: white text on red and teal only</p>
             <Blobs
               words={[
-                { word: "No", className: "bg-teal text-white" },
-                { word: "prompts.", className: "bg-red text-white" },
-                { word: "Just", className: "bg-teal text-white" },
-                { word: "render.", className: "bg-red text-white" },
+                { word: "No", bg: "bg-teal", text: "text-white" },
+                { word: "prompts.", bg: "bg-red", text: "text-white" },
+                { word: "Just", bg: "bg-teal", text: "text-white" },
+                { word: "render.", bg: "bg-red", text: "text-white" },
               ]}
             />
           </div>

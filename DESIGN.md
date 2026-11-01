@@ -118,7 +118,7 @@ Fonts are self-hosted from `brand/fonts/` (never the Google Fonts CDN). The masc
 Wrenn is a free desktop app that turns screenshots into showreel videos with no prompts. The brand is a small, loud, singing bird: the mascot is a wren inspired by the **Ibong Adarna**, the Filipino folklore bird whose song changes its colors. Its 6 tail feathers are the 6 blob colors.
 
 Signature elements:
-- **Blob words:** key words sit on their own uneven, tilted color blobs, like stickers.
+- **Blob words:** key words sit on their own color blobs that look painted with a marker or highlighter: bumpy hand-made edges, tight around the word, barely tilted.
 - **Soft organic edges:** clouds, scallops, blobs. Almost no hard straight section edges.
 - **Hand-drawn accents, used sparingly:** a wobbly circle on the active nav item, small sparkle or "pop" lines.
 - **Simple centered sections:** pill label, big headline, one short line, one button.
@@ -180,7 +180,7 @@ Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
 
 ## Shapes
 
-- **Blobs:** uneven radius on all four corners, e.g. `58% 42% 52% 48% / 55% 48% 52% 45%`. Every blob a bit different. Tilt between -3° and 3°.
+- **Blobs (marker highlight):** a rounded shape with uneven corners (e.g. `45% 38% 42% 40% / 50% 46% 54% 50%`), roughened by an SVG noise filter (`feTurbulence` fractalNoise, baseFrequency `0.035`, numOctaves `2`, then `feDisplacementMap` scale `14`) so the edges look bumpy and hand-painted. Apply the filter to the color shape only, never the text. Use a different noise seed for neighbouring blobs. Tilt between -1.5° and 1.5°. Reference: `web/src/app/page.tsx` (`Blobs`, `MarkerFilters`).
 - **Scallop / cloud edge:** a row of circles for section dividers and the footer top. Never a hard straight edge between two colored sections.
 - **Clouds:** soft, light tint (e.g. `#DCEFF8` on cream), floating in the hero background.
 - **W brush:** thick rounded zig-zag in light sky, at low opacity. **Only once on the whole site**, behind one section.
@@ -192,7 +192,7 @@ Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
 - **Primary button:** navy, cream text, Bubblegum, pill, offset shadow. On a navy background it flips to cream with navy text (`button-on-dark`).
 - **Ghost button:** transparent, 2px navy border, navy text.
 - **Pill label:** 2px navy border, Figtree 600, sits above section headlines ("How it works").
-- **Blob word:** one word per blob, Bubblegum, padding about `0.1em 0.45em 0.18em`, text color by the blob rules in Colors.
+- **Blob word:** one word per blob, Bubblegum, padding about `0.08em 0.4em 0.14em`, marker-highlight shape (see Shapes), text color by the blob rules in Colors.
 - **Card:** blob color background, Bubblegum title, Figtree description, `rounded.lg`, tilted in a fanned group.
 - **Navbar:** navy cloud tab, cream Figtree links, hand-drawn circle on the active link, `button-on-dark` CTA.
 - **Mascot:** navy body, golden beak and note, 6-color tail. App icon version: bird on a cream blob in a navy squircle, no note.
@@ -216,6 +216,6 @@ Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
 - Red and orange right next to each other.
 - White text on sky, lemon, lime or orange.
 - Bubblegum for paragraphs, fake bold on Bubblegum, ALL CAPS headlines, or a third font.
-- Perfect pill or circle blobs, blobs on every heading, or more than 3 blob colors in one line.
+- Smooth ovals, perfect pills or circles as blobs (they look digital, not hand-made), blobs on every heading, or more than 3 blob colors in one line.
 - The W brush more than once, or the hand-drawn circle anywhere except the active nav item.
 - Copying any inspo site's layout, illustrations or colors 1:1.
