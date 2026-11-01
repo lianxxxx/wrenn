@@ -49,8 +49,8 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 ## Phase 2: Design
 
-- [ ] Design tokens in code (Tailwind theme: colors, fonts, spacing, radius)
-- [ ] Install Playwright in `web/` (once `web/` is set up): `npm i -D @playwright/test` then `npx playwright install chromium`
+- [x] Design tokens in code (Tailwind theme: colors, fonts, spacing, radius): `brand/tokens.css`, shared by web/ and desktop/
+- [x] Install Playwright in `web/` (once `web/` is set up): `npm i -D @playwright/test` then `npx playwright install chromium`
 - [ ] Landing page layout: hero, how it works ("Tap. Render. Post."), demo video, download, footer
 - [ ] Install Python + img2threejs (needs the finished mascot). Repo: hoainho/img2threejs (Apache-2.0). Check its README for a project-only install so worktrees get it. Note: result is an approximation, best on clear, simple shapes
 - [ ] Landing page motion: React Bits components (no install: copy only the ones you use from reactbits.dev) + interactive 3D logo/mascot (img2threejs) in the hero. Keep it purposeful, not everything moving

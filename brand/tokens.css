@@ -1,0 +1,50 @@
+/*
+  Wrenn design tokens, shared by web/ and desktop/.
+  Source of truth is DESIGN.md (repo root): change values there first, then here.
+  Tailwind v4 turns these into classes, e.g. bg-navy, text-lemon, font-display, rounded-pill, p-lg.
+
+  Fonts: --font-bubblegum and --font-figtree are set by each app when it loads
+  the files from brand/fonts/ (web/ uses next/font/local).
+*/
+
+@theme {
+  /* Background: cream or white is NOT decided yet. Change only this line. */
+  --color-bg: #fff8ec;
+
+  /* Core */
+  --color-navy: #023047;
+  --color-navy-body: #2a4a5a;
+  --color-cream: #fff8ec;
+  --color-white: #ffffff;
+  --color-line: #e8ddcb;
+
+  /* Blob colors. Dark: red, teal (white text). Light: the rest (navy text). */
+  --color-red: #d62828;
+  --color-orange: #f77f00;
+  --color-lemon: #f3da2e;
+  --color-lime: #82b51f;
+  --color-sky: #8ecae6;
+  --color-teal: #219ebc;
+
+  /* Mascot beak and music note on light backgrounds */
+  --color-golden: #e0b800;
+
+  /* Fonts */
+  --font-display: var(--font-bubblegum), system-ui, sans-serif;
+  --font-body: var(--font-figtree), system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-2xl: 64px;
+  --spacing-3xl: 110px;
+}
