@@ -46,3 +46,6 @@ playwright-report/
 Thumbs.db
 .vscode/
 .idea/
+
+# Superpowers scratch (plan ledgers)
+.superpowers/
