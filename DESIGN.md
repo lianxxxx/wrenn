@@ -149,6 +149,13 @@ Two colors do the main work. Six more are for blobs, cards and highlights.
 - **Dark background (navy, dark video):** all white text, only on red and teal blobs, alternating.
 - **Section headline blobs (one word per headline): always white text**, whatever the blob color (Lian's choice). Light blobs (lemon, lime, orange) are lower contrast with white, so keep these words big (headline size only), never small text.
 
+## Dark mode (draft)
+
+- **Default is light.** A sun / moon toggle in the navbar switches to dark, and the choice is saved for the next visit (it does not follow the device setting).
+- **Look: deep navy night** (option A). Page `#061722`, hero card and footer cloud brand navy `#023047` with small stars and a few lemon sparkles, cards `#0B2A3B`, text cream `#F3EBDD`. Blob colors and white blob text stay the same.
+- How it works in code: `:root.dark` in `brand/tokens.css` overrides the token values (navy and cream swap roles), and `dark:` classes handle the rest. White clouds hide at night; `Stars` only show at night.
+- **Temporary:** the logo and mascot get a thin cream outline in dark mode so their navy doesn't disappear. Lian to make proper light versions later; the step birds show on a white tile in dark mode.
+
 ## Typography
 
 Two fonts only.

@@ -15,6 +15,10 @@ const figtree = localFont({
   weight: "300 900",
 });
 
+// Runs before the page paints, so a saved dark choice doesn't flash light first.
+// Default is light: dark only when the visitor picked it with the toggle.
+const themeScript = 'try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}';
+
 export const metadata: Metadata = {
   title: "Wrenn",
   description: "No prompts. Just render.",
@@ -25,7 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${bubblegum.variable} ${figtree.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

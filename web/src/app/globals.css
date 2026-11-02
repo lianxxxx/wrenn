@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "../../../brand/tokens.css";
 
+/* dark: classes apply when <html> has the "dark" class (set by the theme toggle) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   background: var(--color-bg);
   color: var(--color-navy);
@@ -17,4 +20,10 @@ body::before {
   opacity: 0.1;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* On the dark page the grain lightens a little instead of darkening */
+.dark body::before {
+  mix-blend-mode: screen;
+  opacity: 0.05;
 }

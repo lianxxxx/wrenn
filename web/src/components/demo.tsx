@@ -50,7 +50,7 @@ export function Demo() {
               alt=""
               width={1462}
               height={1076}
-              className="absolute -top-16 right-2 w-24 sm:-top-20 sm:w-28"
+              className="absolute -top-16 right-2 w-24 sm:-top-20 sm:w-28 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]"
             />
             <PhotoStack />
           </div>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { NavLinks } from "@/components/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Navbar: logo on the left, links inside a cream cloud that hangs from the
 // top, flush with the hero card's right edge (inspo: Little Bloom).
@@ -10,7 +11,7 @@ export function SiteNav() {
     <header className="relative z-20 flex w-full items-start justify-between gap-sm pl-md md:pl-2xl">
       <a href="#" className="shrink-0 pt-sm">
         {/* Draft PNG from brand/logo/, swap for the SVG once it's traced */}
-        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} priority className="h-9 w-auto sm:h-12" />
+        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} priority className="h-9 w-auto sm:h-12 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
       </a>
 
       <nav className="relative isolate">
@@ -40,6 +41,7 @@ export function SiteNav() {
         </svg>
         <div className="relative flex items-center gap-lg pb-[2.75rem] pl-[2.75rem] pr-md pt-md text-navy sm:pb-[4.5rem] sm:pl-[5.5rem] sm:pr-xl sm:pt-lg">
           <NavLinks />
+          <ThemeToggle />
           <a
             href="#get-wrenn"
             className="rounded-pill bg-navy px-md py-2 font-display text-lg leading-none text-cream"

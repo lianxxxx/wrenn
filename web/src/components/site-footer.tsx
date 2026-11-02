@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FooterCloud } from "@/components/footer-cloud";
+import { Stars } from "@/components/stars";
 import { Cloud } from "@/components/hero";
 
 // Footer: one big sky-soft cloud (FooterCloud) with white clouds, logo and link columns.
@@ -34,11 +35,12 @@ export function SiteFooter() {
     <div className="relative isolate mx-sm mt-3xl px-12 py-24 text-navy sm:mx-md sm:px-[9%] sm:py-32">
       {/* One continuous cloud outline: round bumps on all four sides */}
       <FooterCloud className="absolute inset-0 -z-10" />
+      <Stars className="inset-[12%] -z-[5]" />
       <Cloud className="right-[12%] top-[22%] hidden w-28 sm:block" />
       <Cloud className="left-[44%] top-[30%] hidden w-16 opacity-60 md:block" />
       <div className="mx-auto grid max-w-[1160px] gap-xl sm:grid-cols-[2fr_1fr_1fr]">
         <div>
-          <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} className="h-12 w-auto" />
+          <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} className="h-12 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
           <p className="mt-sm max-w-[22rem] text-[0.9375rem] leading-relaxed text-navy-body">
             No prompts. Just render. A free app that turns your photos and videos into videos you can post.
           </p>

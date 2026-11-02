@@ -31,6 +31,9 @@
   --color-lemon-soft: #fdf5c4;
   --color-lime-soft: #e6f2cf;
 
+  /* Surface for cards that sit on the page (FAQ questions) */
+  --color-card: #ffffff;
+
   /* Mascot beak and music note on light backgrounds */
   --color-golden: #e0b800;
 
@@ -52,4 +55,20 @@
   --spacing-xl: 40px;
   --spacing-2xl: 64px;
   --spacing-3xl: 110px;
+}
+
+/*
+  Dark mode (option A, deep navy night). Turned on by the "dark" class on <html>.
+  Draft: navy and cream swap roles (text, buttons), so existing classes like
+  text-navy and bg-navy keep working. Blob colors stay the same.
+*/
+:root.dark {
+  --color-bg: #061722;
+  --color-navy: #f3ebdd;
+  --color-navy-body: #c3cfd6;
+  --color-cream: #023047;
+  --color-line: #1e3a4c;
+  --color-card: #0b2a3b;
+  /* Hero card and footer cloud become the navy night sky */
+  --color-sky-soft: #023047;
 }

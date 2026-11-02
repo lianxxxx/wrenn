@@ -1,5 +1,6 @@
 import { BlobWords } from "@/components/blob-words";
 import { SampleVideo } from "@/components/sample-video";
+import { Stars } from "@/components/stars";
 
 // Hero (inspo: Cloudroom). Centered blob headline, short sub, one button,
 // soft clouds behind, and a 9:16 video frame peeking up from the bottom.
@@ -7,7 +8,7 @@ import { SampleVideo } from "@/components/sample-video";
 
 export function Cloud({ className }: { className: string }) {
   return (
-    <svg viewBox="0 0 140 70" aria-hidden className={`absolute -z-10 ${className}`}>
+    <svg viewBox="0 0 140 70" aria-hidden className={`absolute -z-10 dark:hidden ${className}`}>
       <path
         d="M20 60 a20 20 0 0 1 4-38 a28 28 0 0 1 52-8 a22 22 0 0 1 40 14 a18 18 0 0 1 4 32 z"
         fill="#FFFFFF"
@@ -38,6 +39,7 @@ function PopLines() {
 export function Hero() {
   return (
     <section className="relative isolate overflow-hidden px-md pt-2xl text-center sm:pt-3xl">
+      <Stars />
       {/* First-draft positions (upper left, upper right, lower right, lower left),
           current sizes. None around the phone. */}
       <Cloud className="left-[4%] top-8 w-24 sm:w-28" />

@@ -36,7 +36,7 @@ function StepCard({ step, className = "" }: { step: (typeof steps)[number]; clas
     <article
       className={`relative shrink-0 rounded-lg border border-navy/15 bg-bg text-center text-navy ${className}`}
     >
-      <Image {...step.image} alt="" className="mx-auto h-28 w-auto object-contain mix-blend-multiply sm:h-36" />
+      <Image {...step.image} alt="" className="mx-auto h-28 w-auto object-contain mix-blend-multiply sm:h-36 dark:rounded-md dark:bg-white dark:mix-blend-normal dark:p-1" />
       <h3 className="mt-md font-display text-3xl">
         {step.num}. {step.title}
       </h3>

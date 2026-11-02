@@ -65,7 +65,7 @@ export function Faq() {
       />
       <div className="mx-auto mt-2xl flex max-w-[760px] flex-col gap-sm">
         {faqs.map((item) => (
-          <details key={item.q} className="group rounded-md border-2 border-navy bg-white px-lg py-md text-left">
+          <details key={item.q} className="group rounded-md border-2 border-navy bg-card px-lg py-md text-left">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-md font-display text-xl text-navy sm:text-2xl [&::-webkit-details-marker]:hidden">
               {item.q}
               <svg
