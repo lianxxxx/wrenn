@@ -41,7 +41,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
   - [x] App icon: the bird on a cream blob inside a navy squircle. Draft: `brand/mascot/app-icon-draft.png`
   - [ ] Trace both as clean SVGs (Figma or vectorizer.ai). Fixes the fringe specks around the note and tail, and gives the icon transparent corners (the draft has black corners)
   - [ ] Export the app icon sizes (16, 32, 256, 512px) + `.ico` for Windows (Claude can do this once the SVG exists)
-  - [ ] Logo / wordmark: "wrenn" in Bubblegum Sans + the bird
+  - [x] Logo draft: `brand/logo/logo-draft.png` (tail + "wrenn" + sound lines), used in the navbar. Still to trace as SVG. Plan was: [colorful tail feathers only, no bird body] + "wrenn" in navy Bubblegum Sans + [music note or the beak sound lines] after the word. Lian makes the tail-only asset (cut it from the traced mascot SVG). Until then, crop the tail from the PNG as a placeholder in the navbar
 - [x] Pick brand colors: **Navy** `#023047` (text, headlines, buttons, navbar, footer). Blob colors: red `#D62828`, orange `#F77F00`, lemon `#F3DA2E`, lime `#82B51F`, sky `#8ECAE6`, teal `#219EBC`. Background: cream `#FFF8EC` or white, **decide when building**. Draft brand guide: `inspo/mocks/brand-guide.html` (gitignored)
 - [x] Pick fonts (display + body): **Bubblegum Sans** (logo, headlines, blob words) + **Figtree** (descriptions, paragraphs, app UI). Self-hosted WOFF2 in `brand/fonts/` (from Fontsource, OFL license files included). No Google Fonts CDN
 - [x] Write Wrenn's own `DESIGN.md` at the repo root (colors, fonts, spacing, components, do's and don'ts) so agents use exact values instead of guessing
@@ -102,6 +102,8 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 - [ ] Make the launch video WITH Wrenn (dogfooding)
 - [ ] Make repo public
+- [ ] Footer: point "GitHub" and "Report a problem" to the public repo and its Issues page (they are "#" until then, in `web/src/components/site-footer.tsx`)
+- [ ] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
 - [ ] Post on TikTok, X, Reddit, Product Hunt, Facebook dev groups (PH)
 - [ ] Collect feedback, plan v2
 

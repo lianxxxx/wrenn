@@ -1,10 +1,9 @@
 import Image from "next/image";
 import { BlobWords, type BlobWord } from "@/components/blob-words";
-import { CloudEdge } from "@/components/cloud-edge";
+import { SectionHeading } from "@/components/section-heading";
 
 // "Made for every feed" (inspo: Little Bloom staggered cards).
-// A sky-soft band with a cloud-shaped top edge, left-aligned headline, and the
-// 4 size presets as frames at staggered heights with sticker labels on the bottom.
+// Centered headline and sub, then the 4 size presets as frames at staggered heights with sticker labels on the bottom.
 
 const sizes: { label: BlobWord; size: string; aspect: string; offset: string }[] = [
   { label: { word: "Reels", bg: "bg-red", text: "text-white" }, size: "1080 × 1920", aspect: "aspect-[9/16]", offset: "lg:mt-xl" },
@@ -15,17 +14,19 @@ const sizes: { label: BlobWord; size: string; aspect: string; offset: string }[]
 
 export function Templates() {
   return (
-    <section id="templates" className="relative mt-2xl bg-sky-soft px-md pb-3xl pt-2xl">
-      <CloudEdge className="absolute inset-x-0 bottom-[calc(100%-1px)] h-14 text-sky-soft sm:h-20" />
+    <section id="templates" className="px-md py-3xl">
       <div className="mx-auto max-w-[1160px]">
-        <h2 className="font-display text-[clamp(2.5rem,6vw,4rem)] leading-[1.05] text-navy">
-          Made for
-          <br />
-          every feed
-        </h2>
-        <p className="mt-sm max-w-[26rem] text-[1.0625rem] leading-relaxed text-navy-body">
-          One click to pick the size. Your video fits TikTok, Reels, feed posts or YouTube.
-        </p>
+        <SectionHeading
+          title={
+            <>
+              Made for every{" "}
+              <span className="inline-flex align-baseline">
+                <BlobWords className="" offset={1} words={[{ word: "feed", bg: "bg-orange", text: "text-white" }]} />
+              </span>
+            </>
+          }
+          sub="One click to pick the size. Your video fits TikTok, Reels, feed posts or YouTube."
+        />
 
         <div className="mt-2xl grid grid-cols-2 items-start gap-x-md gap-y-2xl lg:grid-cols-[0.8fr_1fr_1fr_1.5fr]">
           {sizes.map((s, i) => (

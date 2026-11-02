@@ -9,7 +9,7 @@
 
 @theme {
   /* Background: cream or white is NOT decided yet. Change only this line. */
-  --color-bg: #fff8ec;
+  --color-bg: #fcfcfa;
 
   /* Core */
   --color-navy: #023047;
@@ -26,8 +26,10 @@
   --color-sky: #8ecae6;
   --color-teal: #219ebc;
 
-  /* Soft sky: hero card, clouds */
+  /* Soft tints: hero card, clouds, step cards */
   --color-sky-soft: #dceff8;
+  --color-lemon-soft: #fdf5c4;
+  --color-lime-soft: #e6f2cf;
 
   /* Mascot beak and music note on light backgrounds */
   --color-golden: #e0b800;

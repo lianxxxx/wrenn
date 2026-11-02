@@ -5,7 +5,7 @@ import { SampleVideo } from "@/components/sample-video";
 // soft clouds behind, and a 9:16 video frame peeking up from the bottom.
 // The video frame is a placeholder until Wrenn can render a real one.
 
-function Cloud({ className }: { className: string }) {
+export function Cloud({ className }: { className: string }) {
   return (
     <svg viewBox="0 0 140 70" aria-hidden className={`absolute -z-10 ${className}`}>
       <path

@@ -1,4 +1,4 @@
-import { Scribble } from "@/components/scribble";
+import { BlobWords } from "@/components/blob-words";
 import { SectionHeading } from "@/components/section-heading";
 
 // FAQ for non-tech visitors. Uses <details> so it opens and closes with no JavaScript.
@@ -40,6 +40,10 @@ const faqs: { q: string; a: string; steps?: string[] }[] = [
     a: "TikTok, Reels and Stories (9:16), Facebook and Instagram feed (4:5), square (1:1), and YouTube or website (16:9).",
   },
   {
+    q: "Why a bird?",
+    a: "Our mascot is a wren, a small bird with a loud song. It's mixed with the Ibong Adarna, the bird from Filipino folklore whose song changes its colors. That's why its tail is full of colors. And say \"Wrenn\" out loud: it sounds like \"render\", which is what it does.",
+  },
+  {
     q: "Is there a Mac version?",
     a: "Not yet. Wrenn is Windows only for now.",
   },
@@ -48,10 +52,18 @@ const faqs: { q: string; a: string; steps?: string[] }[] = [
 export function Faq() {
   return (
     <section id="faq" className="px-md py-3xl">
-      <SectionHeading title="Questions? We got you." sub="The quick answers before you hit download." />
-      <div className="relative isolate mx-auto mt-2xl flex max-w-[760px] flex-col gap-sm">
-        {/* Same scribble as the Download section, behind the whole list */}
-        <Scribble stretch className="-inset-y-lg left-1/2 h-[calc(100%+3rem)] w-[min(1100px,98vw)] -translate-x-1/2" />
+      <SectionHeading
+        title={
+          <>
+            Questions? We got{" "}
+            <span className="inline-flex align-baseline">
+              <BlobWords className="" offset={1} words={[{ word: "you.", bg: "bg-lime", text: "text-white" }]} />
+            </span>
+          </>
+        }
+        sub="The quick answers before you hit download."
+      />
+      <div className="mx-auto mt-2xl flex max-w-[760px] flex-col gap-sm">
         {faqs.map((item) => (
           <details key={item.q} className="group rounded-md border-2 border-navy bg-white px-lg py-md text-left">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-md font-display text-xl text-navy sm:text-2xl [&::-webkit-details-marker]:hidden">
