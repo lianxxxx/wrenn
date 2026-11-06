@@ -1,18 +1,11 @@
 // Thick crayon-like zig-zag (inspo: brush-stroke bg, shape only).
-// Used behind the FAQ list and the Download button. Size it with className.
+// Used behind the Download button only. Size it with className.
 // The viewBox has room on every side so the rounded ends never get clipped.
 
-export function Scribble({
-  className = "",
-  stretch = false,
-}: {
-  className?: string;
-  stretch?: boolean;
-}) {
+export function Scribble({ className = "" }: { className?: string }) {
   return (
     <svg
       viewBox="-90 -90 1380 620"
-      preserveAspectRatio={stretch ? "none" : "xMidYMid meet"}
       aria-hidden
       className={`pointer-events-none absolute -z-10 opacity-40 ${className}`}
       fill="none"

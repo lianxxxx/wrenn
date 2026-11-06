@@ -31,9 +31,18 @@ const steps = [
   },
 ];
 
-function StepCard({ step, className = "" }: { step: (typeof steps)[number]; className?: string }) {
+function StepCard({
+  step,
+  className = "",
+  reveal = false,
+}: {
+  step: (typeof steps)[number];
+  className?: string;
+  reveal?: boolean;
+}) {
   return (
     <article
+      data-reveal={reveal ? "rise" : undefined}
       className={`relative shrink-0 rounded-lg border border-navy/15 bg-bg text-center text-navy ${className}`}
     >
       <Image {...step.image} alt="" className="mx-auto h-28 w-auto object-contain mix-blend-multiply sm:h-36 dark:rounded-md dark:bg-white dark:mix-blend-normal dark:p-1" />
@@ -53,7 +62,7 @@ export function HowItWorks() {
           <>
             Tap. Render.{" "}
             <span className="inline-flex align-baseline">
-              <BlobWords className="" offset={1} words={[{ word: "Post.", bg: "bg-lemon", text: "text-white" }]} />
+              <BlobWords className="" offset={1} pop words={[{ word: "Post.", bg: "bg-lemon", text: "text-white" }]} />
             </span>
           </>
         }
@@ -70,6 +79,7 @@ export function HowItWorks() {
           <StepCard
             key={step.num}
             step={step}
+            reveal
             className={`w-[220px] px-md py-xl lg:w-[300px] lg:px-lg ${step.className}`}
           />
         ))}

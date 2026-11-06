@@ -17,7 +17,9 @@ const figtree = localFont({
 
 // Runs before the page paints, so a saved dark choice doesn't flash light first.
 // Default is light: dark only when the visitor picked it with the toggle.
-const themeScript = 'try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}';
+// It also adds a "js" class, so entrance animations only hide things when JS is on.
+const themeScript =
+  'document.documentElement.classList.add("js");try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}';
 
 export const metadata: Metadata = {
   title: "Wrenn",

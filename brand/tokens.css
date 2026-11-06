@@ -26,10 +26,8 @@
   --color-sky: #8ecae6;
   --color-teal: #219ebc;
 
-  /* Soft tints: hero card, clouds, step cards */
+  /* Soft tint: hero card, clouds, step cards */
   --color-sky-soft: #dceff8;
-  --color-lemon-soft: #fdf5c4;
-  --color-lime-soft: #e6f2cf;
 
   /* Surface for cards that sit on the page (FAQ questions) */
   --color-card: #ffffff;

@@ -21,7 +21,7 @@ export function Templates() {
             <>
               Made for every{" "}
               <span className="inline-flex align-baseline">
-                <BlobWords className="" offset={1} words={[{ word: "feed", bg: "bg-orange", text: "text-white" }]} />
+                <BlobWords className="" offset={1} pop words={[{ word: "feed", bg: "bg-orange", text: "text-white" }]} />
               </span>
             </>
           }
@@ -30,7 +30,7 @@ export function Templates() {
 
         <div className="mt-2xl grid grid-cols-2 items-start gap-x-md gap-y-2xl lg:grid-cols-[0.8fr_1fr_1fr_1.5fr]">
           {sizes.map((s, i) => (
-            <figure key={s.size} className={`relative ${s.offset}`}>
+            <figure key={s.size} data-reveal="rise" className={`relative ${s.offset}`}>
               {i === 0 && (
                 // Draft PNG from brand/mascot/, swap for the SVG once it's traced
                 <Image

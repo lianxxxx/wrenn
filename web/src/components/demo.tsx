@@ -34,7 +34,7 @@ export function Demo() {
           <>
             From photos to{" "}
             <span className="inline-flex align-baseline">
-              <BlobWords className="" offset={1} words={[{ word: "video", bg: "bg-red", text: "text-white" }]} />
+              <BlobWords className="" offset={1} pop words={[{ word: "video", bg: "bg-red", text: "text-white" }]} />
             </span>
           </>
         }
@@ -61,6 +61,7 @@ export function Demo() {
           {features.map((f) => (
             <li
               key={f.title}
+              data-reveal="rise"
               className="rounded-lg border border-navy/15 p-md"
             >
               <h3 className="font-display text-xl text-navy">{f.title}</h3>

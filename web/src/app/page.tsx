@@ -4,6 +4,7 @@ import { Faq } from "@/components/faq";
 import { DownloadCta } from "@/components/download-cta";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteNav } from "@/components/site-nav";
 import { Templates } from "@/components/templates";
@@ -26,6 +27,7 @@ export default function Home() {
         <DownloadCta />
       </main>
       <SiteFooter />
+      <RevealOnScroll />
     </>
   );
 }

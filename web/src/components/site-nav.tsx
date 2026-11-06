@@ -2,7 +2,7 @@ import Image from "next/image";
 import { NavLinks } from "@/components/nav-links";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-// Navbar: logo on the left, links inside a cream cloud that hangs from the
+// Navbar: logo on the left, links inside a page-colored cloud that hangs from the
 // top, flush with the hero card's right edge (inspo: Little Bloom).
 // On phones the links hide and the cloud shrinks to fit the Download button.
 

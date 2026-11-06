@@ -32,10 +32,13 @@ export function BlobWords({
   words,
   className = "text-5xl",
   offset = 0,
+  pop = false,
 }: {
   words: BlobWord[];
   className?: string;
   offset?: number;
+  // Pop in once when scrolled into view (section headlines only)
+  pop?: boolean;
 }) {
   return (
     <span className="flex flex-wrap justify-center gap-x-[0.25em] gap-y-[0.2em]">
@@ -47,6 +50,7 @@ export function BlobWords({
             key={w.word}
             className={`relative isolate font-display leading-tight px-[0.4em] pt-[0.08em] pb-[0.14em] ${className} ${w.text}`}
             style={{ transform: shape.transform }}
+            data-reveal={pop ? "pop" : undefined}
           >
             <span
               aria-hidden

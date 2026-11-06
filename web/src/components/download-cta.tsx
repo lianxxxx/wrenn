@@ -12,7 +12,7 @@ export function DownloadCta() {
           <>
             Ready to make your first{" "}
             <span className="inline-flex align-baseline">
-              <BlobWords className="" offset={2} words={[{ word: "video?", bg: "bg-teal", text: "text-white" }]} />
+              <BlobWords className="" offset={2} pop words={[{ word: "video?", bg: "bg-teal", text: "text-white" }]} />
             </span>
           </>
         }
