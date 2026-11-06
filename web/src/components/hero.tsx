@@ -1,10 +1,9 @@
 import { BlobWords } from "@/components/blob-words";
-import { SampleVideo } from "@/components/sample-video";
 import { Stars } from "@/components/stars";
 
 // Hero (inspo: Cloudroom). Centered blob headline, short sub, one button,
-// soft clouds behind, and a 9:16 video frame peeking up from the bottom.
-// The video frame is a placeholder until Wrenn can render a real one.
+// soft clouds behind. The phone video frame was removed for now; a hero visual
+// comes back once there are real Wrenn sample videos (see inspo 11, gallery hero).
 
 export function Cloud({ className }: { className: string }) {
   return (
@@ -17,28 +16,9 @@ export function Cloud({ className }: { className: string }) {
   );
 }
 
-function PopLines() {
-  return (
-    <svg
-      viewBox="0 0 360 60"
-      aria-hidden
-      className="absolute -top-8 left-1/2 w-[360px] -translate-x-1/2"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="4"
-      strokeLinecap="round"
-    >
-      <path d="M40 50 L22 30" />
-      <path d="M58 40 L52 14" />
-      <path d="M320 50 L338 30" />
-      <path d="M302 40 L308 14" />
-    </svg>
-  );
-}
-
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden px-md pt-2xl text-center sm:pt-3xl">
+    <section className="relative isolate overflow-hidden px-md pb-3xl pt-2xl text-center sm:pt-3xl">
       <Stars />
       {/* First-draft positions (upper left, upper right, lower right, lower left),
           current sizes. None around the phone. */}
@@ -68,12 +48,6 @@ export function Hero() {
         >
           Download for Windows
         </a>
-      </div>
-
-      {/* Product peeking up from the bottom (placeholder video frame) */}
-      <div className="relative mx-auto mt-2xl h-[300px] w-[260px] text-navy">
-        <PopLines />
-        <SampleVideo className="aspect-[9/16] w-full justify-start rounded-[28px] border-8 border-navy pt-xl" />
       </div>
     </section>
   );
