@@ -33,7 +33,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-navy/20 text-navy transition-transform active:scale-90"
+      className="flex size-9 shrink-0 items-center justify-center rounded-full border border-navy/20 text-navy transition-transform duration-150 ease-out active:scale-[0.96]"
     >
       {dark ? (
         // Sun: click to go back to light

@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/section-heading";
 
 // "From photos to video". Plain page background. Centered headline and sub. Below it (inspo: Little Bloom):
 // two staggered frames on the left (your photos with the mascot on top, the finished
-// video), and a column of feature cards on the right.
+// video), and a column of feature rows on the right.
 
 const features = [
   { title: "Music that fits", body: "Beats and sound effects land on every cut." },
@@ -14,20 +14,22 @@ const features = [
   { title: "Saved on your computer", body: "An MP4 file, ready to post anywhere." },
 ];
 
+// A product frame: its contents use fixed light colors so it looks the same in both themes.
+// Only the surface softens to cream at night so it doesn't glare.
 function PhotoStack() {
   return (
-    <div className="relative flex aspect-[4/5] w-full items-center justify-center rounded-md border-[6px] border-navy bg-white">
+    <div className="relative flex aspect-[4/5] w-full items-center justify-center rounded-md border-[6px] border-navy bg-white dark:bg-[#F3EBDD]">
       {/* Placeholder "photos": swap for real sample inputs later */}
       <div className="absolute left-[14%] top-[16%] h-[42%] w-[55%] -rotate-6 rounded-sm bg-sky" />
       <div className="absolute bottom-[16%] right-[14%] h-[42%] w-[55%] rotate-3 rounded-sm bg-lemon" />
-      <span className="relative font-display text-xl text-navy">your photos</span>
+      <span className="relative font-display text-xl text-[#023047]">your photos</span>
     </div>
   );
 }
 
 export function Demo() {
   return (
-    <section id="demo" className="px-md py-3xl">
+    <section id="demo" className="px-md py-xl sm:py-[3.4375rem]">
       <div className="mx-auto max-w-[1160px]">
       <SectionHeading
         title={
@@ -57,7 +59,7 @@ export function Demo() {
           <SampleVideo className="aspect-[9/16] w-full rounded-md border-[6px] border-navy" />
         </div>
 
-        <ul className="flex flex-col gap-md">
+        <ul data-reveal-group className="flex flex-col gap-md">
           {features.map((f) => (
             <li
               key={f.title}

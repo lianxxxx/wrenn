@@ -29,7 +29,7 @@
   /* Soft tint: hero card, clouds, step cards */
   --color-sky-soft: #dceff8;
 
-  /* Surface for cards that sit on the page (FAQ questions) */
+  /* Surface for cards that sit on the page (not used on the landing page right now) */
   --color-card: #ffffff;
 
   /* Mascot beak and music note on light backgrounds */

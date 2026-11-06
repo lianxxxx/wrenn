@@ -3,45 +3,57 @@
 import { Children, useRef, useState } from "react";
 
 // Phone-only swipeable fan of cards. The active card sits straight in the middle;
-// the other two tilt out on each side, cut off by the screen edge. It loops.
+// its neighbours tilt out on each side, cut off by the screen edge. It doesn't loop,
+// so step 1 starts with nothing on its left and only step 2 peeking on the right
+// (a loop would put step 3 on the left and read as 3, 1, 2).
 
 const SWIPE_DISTANCE = 40;
+// A quick flick counts as a swipe even when it's short (pixels per millisecond)
+const SWIPE_VELOCITY = 0.11;
+// Below this it's a tap, however fast
+const MIN_FLICK_DISTANCE = 10;
 
 export function StepCarousel({ children }: { children: React.ReactNode }) {
   const cards = Children.toArray(children);
   const [active, setActive] = useState(0);
-  const dragStartX = useRef<number | null>(null);
+  const dragStart = useRef<{ x: number; time: number } | null>(null);
 
-  const move = (step: number) => setActive((a) => (a + step + cards.length) % cards.length);
+  const move = (step: number) => setActive((a) => Math.min(cards.length - 1, Math.max(0, a + step)));
 
   // Pointer events cover both fingers and a mouse drag
   function handlePointerUp(e: React.PointerEvent) {
-    if (dragStartX.current === null) return;
-    const distance = e.clientX - dragStartX.current;
-    dragStartX.current = null;
-    if (Math.abs(distance) >= SWIPE_DISTANCE) move(distance < 0 ? 1 : -1);
+    if (dragStart.current === null) return;
+    const distance = e.clientX - dragStart.current.x;
+    const elapsed = Math.max(1, e.timeStamp - dragStart.current.time);
+    dragStart.current = null;
+    const flick = Math.abs(distance) >= MIN_FLICK_DISTANCE && Math.abs(distance) / elapsed > SWIPE_VELOCITY;
+    if (Math.abs(distance) >= SWIPE_DISTANCE || flick) move(distance < 0 ? 1 : -1);
   }
 
   return (
     <div className="mt-2xl sm:hidden">
       <div
         className="grid cursor-grab touch-pan-y select-none justify-center pb-xl active:cursor-grabbing"
-        onPointerDown={(e) => (dragStartX.current = e.clientX)}
+        onPointerDown={(e) => (dragStart.current = { x: e.clientX, time: e.timeStamp })}
         onPointerUp={handlePointerUp}
         onDragStart={(e) => e.preventDefault()}
       >
         {cards.map((card, i) => {
-          // -1 = left, 0 = middle, 1 = right
-          const offset = ((i - active + cards.length + 1) % cards.length) - 1;
+          // -1 = left, 0 = middle, 1 = right. Further away waits off to the side, hidden.
+          const offset = i - active;
+          const near = Math.abs(offset) <= 1;
           const y = offset < 0 ? -8 : offset > 0 ? 40 : 0;
           return (
             <div
               key={i}
+              aria-hidden={!near || undefined}
               onClick={() => offset !== 0 && setActive(i)}
-              className="col-start-1 row-start-1 transition-transform duration-300 ease-out motion-reduce:transition-none"
+              className="col-start-1 row-start-1 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
               style={{
                 transform: `translateX(${offset * 92}%) translateY(${y}px) rotate(${offset * 8}deg)`,
                 zIndex: offset === 0 ? 10 : 0,
+                opacity: near ? 1 : 0,
+                pointerEvents: near ? undefined : "none",
               }}
             >
               {card}

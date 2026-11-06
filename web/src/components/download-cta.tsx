@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/section-heading";
 
 export function DownloadCta() {
   return (
-    <section id="get-wrenn" className="px-md py-3xl">
+    <section id="get-wrenn" className="px-md py-xl sm:py-[3.4375rem]">
       <SectionHeading
         title={
           <>
@@ -16,7 +16,7 @@ export function DownloadCta() {
             </span>
           </>
         }
-        sub="Download Wrenn for Windows. No sign-up and no editing skills needed."
+        sub="Your first video is a few clicks away."
       />
       <div className="relative isolate mx-auto mt-xl flex w-fit flex-col items-center gap-sm px-xl py-lg">
         <Scribble className="left-1/2 top-1/2 w-[min(640px,94vw)] -translate-x-1/2 -translate-y-[62%]" />
@@ -24,7 +24,7 @@ export function DownloadCta() {
           href="#"
           className="rounded-pill bg-navy px-[22px] py-2.5 font-display text-xl text-cream transition-transform active:translate-y-0.5"
         >
-          Download free
+          Download for Windows
         </a>
         <p className="text-[0.8125rem] font-medium text-navy-body">Free for Windows · No sign-up needed</p>
       </div>

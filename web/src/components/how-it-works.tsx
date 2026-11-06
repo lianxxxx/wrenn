@@ -56,7 +56,7 @@ function StepCard({
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="overflow-hidden px-md py-3xl">
+    <section id="how-it-works" className="overflow-hidden px-md py-xl sm:py-[3.4375rem]">
       <SectionHeading
         title={
           <>
@@ -74,7 +74,8 @@ export function HowItWorks() {
         ))}
       </StepCarousel>
 
-      <div className="mt-2xl hidden items-stretch justify-center gap-md pb-2xl sm:flex">
+      {/* One reveal group: the offset cards would otherwise come in out of order */}
+      <div data-reveal-group className="mt-2xl hidden items-stretch justify-center gap-md pb-2xl sm:flex">
         {steps.map((step) => (
           <StepCard
             key={step.num}

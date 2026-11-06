@@ -12,7 +12,7 @@ const columns = [
     title: "Product",
     links: [
       { label: "How it works", href: "#how-it-works" },
-      { label: "Templates", href: "#templates" },
+      { label: "Sizes", href: "#templates" },
       { label: "FAQ", href: "#faq" },
       { label: "Download", href: "#get-wrenn" },
     ],
@@ -32,10 +32,12 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer>
-    <div className="relative isolate mx-sm mt-3xl px-12 py-24 text-navy sm:mx-md sm:px-[9%] sm:py-32">
+    {/* Top margin matches the gap between sections (the CTA above adds the same again as bottom padding) */}
+    <div className="relative isolate mx-sm mt-xl px-12 py-24 text-navy sm:mx-md sm:mt-[3.4375rem] sm:px-[9%] sm:py-32">
       {/* One continuous cloud outline: round bumps on all four sides */}
       <FooterCloud className="absolute inset-0 -z-10" />
-      <Stars className="inset-[12%] -z-[5]" />
+      {/* Footer layout keeps the stars in the cloud's bumps, away from the text */}
+      <Stars layout="footer" className="inset-0 -z-[5]" />
       <Cloud className="right-[12%] top-[22%] hidden w-28 sm:block" />
       <Cloud className="left-[44%] top-[30%] hidden w-16 opacity-60 md:block" />
       <div className="mx-auto grid max-w-[1160px] gap-xl sm:grid-cols-[2fr_1fr_1fr]">

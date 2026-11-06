@@ -225,3 +225,17 @@ Mostly flat. Depth comes from overlap and tilt, not heavy shadows.
 - Smooth ovals, perfect pills or circles as blobs (they look digital, not hand-made), blobs on every heading, or more than 3 blob colors in one line.
 - The W brush anywhere except the Download button, or the hand-drawn circle anywhere except the active nav item.
 - Copying any inspo site's layout, illustrations or colors 1:1.
+
+## Design review fixes (Nov 2026)
+
+- **Section spacing:** sections use `py-xl sm:py-[3.4375rem]` (40px / 55px each side), so the gap between sections is 80px on phones and 110px on larger screens. Never `py-3xl` on both neighbours (it doubled the gap).
+- **Product frames** (sample video, "your photos", size frames) never change theme inside: their contents use fixed hex colors, and the frame surface is white by day, cream `#F3EBDD` at night.
+- **Made for every feed:** frames have fixed sizes scaled per screen (max 360px tall on desktop), one staggered row from tablet up, 2x2 on phones. Sticker labels: Reels red, Feed lime, Square orange, YouTube teal (red and orange never touch).
+- **Feature rows** (From photos to video): title and line, thin border. No images (Lian tried the bird on each row and removed it).
+- **FAQ:** no boxes. Questions sit on the page with a thin divider between them.
+- **Navbar:** links are Home, How it works, Sizes (`#templates`). The hand-drawn circle draws itself once on load (about 700ms) around Home; clicks just move it.
+- **Motion groups:** a parent with `data-reveal-group` reveals all its children together, left to right, 70ms apart. Used on the How it works row, feature rows, size frames and FAQ list.
+- **Phone step cards** don't loop: step 1 starts in the middle with nothing on its left; a quick flick swipes.
+- **W scribble in dark mode:** teal at low opacity, so it stays a soft mark.
+- **Footer stars** sit only in the cloud bumps, never over text.
+
