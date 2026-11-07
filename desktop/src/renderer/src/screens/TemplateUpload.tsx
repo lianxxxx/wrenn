@@ -9,10 +9,14 @@ type Props = {
   onChange: (changes: Partial<TemplateDraft>) => void
   onBack: () => void
   onGenerate: () => void
+  // True while Wrenn is setting up the job (before the Generating screen)
+  starting: boolean
+  // Why the job couldn't start, in plain words. Empty when all is fine.
+  error: string
 }
 
 // Step 3 of the template path: your files and a few words.
-export function TemplateUpload({ draft, onChange, onBack, onGenerate }: Props) {
+export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error }: Props) {
   const hasFiles = draft.photos.length > 0 || draft.recordings.length > 0
   const ready = hasFiles && draft.brandName.trim() !== ''
 
@@ -63,12 +67,18 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate }: Props) {
         />
       </div>
 
+      {error && (
+        <p className="mt-xl rounded-sm border-2 border-red bg-card px-md py-sm font-semibold text-navy" role="alert">
+          {error}
+        </p>
+      )}
+
       <div className="mt-xl flex items-center justify-end gap-md">
         {!ready && (
           <p className="text-[0.9375rem] text-navy-body">Add at least one file and your brand name.</p>
         )}
-        <Button onClick={onGenerate} disabled={!ready}>
-          Make my video
+        <Button onClick={onGenerate} disabled={!ready || starting}>
+          {starting ? 'Starting...' : 'Make my video'}
         </Button>
       </div>
     </div>

@@ -5,9 +5,10 @@ import { CheckIcon, Spinner } from '../components/Spinner'
 import { TextField } from '../components/TextField'
 
 type Props = {
-  elevenLabsKey: string
+  voiceoverKey: string
   onKeyChange: (key: string) => void
-  onContinue: () => void
+  // Saves "setup done" and the key, then goes to Home
+  onContinue: () => Promise<void>
 }
 
 // Where setup is. People only click buttons here, and Wrenn checks again on its own.
@@ -24,11 +25,25 @@ const INSTALL_URL = 'https://docs.anthropic.com/en/docs/claude-code/setup'
 // How often to check again while waiting for the user to install or sign in
 const RECHECK_MS = 4000
 
-export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
+export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
   const [status, setStatus] = useState<Status>('checking')
   const [version, setVersion] = useState<string>()
   // Each check gets a number, so an old, slow answer can't overwrite a newer one
   const latestCheck = useRef(0)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+
+  // Continue saves "setup done", so setup doesn't show again next launch
+  async function finish() {
+    setSaving(true)
+    setSaveError(false)
+    try {
+      await onContinue()
+    } catch {
+      setSaveError(true)
+      setSaving(false)
+    }
+  }
 
   const check = useCallback(async (waitingForSignIn = false) => {
     const id = ++latestCheck.current
@@ -146,13 +161,18 @@ export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
         autoComplete="off"
         spellCheck={false}
         placeholder="Paste your key here"
-        value={elevenLabsKey}
+        value={voiceoverKey}
         onChange={(e) => onKeyChange(e.target.value)}
       />
 
-      <div className="mt-xl flex justify-end">
-        <Button onClick={onContinue} disabled={status !== 'found'}>
-          Continue
+      <div className="mt-xl flex items-center justify-end gap-md">
+        {saveError && (
+          <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
+            Couldn't save your settings. Try again.
+          </p>
+        )}
+        <Button onClick={finish} disabled={status !== 'found' || saving}>
+          {saving ? 'Saving...' : 'Continue'}
         </Button>
       </div>
     </div>

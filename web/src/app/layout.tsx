@@ -18,8 +18,14 @@ const figtree = localFont({
 // Runs before the page paints, so a saved dark choice doesn't flash light first.
 // Default is light: dark only when the visitor picked it with the toggle.
 // It also adds a "js" class, so entrance animations only hide things when JS is on.
+// It also adds "loaded" as soon as the page has finished loading, which removes the
+// loading dots right away (or after 6 seconds at most, so they can never get stuck).
 const themeScript =
-  'document.documentElement.classList.add("js");try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}';
+  'var d=document.documentElement;d.classList.add("js");try{if(localStorage.getItem("theme")==="dark")d.classList.add("dark")}catch(e){}' +
+  'function l(){d.classList.add("loaded")}addEventListener("load",l);setTimeout(l,6000);';
+
+// The 5 dots from the videos, in the blob colors
+const loaderDots = ["bg-teal", "bg-lime", "bg-lemon", "bg-orange", "bg-red"];
 
 export const metadata: Metadata = {
   title: "Wrenn",
@@ -36,7 +42,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* Loading dots: only appear if loading takes longer than 0.3s, gone the moment it's done */}
+        <div className="page-loader" aria-hidden>
+          {loaderDots.map((color) => (
+            <span key={color} className={color} />
+          ))}
+        </div>
+        {children}
+      </body>
     </html>
   );
 }

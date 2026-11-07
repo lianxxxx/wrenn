@@ -1,7 +1,10 @@
-// Fake data and shared types for the first version of the app screens.
-// Nothing here talks to Claude Code or the render engine yet.
+// Shared types and the fixed lists the screens use (sizes, templates, vibes).
+// Types the main process also uses come from the preload (the contract), so both sides agree.
+import type { JobRequest, SizeId, VideoInfo } from '../../preload'
+// Placeholder video for the fake edit path
+import sampleVideo from './assets/sample.mp4'
 
-export type SizeId = 'reels' | 'feed' | 'square' | 'youtube'
+export type { JobEvent, JobRequest, Settings, SizeId, VideoInfo } from '../../preload'
 
 export type Size = {
   id: SizeId
@@ -131,54 +134,42 @@ export const emptyEditDraft: EditDraft = {
   size: 'reels'
 }
 
-// Which path the current video came from, and its size (for the Done preview)
-export type Job = {
-  kind: 'template' | 'edit'
-  size: SizeId
-}
-
-export type Settings = {
-  elevenLabsKey: string
-  outputFolder: string
-}
-
-export const defaultSettings: Settings = {
-  elevenLabsKey: '',
-  outputFolder: 'C:\\Users\\You\\Videos\\Wrenn'
-}
-
-// A finished video in "Your videos" on Home. Fake for now: kept in memory only,
-// and every preview plays the engine test video. Later this list comes from the output folder.
-export type Video = {
-  id: string
-  fileName: string
-  kind: 'template' | 'edit'
-  size: SizeId
-  createdAt: Date
-}
-
-// A unique name per video, so a new one never replaces an old one
-export function makeVideo(job: Job, now = new Date()): Video {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`
+// Fake for now: the edit path isn't built yet. It shows fake progress, then the engine test video.
+// Only the template path talks to Claude Code and the render engine.
+export function fakeEditVideo(size: SizeId, now = new Date()): VideoInfo {
   return {
-    id: String(now.getTime()),
-    fileName: `wrenn ${stamp}.mp4`,
-    kind: job.kind,
-    size: job.size,
-    createdAt: now
+    id: `fake-edit-${now.getTime()}`,
+    fileName: 'sample.mp4',
+    filePath: 'Not saved yet. Editing your own video is coming soon.',
+    url: sampleVideo,
+    kind: 'edit',
+    size,
+    createdAt: now.toISOString()
   }
 }
 
-// A few fake past videos, so Home doesn't look empty while we design it
-export const sampleVideos: Video[] = [
-  makeVideo({ kind: 'template', size: 'reels' }, new Date(2026, 10, 6, 16, 20, 5)),
-  makeVideo({ kind: 'edit', size: 'square' }, new Date(2026, 10, 5, 10, 2, 40)),
-  makeVideo({ kind: 'template', size: 'youtube' }, new Date(2026, 10, 3, 19, 45, 12))
-]
+// The picked files as real paths on disk, each with its role, for startJob
+export function draftFiles(draft: TemplateDraft): JobRequest['files'] {
+  const toPaths = (files: File[], role: 'photo' | 'recording' | 'logo') =>
+    files.map((file) => ({ path: window.api.getPathForFile(file), role }))
+  return [...toPaths(draft.photos, 'photo'), ...toPaths(draft.recordings, 'recording'), ...toPaths(draft.logo, 'logo')]
+}
+
+// The folder a file sits in (everything before the last slash)
+export function folderOf(filePath: string): string {
+  const cut = Math.max(filePath.lastIndexOf('\\'), filePath.lastIndexOf('/'))
+  return cut > 0 ? filePath.slice(0, cut) : filePath
+}
 
 // A friendly name for a video, like "Reels video, Nov 6". The file name stays in "Saved to".
-export function videoTitle(video: Video): string {
-  const day = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(video.createdAt)
+export function videoTitle(video: VideoInfo): string {
+  const day = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(video.createdAt))
   return `${getSize(video.size).name} video, ${day}`
+}
+
+// Electron wraps errors from the main process like "Error invoking remote method 'start-job': Error: ...".
+// Keep only the plain message at the end.
+export function cleanError(error: unknown): string {
+  const text = error instanceof Error ? error.message : String(error)
+  return text.replace(/^Error invoking remote method '[^']*':\s*/, '').replace(/^Error:\s*/, '')
 }

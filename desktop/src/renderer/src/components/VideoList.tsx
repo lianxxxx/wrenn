@@ -1,10 +1,8 @@
-import { getSize, videoTitle, type Video } from '../data'
-// Placeholder: every card shows the engine test video until real videos exist
-import sampleVideo from '../assets/sample.mp4'
+import { getSize, videoTitle, type VideoInfo } from '../data'
 
 type Props = {
-  videos: Video[]
-  onOpen: (video: Video) => void
+  videos: VideoInfo[]
+  onOpen: (video: VideoInfo) => void
 }
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
@@ -38,7 +36,7 @@ export function VideoList({ videos, onOpen }: Props) {
                   {/* Product frames keep fixed colors in both themes (DESIGN.md) */}
                   <span className="flex aspect-video items-center justify-center overflow-hidden rounded-md bg-[#023047]">
                     <video
-                      src={`${sampleVideo}#t=1.5`}
+                      src={`${video.url}#t=1.5`}
                       muted
                       preload="metadata"
                       className="max-h-full max-w-full object-cover"
@@ -48,7 +46,7 @@ export function VideoList({ videos, onOpen }: Props) {
                   </span>
                   <span className="mt-sm block truncate px-xs font-semibold text-navy">{videoTitle(video)}</span>
                   <span className="block px-xs pb-xs text-[0.8125rem] text-navy-body">
-                    {dateFormat.format(video.createdAt)} · {size.ratio} ·{' '}
+                    {dateFormat.format(new Date(video.createdAt))} · {size.ratio} ·{' '}
                     {video.kind === 'template' ? 'Template' : 'Edited'}
                   </span>
                 </button>

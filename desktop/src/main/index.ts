@@ -1,22 +1,53 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
-import { mkdir } from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import type { Settings } from '../preload'
 import { checkClaude, openClaudeSignIn } from './claude'
+import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from './jobs'
+import { outputDir, listVideos } from './library'
+import { registerMediaHandler, registerMediaScheme } from './media'
+import { getSettings, saveSettings } from './settings'
+
+// The wrenn-media:// address for playing videos has to be announced before the app is ready
+registerMediaScheme()
+
+// ---------------------------------------------------------------------------
+// Actions the screens can ask for (see the bridge in preload/index.ts).
+// Everything a screen sends is checked here or in the module it goes to.
+// ---------------------------------------------------------------------------
 
 // Is the user's Claude Code installed and signed in? (see claude.ts)
 ipcMain.handle('check-claude', () => checkClaude())
 // Opens Claude Code's own sign-in, so the user signs in themselves
 ipcMain.handle('open-claude-sign-in', () => openClaudeSignIn())
 
-// Where finished videos go: Videos\Wrenn. Made if it's missing, then opened in File Explorer.
+// Where finished videos go: Videos\Wrenn (outputDir makes it if it's missing), opened in File Explorer.
 // The main process owns this path: the screens never send a path to open.
 // Returns an error message, or an empty string if it worked.
-ipcMain.handle('open-output-folder', async () => {
-  const folder = join(app.getPath('videos'), 'Wrenn')
-  await mkdir(folder, { recursive: true })
-  return shell.openPath(folder)
-})
+ipcMain.handle('open-output-folder', () => shell.openPath(outputDir()))
+
+// Settings saved on this computer (see settings.ts)
+ipcMain.handle('get-settings', () => getSettings())
+ipcMain.handle('save-settings', (_event, changes: unknown) => saveSettings(cleanSettings(changes)))
+
+// Every video in Videos\Wrenn, newest first (see library.ts)
+ipcMain.handle('list-videos', () => listVideos())
+
+// Video jobs (see jobs.ts). Progress goes back to the window that started the job.
+ipcMain.handle('start-job', (event, request: unknown) => startJob(event.sender, request))
+ipcMain.handle('open-claude-in-job', (_event, jobId: unknown) => openClaudeInJob(jobId))
+ipcMain.handle('cancel-job', (_event, jobId: unknown) => cancelJob(jobId))
+
+// Keep only the settings we know, with the right types. Anything else the page sends is dropped.
+function cleanSettings(input: unknown): Partial<Settings> {
+  const changes: Partial<Settings> = {}
+  if (!input || typeof input !== 'object') return changes
+  const i = input as Record<string, unknown>
+  if (typeof i.setupDone === 'boolean') changes.setupDone = i.setupDone
+  // API keys are short. A very long string is a mistake, so it's ignored.
+  if (typeof i.voiceoverKey === 'string' && i.voiceoverKey.length <= 500) changes.voiceoverKey = i.voiceoverKey.trim()
+  return changes
+}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -72,6 +103,12 @@ function createWindow(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.wrenn.app')
 
+  // Serve finished videos to the screens at wrenn-media://video/<file name> (see media.ts)
+  registerMediaHandler()
+
+  // Delete job folders older than a week (in the background, never blocks the app)
+  void cleanOldJobs()
+
   // F12 opens DevTools in dev, and reload shortcuts are off in the built app
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -83,6 +120,9 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+// Stop any waiting or rendering jobs. Their folders stay on disk.
+app.on('before-quit', () => stopAllJobs())
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
