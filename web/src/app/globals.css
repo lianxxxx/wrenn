@@ -1,8 +1,112 @@
 @import "tailwindcss";
 @import "../../../brand/tokens.css";
 
+/* dark: classes apply when <html> has the "dark" class (set by the theme toggle) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   background: var(--color-bg);
   color: var(--color-navy);
   font-family: var(--font-body);
+}
+
+/* Faint paper grain over the whole page, so the background isn't flat digital white */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* On the dark page the grain lightens a little instead of darkening */
+.dark body::before {
+  mix-blend-mode: screen;
+  opacity: 0.05;
+}
+
+/* ---------- Motion ----------
+   Everything below only runs for visitors who allow motion, and only on screen
+   (printing shows the finished page). Hidden start states need a class or
+   attribute that JavaScript adds, so with no JS every word stays visible. */
+
+:root {
+  /* Strong ease-out: fast start, soft landing */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Ease-out with a little overshoot, for the playful pops */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* Uses the separate scale and rotate properties, so the blob's own tilt
+   (its inline transform) is kept and it lands back on its normal shape. */
+@keyframes blob-pop {
+  from {
+    scale: 0.6;
+    rotate: -8deg;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* --draw-dash and --draw-from are set by NavLinks from the path's real length */
+@keyframes draw-in {
+  from {
+    stroke-dashoffset: var(--draw-from);
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* Nav circle draws itself once on load, around the first active link, as the
+     last beat of the hero entrance. Hidden until NavLinks has measured it. */
+  .js .circle-intro {
+    opacity: 0;
+  }
+  .draw-in {
+    stroke-dasharray: var(--draw-dash);
+    /* Ease-in-out, like a pen speeding up and slowing down */
+    animation: draw-in 500ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  /* Hero entrance on load. The "js" class is set by the script in layout.tsx
+     before the first paint, so there's no flash of hidden content. */
+  .js .hero-rise {
+    animation: rise-in 500ms var(--ease-out-strong) both;
+    animation-delay: calc(var(--hero-step, 0) * 90ms + 80ms);
+  }
+  .js .hero-rise [data-reveal="pop"] {
+    animation:
+      blob-pop 450ms var(--ease-pop) both,
+      fade-in 200ms ease-out both;
+    animation-delay: 380ms;
+  }
+
+  /* Scroll reveal, driven by RevealOnScroll. "waiting" is only set on things
+     below the fold, "in" when they scroll into view. */
+  [data-reveal-state="waiting"] {
+    opacity: 0;
+  }
+  [data-reveal="rise"][data-reveal-state="in"] {
+    animation: rise-in 500ms var(--ease-out-strong) both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+  [data-reveal="pop"][data-reveal-state="in"] {
+    animation:
+      blob-pop 450ms var(--ease-pop) both,
+      fade-in 200ms ease-out both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
 }

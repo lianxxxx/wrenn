@@ -1,4 +1,4 @@
-import { Scribble } from "@/components/scribble";
+import { BlobWords } from "@/components/blob-words";
 import { SectionHeading } from "@/components/section-heading";
 
 // FAQ for non-tech visitors. Uses <details> so it opens and closes with no JavaScript.
@@ -40,6 +40,10 @@ const faqs: { q: string; a: string; steps?: string[] }[] = [
     a: "TikTok, Reels and Stories (9:16), Facebook and Instagram feed (4:5), square (1:1), and YouTube or website (16:9).",
   },
   {
+    q: "Why a bird?",
+    a: "Our mascot is a wren, a small bird with a loud song. It's mixed with the Ibong Adarna, the bird from Filipino folklore whose song changes its colors. That's why its tail is full of colors. And say \"Wrenn\" out loud: it sounds like \"render\", which is what it does.",
+  },
+  {
     q: "Is there a Mac version?",
     a: "Not yet. Wrenn is Windows only for now.",
   },
@@ -47,14 +51,23 @@ const faqs: { q: string; a: string; steps?: string[] }[] = [
 
 export function Faq() {
   return (
-    <section id="faq" className="px-md py-3xl">
-      <SectionHeading title="Questions? We got you." sub="The quick answers before you hit download." />
-      <div className="relative isolate mx-auto mt-2xl flex max-w-[760px] flex-col gap-sm">
-        {/* Same scribble as the Download section, behind the whole list */}
-        <Scribble stretch className="-inset-y-lg left-1/2 h-[calc(100%+3rem)] w-[min(1100px,98vw)] -translate-x-1/2" />
+    <section id="faq" className="px-md py-xl sm:py-[3.4375rem]">
+      <SectionHeading
+        title={
+          <>
+            Questions? We got{" "}
+            <span className="inline-flex align-baseline">
+              <BlobWords className="" offset={1} pop words={[{ word: "you.", bg: "bg-lime", text: "text-white" }]} />
+            </span>
+          </>
+        }
+        sub="The quick answers before you hit download."
+      />
+      {/* Light list: one thin line between questions, no boxes. The whole question row is the tap area. */}
+      <div data-reveal-group className="mx-auto mt-2xl flex max-w-[760px] flex-col divide-y divide-line">
         {faqs.map((item) => (
-          <details key={item.q} className="group rounded-md border-2 border-navy bg-white px-lg py-md text-left">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-md font-display text-xl text-navy sm:text-2xl [&::-webkit-details-marker]:hidden">
+          <details key={item.q} data-reveal="rise" className="group text-left">
+            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-md py-md font-display text-xl text-navy sm:py-lg sm:text-2xl [&::-webkit-details-marker]:hidden">
               {item.q}
               <svg
                 viewBox="0 0 24 24"
@@ -69,9 +82,9 @@ export function Faq() {
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </summary>
-            {item.a && <p className="mt-sm text-[0.9375rem] leading-relaxed text-navy-body">{item.a}</p>}
+            {item.a && <p className="pb-md text-[0.9375rem] sm:pb-lg leading-relaxed text-navy-body">{item.a}</p>}
             {item.steps && (
-              <ol className="mt-sm list-decimal space-y-xs pl-lg text-[0.9375rem] leading-relaxed text-navy-body">
+              <ol className="list-decimal pb-md sm:pb-lg space-y-xs pl-lg text-[0.9375rem] leading-relaxed text-navy-body">
                 {item.steps.map((step) => (
                   <li key={step}>{step}</li>
                 ))}

@@ -41,7 +41,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
   - [x] App icon: the bird on a cream blob inside a navy squircle. Draft: `brand/mascot/app-icon-draft.png`
   - [ ] Trace both as clean SVGs (Figma or vectorizer.ai). Fixes the fringe specks around the note and tail, and gives the icon transparent corners (the draft has black corners)
   - [ ] Export the app icon sizes (16, 32, 256, 512px) + `.ico` for Windows (Claude can do this once the SVG exists)
-  - [ ] Logo / wordmark: "wrenn" in Bubblegum Sans + the bird
+  - [x] Logo draft: `brand/logo/logo-draft.png` (tail + "wrenn" + sound lines), used in the navbar. Still to trace as SVG. Plan was: [colorful tail feathers only, no bird body] + "wrenn" in navy Bubblegum Sans + [music note or the beak sound lines] after the word. Lian makes the tail-only asset (cut it from the traced mascot SVG). Until then, crop the tail from the PNG as a placeholder in the navbar
 - [x] Pick brand colors: **Navy** `#023047` (text, headlines, buttons, navbar, footer). Blob colors: red `#D62828`, orange `#F77F00`, lemon `#F3DA2E`, lime `#82B51F`, sky `#8ECAE6`, teal `#219EBC`. Background: cream `#FFF8EC` or white, **decide when building**. Draft brand guide: `inspo/mocks/brand-guide.html` (gitignored)
 - [x] Pick fonts (display + body): **Bubblegum Sans** (logo, headlines, blob words) + **Figtree** (descriptions, paragraphs, app UI). Self-hosted WOFF2 in `brand/fonts/` (from Fontsource, OFL license files included). No Google Fonts CDN
 - [x] Write Wrenn's own `DESIGN.md` at the repo root (colors, fonts, spacing, components, do's and don'ts) so agents use exact values instead of guessing
@@ -51,31 +51,35 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 - [x] Design tokens in code (Tailwind theme: colors, fonts, spacing, radius): `brand/tokens.css`, shared by web/ and desktop/
 - [x] Install Playwright in `web/` (once `web/` is set up): `npm i -D @playwright/test` then `npx playwright install chromium`
-- [ ] Landing page layout: hero, how it works ("Tap. Render. Post."), demo video, download, footer
-- [ ] Install Python + img2threejs (needs the finished mascot). Repo: hoainho/img2threejs (Apache-2.0). Check its README for a project-only install so worktrees get it. Note: result is an approximation, best on clear, simple shapes
-- [ ] Landing page motion: React Bits components (no install: copy only the ones you use from reactbits.dev) + interactive 3D logo/mascot (img2threejs) in the hero. Keep it purposeful, not everything moving
-- [ ] Run `/impeccable critique` and Emil's animation review on the landing page
-- [ ] App screens:
-  - [ ] Setup screen (detect Claude Code, optional ElevenLabs key)
-  - [ ] Template picker
-  - [ ] Options: platform/size, length, vibe
-  - [ ] Upload assets + details (brand name, CTA)
-  - [ ] Generating / progress screen
-  - [ ] Done screen (preview + open MP4)
-- [ ] Settings screen
+- [x] Landing page layout: hero, how it works ("Tap. Render. Post."), demo video, download, footer. Done for now: hero, How it works, From photos to video, Made for every feed, FAQ, Download, cloud footer, Privacy and Credits pages, dark mode draft. Visuals that need real app output are placeholders (see Phase 5)
+- [ ] Later (after the mascot SVG): install Python + img2threejs (needs the finished mascot). Repo: hoainho/img2threejs (Apache-2.0). Check its README for a project-only install so worktrees get it. Note: result is an approximation, best on clear, simple shapes
+- [x] Landing page motion: hero entrance, blob pops, grouped scroll reveals, nav circle draw (CSS + one small component, no React Bits needed so far). The interactive 3D mascot (img2threejs) waits for the mascot SVG
+- [x] Run `/impeccable critique` and Emil's animation review on the landing page (fixes committed on the `hero-gallery` branch)
+- [x] App screens (real Electron app in `desktop/`, fake data, checked with a code and design review):
+  - [x] Setup screen (Claude Code found / not installed / not signed in, optional voiceover key)
+  - [x] Home: two ways to start (Make from a template, Edit my video) + "Your videos" list
+  - [x] Template picker
+  - [x] Options: platform/size, length, vibe
+  - [x] Upload assets + details (brand name, ending text), one column
+  - [x] Edit my video: upload + Customize (subtitles, cuts, zooms, color, size), automatic by default
+  - [x] Generating / progress screen
+  - [x] Done screen (preview + open folder)
+- [x] Settings screen
+- [x] Easier setup screens: "Install Claude Code" and "Sign in" buttons so users never see a terminal (fake for now; real in Phase 4, after Anthropic answers)
 
 ## Phase 3: Research (before building the AI part)
 
-- [ ] Confirm Anthropic's terms allow an app to run the user's own Claude Code. If not, fallback: user's own Anthropic API key
-- [ ] Pick render method: Electron Chromium capture vs Playwright vs HyperFrames (check license)
+- [x] Research report: `docs/research/2026-11-07-phase-3.md` (answer: grey area, ask Anthropic)
+- [x] Decision (Lian, 2026-11-07): **Option B**. Wrenn prepares the video folder (files + instructions), and the user runs Claude Code there themselves with one short line. Clearly allowed: their own laptop, their own plan, no extra cost. The Generate flow and setup screens change to match in Phase 4
+- [x] Pick render method: Electron's own Chromium capture + ffmpeg-static (no extra browser to download). Playwright for dev and tests. HyperFrames maybe later (Apache 2.0, not stable yet)
 
 ## Phase 4: Build v1
 
-- [ ] Render engine proof of concept: 5s HTML animation to MP4 (`desktop/engine/`)
+- [x] Render engine proof of concept: 5s HTML animation to MP4 (`desktop/engine/`, Playwright, about 29s to render)
 - [ ] Local audio: Web Audio music + SFX, merged into MP4
-- [ ] Electron + Vite + React app shell (`desktop/`)
+- [x] Electron + Vite + React app shell (`desktop/`)
 - [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
-- [ ] Setup screen: detect Claude Code installed
+- [x] Setup screen: detect Claude Code installed and signed in (real check, `desktop/src/main/claude.ts`)
 - [ ] First template: feature walkthrough
 - [ ] Size picker + length picker
 - [ ] Generate button runs Claude Code, renders MP4, saves to user's folder
@@ -84,6 +88,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 5: Test
 
 - [ ] Make 3 real videos with it (Trackr, Beavr, one more)
+- [ ] Replace the landing page placeholders with real Wrenn output: hero visual (gallery idea, inspo 11), the sample video, the "your photos" frame, the 4 size frames, and the demo video
 - [ ] Test on a fresh Windows laptop (no Node, no dev tools)
 - [ ] Ask 2 to 3 non-techy friends to try it, watch where they get stuck
 - [ ] Fix the top issues
@@ -102,6 +107,8 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 - [ ] Make the launch video WITH Wrenn (dogfooding)
 - [ ] Make repo public
+- [ ] Footer: point "GitHub" and "Report a problem" to the public repo and its Issues page (they are "#" until then, in `web/src/components/site-footer.tsx`)
+- [ ] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
 - [ ] Post on TikTok, X, Reddit, Product Hunt, Facebook dev groups (PH)
 - [ ] Collect feedback, plan v2
 

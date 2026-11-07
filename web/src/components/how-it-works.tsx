@@ -1,49 +1,88 @@
+import Image from "next/image";
+import { BlobWords } from "@/components/blob-words";
 import { SectionHeading } from "@/components/section-heading";
+import { StepCarousel } from "@/components/step-carousel";
 
 // "Tap. Render. Post." with 3 cards fanned like a hand of cards (inspo: Detach).
-// Always one row, middle card straight and in front.
-// Phone (Detach): side cards tilt outward (-8° / 8°) at staggered heights (left higher,
-// right lower), cut off by the screen edge.
-// Desktop (Little Bloom): bigger cards, both side cards tilt clockwise (6°), sides higher, middle lower.
+// Phone (Detach): swipeable fan in StepCarousel, side cards cut off by the screen edge.
+// Desktop (Little Bloom): bigger cards, both side cards tilt clockwise (6°), sides higher, middle lower and in front.
 
 const steps = [
   {
     num: "1",
     title: "Pick a template",
+    image: { src: "/steps/pick.png", width: 1448, height: 1086 },
     body: "Choose a style, a size for TikTok, Reels or YouTube, and a vibe.",
-    className: "bg-sky -rotate-[8deg] -translate-y-sm sm:rotate-[6deg] sm:translate-y-0",
+    className: "rotate-[6deg]",
   },
   {
     num: "2",
     title: "Drop your stuff",
+    image: { src: "/steps/drop.png", width: 1448, height: 1086 },
     body: "Add your logo, photos or videos, and your brand name.",
-    className: "bg-lemon z-10 sm:translate-y-2xl",
+    className: "z-10 translate-y-2xl",
   },
   {
     num: "3",
     title: "Hit render",
+    image: { src: "/steps/render.png", width: 1558, height: 1010 },
     body: "Wrenn makes the video with music and saves it to your computer.",
-    className: "bg-lime rotate-[8deg] translate-y-xl sm:rotate-[6deg] sm:translate-y-md",
+    className: "rotate-[6deg] translate-y-md",
   },
 ];
 
+function StepCard({
+  step,
+  className = "",
+  reveal = false,
+}: {
+  step: (typeof steps)[number];
+  className?: string;
+  reveal?: boolean;
+}) {
+  return (
+    <article
+      data-reveal={reveal ? "rise" : undefined}
+      className={`relative shrink-0 rounded-lg border border-navy/15 bg-bg text-center text-navy ${className}`}
+    >
+      <Image {...step.image} alt="" className="mx-auto h-28 w-auto object-contain mix-blend-multiply sm:h-36 dark:rounded-md dark:bg-white dark:mix-blend-normal dark:p-1" />
+      <h3 className="mt-md font-display text-3xl">
+        {step.num}. {step.title}
+      </h3>
+      <p className="mt-sm text-[0.9375rem] leading-relaxed">{step.body}</p>
+    </article>
+  );
+}
+
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="overflow-hidden px-md py-3xl">
+    <section id="how-it-works" className="overflow-hidden px-md py-xl sm:py-[3.4375rem]">
       <SectionHeading
-        title="Tap. Render. Post."
+        title={
+          <>
+            Tap. Render.{" "}
+            <span className="inline-flex align-baseline">
+              <BlobWords className="" offset={1} pop words={[{ word: "Post.", bg: "bg-lemon", text: "text-white" }]} />
+            </span>
+          </>
+        }
         sub="No editing and no timeline. Three steps and your video is ready to post."
       />
-      <div className="mt-2xl flex items-stretch justify-center sm:pb-2xl">
+      <StepCarousel>
         {steps.map((step) => (
-          <article
+          <StepCard key={step.num} step={step} className="h-full w-[240px] px-md py-xl" />
+        ))}
+      </StepCarousel>
+
+      {/* One reveal group: the offset cards would otherwise come in out of order */}
+      <div data-reveal-group className="mt-2xl hidden items-stretch justify-center gap-md pb-2xl sm:flex">
+        {steps.map((step) => (
+          <StepCard
             key={step.num}
-            className={`relative w-[210px] shrink-0 rounded-lg px-md py-xl text-center text-navy shadow-[0_10px_30px_rgba(0,0,0,0.08)] -mx-lg sm:w-[280px] sm:px-lg sm:py-2xl lg:w-[330px] lg:-mx-xl ${step.className}`}
-          >
-            <p className="font-display text-6xl leading-none">{step.num}</p>
-            <h3 className="mt-sm font-display text-3xl">{step.title}</h3>
-            <p className="mt-sm text-[0.9375rem] leading-relaxed">{step.body}</p>
-          </article>
+            step={step}
+            reveal
+            className={`w-[220px] px-md py-xl lg:w-[300px] lg:px-lg ${step.className}`}
+          />
         ))}
       </div>
     </section>

@@ -10,7 +10,7 @@ test("tokens and fonts apply", async ({ page }) => {
   await page.evaluate(() => document.fonts.ready);
 
   const body = page.locator("body");
-  await expect(body).toHaveCSS("background-color", "rgb(255, 248, 236)");
+  await expect(body).toHaveCSS("background-color", "rgb(252, 252, 250)");
 
   const h1 = page.getByRole("heading", { level: 1 });
   const h1Font = await h1.evaluate((el) => getComputedStyle(el).fontFamily);
