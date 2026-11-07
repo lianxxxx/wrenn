@@ -70,7 +70,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 3: Research (before building the AI part)
 
 - [x] Research report: `docs/research/2026-11-07-phase-3.md` (answer: grey area, ask Anthropic)
-- [x] Decision (Lian, 2026-11-07): **Option B**. Wrenn prepares the video folder (files + instructions), and the user runs Claude Code there themselves with one short line. Clearly allowed: their own laptop, their own plan, no extra cost. The Generate flow and setup screens change to match in Phase 4
+- [x] Decision (Lian, 2026-11-07, final): stick with the original concept. Wrenn runs the user's own Claude Code in the background (`claude -p`), the user only clicks ("No prompts. Just render."). Wrenn is Lian's personal side project; if Anthropic ever objects, switch to the user's own API key
 - [x] Pick render method: Electron's own Chromium capture + ffmpeg-static (no extra browser to download). Playwright for dev and tests. HyperFrames maybe later (Apache 2.0, not stable yet)
 
 ## Phase 4: Build v1
@@ -80,9 +80,11 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [x] Electron + Vite + React app shell (`desktop/`)
 - [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
 - [x] Setup screen: detect Claude Code installed and signed in (real check, `desktop/src/main/claude.ts`)
-- [ ] First template: feature walkthrough
+- [x] First template: feature walkthrough (`desktop/templates/feature-walkthrough/`, examples Lian liked in `examples/`)
+  - Source: https://motion-graphics.org/ (gallery + /prompts). Credit every creator and the site in the README and /credits. The site has no license and says prompts belong to their creators: use it for inspiration and write our own prompts, or get the creator's OK before copying a prompt word for word
 - [ ] Size picker + length picker
-- [ ] Generate button runs Claude Code, renders MP4, saves to user's folder
+- [x] Make my video: Wrenn makes the job folder, runs Claude Code in the background, Wrenn renders the MP4 (Electron capture) into the Videos/Wrenn folder
+- [x] Real "Your videos" list and saved settings (setup only once)
 - [ ] Landing page (`web/`)
 
 ## Phase 5: Test
@@ -116,3 +118,9 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 - v2: more templates (promo, product showcase, testimonial, stats, tips), export all sizes at once, ElevenLabs
 - v3: edit mode (user's own video + Whisper), local TTS (Kokoro)
+- Lian's feature list (2026-11-07), after v1 is final:
+  - macOS version: same Electron code, built by GitHub Actions on a Mac (can't build it on Windows). Shared on GitHub only, unsigned, so the README needs a 'how to open on Mac' guide (Privacy & Security, Open Anyway). Signing ($99/yr) not needed
+  - Sidebar in the app: Home, templates, your videos, settings
+  - Choose the AI: Claude Code or GPT (Codex CLI), plus a model picker (for example Opus). Same Option B flow: the user runs it themselves
+  - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
+  - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first

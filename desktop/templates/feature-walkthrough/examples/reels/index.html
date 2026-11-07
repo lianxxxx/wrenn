@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wrenn video</title>
+    <style>
+      @font-face {
+        font-family: "Bubblegum Sans";
+        src: url("../assets/BubblegumSans-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Figtree";
+        src: url("fonts/Figtree-Variable.woff2") format("woff2");
+        font-weight: 300 900;
+        font-display: block;
+      }
+
+      :root {
+        /* Brand colors, picked from the logo */
+        --bg: #062b42;      /* deep navy (logo wordmark) */
+        --ink: #fbf8ef;     /* warm cream */
+        --navy: #06304a;
+        --yellow: #f2d32e;  /* main accent */
+        --blue: #1f9fc6;
+        --red: #dd342d;
+        --orange: #f57c12;
+        --green: #8bb83a;
+        --sky: #8fcbe6;
+
+        --font-display: "Bubblegum Sans", "Figtree", system-ui, sans-serif;
+        --font-body: "Figtree", system-ui, sans-serif;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .stage { position: absolute; inset: 0; overflow: hidden; }
+      .layer { position: absolute; inset: 0; }
+
+      .blob {
+        position: absolute;
+        will-change: transform;
+      }
+      .disc {
+        position: absolute;
+        border-radius: 50%;
+        will-change: transform;
+      }
+
+      .line {
+        position: absolute;
+        white-space: nowrap;
+        font-family: var(--font-display);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.01em;
+      }
+      .hook-line { color: var(--navy); font-size: calc(var(--u) * 15); }
+      .label { color: var(--ink); font-size: calc(var(--u) * 8); }
+      .end-line { color: var(--navy); font-size: calc(var(--u) * 17); }
+
+      .logo { position: absolute; will-change: transform; }
+      .ray {
+        position: absolute;
+        border-radius: 999px;
+        will-change: transform;
+      }
+      .underline {
+        position: absolute;
+        border-radius: 999px;
+        background: var(--yellow);
+        will-change: transform;
+      }
+      .end-group { position: absolute; inset: 0; will-change: transform; }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div class="layer" id="blobs"></div>
+      <div class="layer" id="hook">
+        <h1 class="line hook-line" id="hook-1">Screenshots in</h1>
+        <h1 class="line hook-line" id="hook-2">Video out</h1>
+      </div>
+      <div class="layer" id="devices"></div>
+      <div class="layer" id="labels"></div>
+      <div class="layer" id="discs"></div>
+      <div class="layer" id="brand"></div>
+      <div class="end-group" id="end-group">
+        <div class="underline" id="underline"></div>
+        <h2 class="line end-line" id="end-1">Download</h2>
+        <h2 class="line end-line" id="end-2">it free</h2>
+      </div>
+    </div>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script src="wrenn.js"></script>
+    <script>
+      (async () => {
+        // Settings copied from ../brief.json
+        const VIDEO = { size: "reels", duration: 15, vibe: "playful" };
+        const BRAND = "Wrenn";
+        const ENDING = "Download it free";
+
+        const C = Wrenn.canvas(VIDEO.size);
+        const v = Wrenn.vibe(VIDEO.vibe);
+        const tl = gsap.timeline({ paused: true });
+        const S = C.safe;
+        const U = C.u;
+        const W = C.width;
+        const H = C.height;
+        const $ = (id) => document.getElementById(id);
+        const css = getComputedStyle(document.documentElement);
+        const col = (name) => css.getPropertyValue("--" + name).trim();
+
+        await Wrenn.fontsReady();
+
+        const FEATURES = [
+          { src: "../assets/light-02-home.png", label: "Pick what to make", focus: { x: 0.3, y: 0.4, zoom: 1.6 } },
+          { src: "../assets/light-04-template-options.png", label: "Choose your vibe", focus: { x: 0.33, y: 0.73, zoom: 1.9 } },
+          { src: "../assets/light-05-template-upload-filled.png", label: "Add your screenshots", focus: { x: 0.5, y: 0.37, zoom: 1.9 } },
+          { src: "../assets/light-07-done-new.png", label: "Your video, done", focus: { x: 0.65, y: 0.38, zoom: 1.9 } },
+        ];
+        const imgs = await Wrenn.loadImages([...FEATURES.map((f) => f.src), "../assets/logo.png"]);
+        const logoImg = imgs.pop();
+
+        // ---------------------------------------------------------------
+        // Helpers
+        // ---------------------------------------------------------------
+        const fit = (el, maxW) => {
+          let size = parseFloat(getComputedStyle(el).fontSize);
+          while (el.offsetWidth > maxW && size > 10) {
+            size *= 0.96;
+            el.style.fontSize = size + "px";
+          }
+        };
+        const center = (el, x, y) => {
+          el.style.left = x - el.offsetWidth / 2 + "px";
+          el.style.top = y - el.offsetHeight / 2 + "px";
+        };
+
+        // ---------------------------------------------------------------
+        // Timing (total = 15s, hits on a 0.25s grid)
+        // hook 0 to 2.0, features 2.0 to 11.0 (2.25 each), logo 11.0 to 12.5, ending 12.5 to 15
+        // ---------------------------------------------------------------
+        const T_FEAT = 2.0;
+        const FEAT = 2.25;
+        const T_LOGO = T_FEAT + FEAT * FEATURES.length; // 11.0
+        const T_END = 12.5;
+
+        // Layout
+        const labelY = H * 0.245;
+        const devCy = H * 0.58;
+        const devMaxW = S.width * 0.9;
+        const devMaxH = H * 0.5;
+
+        // ---------------------------------------------------------------
+        // Blobs: the colored shape that lives behind every screen
+        // ---------------------------------------------------------------
+        const blobColors = [col("yellow"), col("blue"), col("red"), col("green")];
+        const blobShapes = [
+          "46% 54% 58% 42% / 52% 44% 56% 48%",
+          "58% 42% 44% 56% / 46% 58% 42% 54%",
+          "42% 58% 52% 48% / 58% 46% 54% 42%",
+          "54% 46% 40% 60% / 44% 52% 48% 56%",
+        ];
+        const B = U * 92;
+        const blobs = blobColors.map((c, i) => {
+          const b = document.createElement("div");
+          b.className = "blob";
+          b.style.width = B + "px";
+          b.style.height = B + "px";
+          b.style.left = C.cx - B / 2 + "px";
+          b.style.top = devCy - B / 2 + "px";
+          b.style.background = c;
+          b.style.borderRadius = blobShapes[i];
+          $("blobs").appendChild(b);
+          gsap.set(b, { scale: 0, rotation: i * 40 });
+          return b;
+        });
+
+        // ---------------------------------------------------------------
+        // Hook: "Screenshots in / Video out" on the yellow blob
+        // ---------------------------------------------------------------
+        const h1 = $("hook-1");
+        const h2 = $("hook-2");
+        Wrenn.split(h1);
+        Wrenn.split(h2);
+        fit(h1, S.width * 0.92);
+        h2.style.fontSize = h1.style.fontSize || getComputedStyle(h1).fontSize;
+        const hookGap = h1.offsetHeight * 0.05;
+        center(h1, C.cx, C.cy - h1.offsetHeight / 2 - hookGap);
+        center(h2, C.cx, C.cy + h2.offsetHeight / 2 + hookGap);
+
+        // Yellow blob pops in at the center of the screen, then becomes the first screen's backdrop
+        gsap.set(blobs[0], { y: C.cy - devCy });
+        tl.to(blobs[0], { scale: 1.32, duration: v.d(1.0), ease: v.pop }, 0.0);
+        Wrenn.reveal(tl, h1, { at: 0.25, vibe: v });
+        Wrenn.reveal(tl, h2, { at: 0.75, vibe: v });
+        // beat punch
+        tl.to([h1, h2], { scale: 1.07, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, 1.25);
+        tl.to(blobs[0], { scale: 1.4, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, 1.25);
+        Wrenn.hide(tl, h1, { at: 1.6, vibe: v });
+        Wrenn.hide(tl, h2, { at: 1.65, vibe: v });
+        tl.to(blobs[0], { y: 0, scale: 1, duration: v.d(0.7), ease: v.move }, 1.7);
+
+        // Blobs keep turning slowly so nothing freezes
+        blobs.forEach((b, i) => {
+          tl.to(b, { rotation: "+=70", duration: VIDEO.duration, ease: "sine.inOut" }, 0);
+        });
+
+        // ---------------------------------------------------------------
+        // Features: each screen pops out of the blob, zooms to the key spot, pops back in
+        // ---------------------------------------------------------------
+        FEATURES.forEach((f, i) => {
+          const T = T_FEAT + i * FEAT;
+          const d = Wrenn.device(imgs[i], { maxWidth: devMaxW, maxHeight: devMaxH });
+          $("devices").appendChild(d.el);
+          d.place(C.cx, devCy);
+          gsap.set(d.el, { scale: 0, rotation: 8 });
+
+          const label = document.createElement("p");
+          label.className = "line label";
+          label.textContent = f.label;
+          $("labels").appendChild(label);
+          Wrenn.split(label);
+          fit(label, S.width);
+          center(label, C.cx, labelY);
+
+          // New blob color pops in (the first one is already there from the hook)
+          if (i > 0) tl.fromTo(blobs[i], { scale: 0.2 }, { scale: 1, duration: v.d(0.9), ease: v.pop, immediateRender: false }, T - 0.1);
+
+          // Screen enters from the middle of the blob, where the eye already is
+          tl.fromTo(
+            d.el,
+            { scale: 0.3, rotation: 8, y: U * 6 },
+            { scale: 1, rotation: 0, y: 0, duration: v.d(0.65), ease: v.enter, immediateRender: false },
+            T
+          );
+          Wrenn.reveal(tl, label, { at: T + 0.15, vibe: v });
+
+          // Zoom to the important part on the beat
+          d.focus(tl, { x: f.focus.x, y: f.focus.y, zoom: f.focus.zoom, at: T + 0.6, duration: v.d(0.85), ease: v.move });
+
+          // Gentle drift while holding
+          tl.to(d.el, { y: -U * 1.6, rotation: i % 2 ? 0.8 : -0.8, duration: 1.3, ease: "sine.inOut" }, T + 0.6);
+
+          // Out: label lifts away, screen tucks back into the blob
+          Wrenn.hide(tl, label, { at: T + FEAT - 0.4, vibe: v });
+          tl.to(d.el, { scale: 0, rotation: -8, duration: v.d(0.32), ease: v.exit }, T + FEAT - 0.25);
+        });
+
+        // ---------------------------------------------------------------
+        // Logo moment: rainbow rings burst out of the last screen, cream fills the frame
+        // ---------------------------------------------------------------
+        const ringColors = [col("red"), col("orange"), col("yellow"), col("green"), col("sky"), col("blue"), col("ink")];
+        const R = 2 * Math.hypot(Math.max(C.cx, W - C.cx), Math.max(devCy, H - devCy)) + U * 4;
+        ringColors.forEach((c, i) => {
+          const disc = document.createElement("div");
+          disc.className = "disc";
+          disc.style.width = R + "px";
+          disc.style.height = R + "px";
+          disc.style.left = C.cx - R / 2 + "px";
+          disc.style.top = devCy - R / 2 + "px";
+          disc.style.background = c;
+          $("discs").appendChild(disc);
+          gsap.set(disc, { scale: 0 });
+          tl.to(disc, { scale: 1, duration: v.d(0.65), ease: "power3.inOut" }, T_LOGO - 0.2 + i * 0.06);
+        });
+
+        const logoW = S.width * 0.78;
+        const logo = logoImg;
+        logo.className = "logo";
+        logo.alt = BRAND;
+        logo.style.width = logoW + "px";
+        $("brand").appendChild(logo);
+        const logoH = logoW * (logo.naturalHeight / logo.naturalWidth);
+        logo.style.left = C.cx - logoW / 2 + "px";
+        logo.style.top = C.cy - logoH / 2 + "px";
+        gsap.set(logo, { scale: 0, rotation: -6 });
+        tl.to(logo, { scale: 1, rotation: 0, duration: v.d(1.0), ease: v.pop }, T_LOGO + 0.5);
+        tl.to(logo, { scale: 1.05, duration: 0.24, ease: "sine.inOut", yoyo: true, repeat: 1 }, T_LOGO + 1.0);
+
+        // Little rainbow sparks around the logo, like the ones on the wordmark
+        const rayColors = [col("red"), col("orange"), col("yellow"), col("green"), col("sky"), col("blue"), col("yellow"), col("red")];
+        const rays = rayColors.map((c, i) => {
+          const a = (i / rayColors.length) * Math.PI * 2 + Math.PI / 8;
+          const rx = logoW * 0.55;
+          const ry = logoH * 1.15;
+          const len = U * 7;
+          const th = U * 2.2;
+          const r = document.createElement("div");
+          r.className = "ray";
+          r.style.width = len + "px";
+          r.style.height = th + "px";
+          r.style.background = c;
+          r.style.left = C.cx + Math.cos(a) * rx - len / 2 + "px";
+          r.style.top = C.cy + Math.sin(a) * ry - th / 2 + "px";
+          $("brand").appendChild(r);
+          const deg = (Math.atan2(Math.sin(a) * ry, Math.cos(a) * rx) * 180) / Math.PI;
+          gsap.set(r, { rotation: deg, scale: 0 });
+          return { el: r, dx: Math.cos(a), dy: Math.sin(a) };
+        });
+        rays.forEach((r, i) => {
+          tl.fromTo(
+            r.el,
+            { scale: 0, x: -r.dx * U * 6, y: -r.dy * U * 6 },
+            { scale: 1, x: 0, y: 0, duration: v.d(0.7), ease: v.enter, immediateRender: false },
+            T_LOGO + 0.75 + i * 0.03
+          );
+          tl.to(r.el, { x: r.dx * U * 1.5, y: r.dy * U * 1.5, duration: 0.6, ease: "sine.inOut" }, T_LOGO + 1.4);
+          tl.to(r.el, { scale: 0, x: -r.dx * U * 4, y: -r.dy * U * 4, duration: v.d(0.3), ease: v.exit }, T_END - 0.1);
+        });
+
+        // ---------------------------------------------------------------
+        // Ending: logo moves up, "Download it free" lands below
+        // ---------------------------------------------------------------
+        tl.to(logo, { y: H * 0.3 - C.cy, scale: 0.68, duration: v.d(0.7), ease: v.move }, T_END);
+        tl.to(logo, { y: H * 0.3 - C.cy - U * 1.2, duration: 1.6, ease: "sine.inOut" }, T_END + 0.8);
+
+        const e1 = $("end-1");
+        const e2 = $("end-2");
+        Wrenn.split(e1);
+        Wrenn.split(e2);
+        fit(e1, S.width * 0.92);
+        e2.style.fontSize = e1.style.fontSize || getComputedStyle(e1).fontSize;
+        const endCy = H * 0.56;
+        center(e1, C.cx, endCy - e1.offsetHeight / 2);
+        center(e2, C.cx, endCy + e2.offsetHeight / 2);
+
+        const ul = $("underline");
+        const ulW = e2.offsetWidth * 1.1;
+        const ulH = U * 3;
+        ul.style.width = ulW + "px";
+        ul.style.height = ulH + "px";
+        ul.style.left = C.cx - ulW / 2 + "px";
+        ul.style.top = endCy + e2.offsetHeight * 0.98 + "px";
+        gsap.set(ul, { scaleX: 0, transformOrigin: "0% 50%" });
+
+        Wrenn.reveal(tl, e1, { at: T_END + 0.1, vibe: v });
+        Wrenn.reveal(tl, e2, { at: T_END + 0.35, vibe: v });
+        tl.to(ul, { scaleX: 1, duration: v.d(0.6), ease: v.enter }, T_END + 0.75);
+        tl.to([e1, e2], { scale: 1.06, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, T_END + 1.0);
+        // soft breathing to the last frame
+        const eg = $("end-group");
+        gsap.set(eg, { transformOrigin: `50% ${endCy}px` });
+        tl.to(eg, { scale: 1.035, duration: VIDEO.duration - (T_END + 1.25), ease: "sine.inOut" }, T_END + 1.25);
+
+        Wrenn.install({ timeline: tl, duration: VIDEO.duration });
+      })().catch(Wrenn.fail);
+    </script>
+  </body>
+</html>

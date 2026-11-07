@@ -28,6 +28,62 @@ body::before {
   opacity: 0.05;
 }
 
+/* ---------- Loading dots ----------
+   Only with JS on. Invisible for the first 0.3s, so on fast internet nobody sees it.
+   The moment the page has loaded ("loaded" class), it's removed at once: no waiting
+   for the bounce to finish. */
+
+.page-loader {
+  display: none;
+}
+
+html.js:not(.loaded) .page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--color-bg);
+  pointer-events: none;
+  opacity: 0;
+  animation: loader-show 150ms ease-out 300ms forwards;
+}
+
+.page-loader span {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+}
+
+@keyframes loader-show {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loader-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-12px);
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  .page-loader span {
+    animation: loader-bounce 900ms var(--ease-out-strong) infinite;
+  }
+  .page-loader span:nth-child(2) { animation-delay: 90ms; }
+  .page-loader span:nth-child(3) { animation-delay: 180ms; }
+  .page-loader span:nth-child(4) { animation-delay: 270ms; }
+  .page-loader span:nth-child(5) { animation-delay: 360ms; }
+}
+
 /* ---------- Motion ----------
    Everything below only runs for visitors who allow motion, and only on screen
    (printing shows the finished page). Hidden start states need a class or

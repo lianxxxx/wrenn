@@ -25,7 +25,8 @@ function run(command: string, args: string[], timeoutMs = 15000): Promise<{ ok: 
 }
 
 // Where is Claude Code? First the PATH, then the native installer's usual spot.
-async function findClaude(): Promise<string | null> {
+// Returns a command ready for a command line ("claude", or a quoted full path), or null.
+export async function findClaude(): Promise<string | null> {
   const lookup = await run(isWindows ? 'where' : 'which', ['claude'])
   if (lookup.ok && lookup.out) return 'claude'
 

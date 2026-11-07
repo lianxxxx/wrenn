@@ -1,20 +1,18 @@
 import { BlobWord } from '../components/BlobWord'
 import { Button } from '../components/Button'
-import { getSize, videoTitle, type Video } from '../data'
-// Placeholder: the engine test video. Later this is the user's real video.
-import sampleVideo from '../assets/sample.mp4'
+import { getSize, videoTitle, type VideoInfo } from '../data'
 
 type Props = {
-  video: Video
+  video: VideoInfo
   // True right after making it, false when opened again from "Your videos"
   isNew: boolean
-  outputFolder: string
   onAnother: () => void
   onHome: () => void
 }
 
 // One finished video: right after it's made, or opened again from Home.
-export function Done({ video, isNew, outputFolder, onAnother, onHome }: Props) {
+// It plays from the wrenn-media:// address the main process gives each video.
+export function Done({ video, isNew, onAnother, onHome }: Props) {
   const size = getSize(video.size)
   const wide = size.width > size.height
 
@@ -24,7 +22,7 @@ export function Done({ video, isNew, outputFolder, onAnother, onHome }: Props) {
       <div className="flex w-[420px] shrink-0 justify-center">
         <video
           // #t=1.5 shows a frame from 1.5s before play, so the box isn't blank navy
-          src={`${sampleVideo}#t=1.5`}
+          src={`${video.url}#t=1.5`}
           preload="metadata"
           controls
           playsInline
@@ -49,7 +47,7 @@ export function Done({ video, isNew, outputFolder, onAnother, onHome }: Props) {
         )}
         <p className="mt-md text-[1.1875rem] leading-[1.55] text-navy-body">Saved to</p>
         <p className="mt-xs break-all rounded-sm bg-sky-soft px-md py-sm font-semibold text-navy">
-          {outputFolder}\{video.fileName}
+          {video.filePath}
         </p>
         <div className="mt-xl flex flex-wrap gap-md">
           <Button onClick={() => window.api.openOutputFolder()}>Open folder</Button>

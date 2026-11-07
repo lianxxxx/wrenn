@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wrenn video</title>
+    <!--
+      STARTER SCENE. This is a placeholder so the renderer can be tested before
+      Claude Code writes the real video. Claude Code replaces the content below,
+      but keeps the same setup: GSAP + wrenn.js, one paused timeline, Wrenn.install().
+    -->
+    <style>
+      @font-face {
+        font-family: "Figtree";
+        src: url("fonts/Figtree-Variable.woff2") format("woff2");
+        font-weight: 300 900;
+        font-display: block;
+      }
+
+      :root {
+        /* Brand colors. Replace with 2 or 3 colors picked from the logo. */
+        --bg: #0f1b2d;
+        --ink: #fbfaf6;
+        --accent: #ffb703;
+        --accent-2: #2ec4b6;
+
+        --font-display: "Figtree", system-ui, sans-serif;
+        --font-body: "Figtree", system-ui, sans-serif;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .stage { position: absolute; inset: 0; overflow: hidden; }
+      .layer { position: absolute; inset: 0; }
+
+      /* One big shape that lives through the whole video, for continuity. */
+      .anchor {
+        position: absolute;
+        width: calc(var(--u) * 90);
+        height: calc(var(--u) * 90);
+        border-radius: 50%;
+        background: var(--accent);
+        will-change: transform;
+      }
+
+      .headline {
+        position: absolute;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: calc(var(--u) * 14);
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        text-align: center;
+      }
+
+      .label {
+        position: absolute;
+        font-weight: 800;
+        font-size: calc(var(--u) * 7);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-align: center;
+      }
+
+      /* Placeholder "screenshot" drawn in CSS so the starter needs no assets. */
+      .fake-shot { background: #f6f5f1; position: relative; }
+      .fake-shot b { position: absolute; border-radius: calc(var(--u) * 0.8); background: #dedbd2; }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div class="anchor" id="anchor"></div>
+      <div class="layer" id="hook"><h1 class="headline" id="hook-text">Your brand</h1></div>
+      <div class="layer" id="feature"><p class="label" id="feature-label">Your best feature</p></div>
+      <div class="layer" id="ending"><h2 class="headline" id="ending-text">Your ending text</h2></div>
+    </div>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script src="wrenn.js"></script>
+    <script>
+      (async () => {
+        // 1. Settings (copied from ../brief.json by Claude Code)
+        const VIDEO = { size: "reels", duration: 8, vibe: "playful" };
+
+        const C = Wrenn.canvas(VIDEO.size);
+        const v = Wrenn.vibe(VIDEO.vibe);
+        const tl = gsap.timeline({ paused: true });
+        const S = C.safe;
+
+        await Wrenn.fontsReady(); // measure text only after fonts are in
+
+        // 2. Layout (pixel values come from the canvas, so every size works)
+        const hookText = document.getElementById("hook-text");
+        const endText = document.getElementById("ending-text");
+        const label = document.getElementById("feature-label");
+        for (const el of [hookText, endText, label]) {
+          el.style.left = S.left + "px";
+          el.style.width = S.width + "px";
+        }
+        hookText.style.top = C.cy - hookText.offsetHeight / 2 + "px";
+        endText.style.top = C.cy - endText.offsetHeight / 2 + "px";
+
+        // Placeholder screenshot in a device frame
+        const shot = document.createElement("div");
+        shot.className = "wrenn-fill fake-shot";
+        const rand = Wrenn.random(3);
+        for (let i = 0; i < 9; i++) {
+          const b = document.createElement("b");
+          b.style.left = 6 + rand() * 50 + "%";
+          b.style.top = 8 + i * 10 + "%";
+          b.style.width = 20 + rand() * 30 + "%";
+          b.style.height = "5%";
+          if (i === 4) b.style.background = getComputedStyle(document.documentElement).getPropertyValue("--accent-2");
+          shot.appendChild(b);
+        }
+        const labelGap = C.u * 6;
+        const frameMaxH = S.height - label.offsetHeight - labelGap;
+        const device = Wrenn.device(shot, { aspect: 0.66, maxWidth: S.width * 0.92, maxHeight: frameMaxH });
+        document.getElementById("feature").appendChild(device.el);
+        const groupH = label.offsetHeight + labelGap + device.height;
+        const groupTop = C.cy - groupH / 2;
+        label.style.top = groupTop + "px";
+        device.place(C.cx, groupTop + label.offsetHeight + labelGap + device.height / 2);
+
+        // 3. Timeline
+        const anchor = document.getElementById("anchor");
+        const A = anchor.offsetWidth;
+        gsap.set(anchor, { x: C.cx - A / 2, y: C.cy - A / 2, scale: 0 });
+
+        // Hook (0 to 2.2s)
+        tl.to(anchor, { scale: 1, duration: v.d(0.8), ease: v.pop }, 0.1);
+        tl.set(hookText, { color: Wrenn.readableOn("#ffb703", "#0f1b2d", "#fbfaf6") }, 0);
+        const hookIn = Wrenn.reveal(tl, hookText, { at: 0.35, vibe: v });
+        tl.to(hookText, { scale: 1.06, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, hookIn + 0.2);
+        Wrenn.hide(tl, hookText, { at: 1.9, vibe: v });
+
+        // Anchor shrinks and slides behind the device: carries the eye into the feature
+        tl.to(anchor, { scale: 0.55, x: C.cx - A / 2 + S.width * 0.28, y: groupTop - A * 0.2, duration: v.d(0.9), ease: v.move }, 1.95);
+
+        // Feature (2.2 to 5.8s)
+        tl.fromTo(device.el, { y: C.height, rotation: -4 }, { y: 0, rotation: 0, duration: v.d(0.9), ease: v.enter }, 2.15);
+        Wrenn.reveal(tl, label, { at: 2.45, vibe: v });
+        device.focus(tl, { x: 0.35, y: 0.45, zoom: 1.9, at: 3.2, duration: v.d(1.1), ease: v.move });
+        tl.to(device.el, { y: -C.u * 1.5, duration: 1.6, ease: "sine.inOut" }, 3.4); // small drift so it never freezes
+        device.focus(tl, { x: 0.5, y: 0.5, zoom: 1, at: 5.0, duration: v.d(0.7), ease: v.move });
+        Wrenn.hide(tl, label, { at: 5.4, vibe: v });
+        tl.to(device.el, { y: -C.height, rotation: 3, duration: v.d(0.6), ease: v.exit }, 5.5);
+
+        // Ending (5.8 to 8s): anchor grows back as the backdrop for the line
+        tl.to(anchor, { scale: 1, x: C.cx - A / 2, y: C.cy - A / 2, duration: v.d(0.8), ease: v.move }, 5.55);
+        tl.set(endText, { color: "#0f1b2d" }, 0);
+        Wrenn.reveal(tl, endText, { at: 5.95, vibe: v });
+        tl.to(anchor, { scale: 1.08, duration: 1.4, ease: "sine.inOut" }, 6.6);
+
+        // 4. Hand the timeline to the renderer. Always last.
+        Wrenn.install({ timeline: tl, duration: VIDEO.duration });
+      })().catch(Wrenn.fail);
+    </script>
+  </body>
+</html>

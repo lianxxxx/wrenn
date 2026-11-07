@@ -4,7 +4,17 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  main: {},
+  main: {
+    build: {
+      rolldownOptions: {
+        // The app, plus a small dev tool that renders a scene from the terminal
+        input: {
+          index: resolve('src/main/index.ts'),
+          'render-cli': resolve('src/main/render/cli.ts')
+        }
+      }
+    }
+  },
   preload: {},
   renderer: {
     resolve: {
