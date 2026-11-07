@@ -2,6 +2,12 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { mkdir } from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { checkClaude, openClaudeSignIn } from './claude'
+
+// Is the user's Claude Code installed and signed in? (see claude.ts)
+ipcMain.handle('check-claude', () => checkClaude())
+// Opens Claude Code's own sign-in, so the user signs in themselves
+ipcMain.handle('open-claude-sign-in', () => openClaudeSignIn())
 
 // Where finished videos go: Videos\Wrenn. Made if it's missing, then opened in File Explorer.
 // The main process owns this path: the screens never send a path to open.

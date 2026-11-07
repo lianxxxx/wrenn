@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '../components/Button'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { CheckIcon, Spinner } from '../components/Spinner'
@@ -10,60 +10,52 @@ type Props = {
   onContinue: () => void
 }
 
-// Where setup is. People only ever click buttons: no terminal.
-//   checking    -> looking for Claude Code
-//   missing     -> not installed: "Install Claude Code" button
-//   installing  -> Wrenn runs Anthropic's official installer, with a progress bar
-//   signed-out  -> installed, not signed in: "Sign in" button
-//   waiting     -> the browser is open on Claude's sign-in page, Wrenn checks on its own
+// Where setup is. People only click buttons here, and Wrenn checks again on its own.
+//   checking    -> asking the computer for Claude Code (first time only)
+//   missing     -> not installed: link to Anthropic's install guide
+//   signed-out  -> installed, not signed in: "Sign in" opens Claude Code's own sign-in
+//   waiting     -> the sign-in window is open, Wrenn checks until it's done
 //   found       -> all set
-type Status = 'checking' | 'missing' | 'installing' | 'signed-out' | 'waiting' | 'found'
-type FirstResult = 'found' | 'missing' | 'signed-out'
+type Status = 'checking' | 'missing' | 'signed-out' | 'waiting' | 'found'
 
 // Placeholder link: double check the exact Anthropic install page before launch
 const INSTALL_URL = 'https://docs.anthropic.com/en/docs/claude-code/setup'
 
-// All FAKE for now: timers stand in for the real work. Later each step asks the main process
-// (check, run the official installer, start Claude Code's own sign-in), once Anthropic says it's okay.
+// How often to check again while waiting for the user to install or sign in
+const RECHECK_MS = 4000
+
 export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
   const [status, setStatus] = useState<Status>('checking')
-  const [progress, setProgress] = useState(0)
-  // Dev only: what the fake first check finds, to preview each case
-  const [firstResult, setFirstResult] = useState<FirstResult>('missing')
+  const [version, setVersion] = useState<string>()
+  // Each check gets a number, so an old, slow answer can't overwrite a newer one
+  const latestCheck = useRef(0)
 
-  // Every fake timer goes through here, so leaving the screen or restarting clears them all
-  const timers = useRef<number[]>([])
-  function later(fn: () => void, ms: number) {
-    timers.current.push(window.setTimeout(fn, ms))
-  }
-  function clearTimers() {
-    timers.current.forEach((t) => window.clearTimeout(t))
-    timers.current = []
-  }
-  useEffect(() => clearTimers, [])
+  const check = useCallback(async (waitingForSignIn = false) => {
+    const id = ++latestCheck.current
+    const result = await window.api.checkClaude()
+    if (id !== latestCheck.current) return
 
-  // The first check. Runs again when the dev preview changes.
+    setVersion(result.version)
+    if (!result.installed) setStatus('missing')
+    else if (result.signedIn) setStatus('found')
+    else setStatus(waitingForSignIn ? 'waiting' : 'signed-out')
+  }, [])
+
+  // First check when the screen opens
   useEffect(() => {
-    clearTimers()
-    setStatus('checking')
-    later(() => setStatus(firstResult), 1200)
-  }, [firstResult])
+    check()
+  }, [check])
 
-  function install() {
-    clearTimers()
-    setStatus('installing')
-    setProgress(0)
-    // Fake progress: 10 small steps, then it's installed but not signed in yet
-    for (let i = 1; i <= 10; i++) later(() => setProgress(i * 10), i * 300)
-    later(() => setStatus('signed-out'), 3300)
-  }
+  // While someone is installing or signing in, check again every few seconds
+  useEffect(() => {
+    if (status === 'checking' || status === 'found') return
+    const timer = window.setInterval(() => check(status === 'waiting'), RECHECK_MS)
+    return () => window.clearInterval(timer)
+  }, [status, check])
 
   function signIn() {
-    clearTimers()
     setStatus('waiting')
-    // Real version: opens Claude's sign-in page in the browser, then checks every few seconds.
-    // Fake: "signs in" after 3 seconds.
-    later(() => setStatus('found'), 3000)
+    window.api.openClaudeSignIn()
   }
 
   return (
@@ -86,32 +78,21 @@ export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
               <Row
                 icon={<Badge>1</Badge>}
                 title="Install Claude Code"
-                text="Wrenn installs it for you. It takes about a minute."
+                text="Follow Anthropic's short guide. Wrenn notices on its own when it's done."
               />
               <Actions>
-                <Button onClick={install}>Install Claude Code</Button>
-                <a href={INSTALL_URL} target="_blank" rel="noreferrer" className="text-[0.9375rem] font-semibold text-navy underline">
-                  I'd rather do it myself
+                <a
+                  href={INSTALL_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="press inline-flex items-center rounded-pill bg-navy px-[22px] py-[10px] font-display text-lg leading-none text-bg"
+                >
+                  Open the install guide
+                </a>
+                <a href="https://claude.ai" target="_blank" rel="noreferrer" className="text-[0.9375rem] font-semibold text-navy underline">
+                  No Claude plan yet? Get one at claude.ai
                 </a>
               </Actions>
-            </>
-          )}
-
-          {status === 'installing' && (
-            <>
-              <Row icon={<Spinner className="size-8" />} title="Installing Claude Code..." text="You can leave this open. Don't close Wrenn." />
-              <div className="mt-md ml-[56px]">
-                <div
-                  className="h-3 overflow-hidden rounded-pill bg-sky-soft"
-                  role="progressbar"
-                  aria-label="Installing Claude Code"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={progress}
-                >
-                  <div className="h-full rounded-pill bg-teal transition-[width] duration-300" style={{ width: `${progress}%` }} />
-                </div>
-              </div>
             </>
           )}
 
@@ -120,13 +101,10 @@ export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
               <Row
                 icon={<Badge>2</Badge>}
                 title="Sign in to Claude"
-                text="Your browser opens Claude's sign-in page. Sign in there, then come back."
+                text="A small window opens, then your browser. Sign in there, then come back."
               />
               <Actions>
                 <Button onClick={signIn}>Sign in</Button>
-                <a href="https://claude.ai" target="_blank" rel="noreferrer" className="text-[0.9375rem] font-semibold text-navy underline">
-                  No Claude plan yet? Get one at claude.ai
-                </a>
               </Actions>
             </>
           )}
@@ -140,7 +118,7 @@ export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
               />
               <Actions>
                 <Button variant="ghost" onClick={signIn}>
-                  Open the sign-in page again
+                  Open sign-in again
                 </Button>
               </Actions>
             </>
@@ -154,28 +132,11 @@ export function Setup({ elevenLabsKey, onKeyChange, onContinue }: Props) {
                 </span>
               }
               title="You're all set"
-              text="Claude Code is ready. Wrenn will use it in the background."
+              text={`Claude Code${version ? ` ${version}` : ''} is ready. Wrenn will use it to build your videos.`}
             />
           )}
         </div>
       </div>
-
-      {/* Dev only: pick what the fake first check finds, to see each case */}
-      {import.meta.env.DEV && (
-        <div className="mt-sm flex items-center gap-sm text-[0.8125rem] text-navy-body">
-          <span>Preview start:</span>
-          {(['missing', 'signed-out', 'found'] as const).map((result) => (
-            <button
-              key={result}
-              type="button"
-              onClick={() => setFirstResult(result)}
-              className={`cursor-pointer rounded-pill border px-sm py-[2px] ${firstResult === result ? 'border-navy text-navy' : 'border-line'}`}
-            >
-              {result}
-            </button>
-          ))}
-        </div>
-      )}
 
       <TextField
         className="mt-xl"

@@ -70,7 +70,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 3: Research (before building the AI part)
 
 - [x] Research report: `docs/research/2026-11-07-phase-3.md` (answer: grey area, ask Anthropic)
-- [ ] Ask Anthropic if Wrenn can run the user's own signed-in Claude Code. If not, fallback: user's own Anthropic API key
+- [x] Decision (Lian, 2026-11-07): **Option B**. Wrenn prepares the video folder (files + instructions), and the user runs Claude Code there themselves with one short line. Clearly allowed: their own laptop, their own plan, no extra cost. The Generate flow and setup screens change to match in Phase 4
 - [x] Pick render method: Electron's own Chromium capture + ffmpeg-static (no extra browser to download). Playwright for dev and tests. HyperFrames maybe later (Apache 2.0, not stable yet)
 
 ## Phase 4: Build v1
@@ -79,7 +79,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [ ] Local audio: Web Audio music + SFX, merged into MP4
 - [x] Electron + Vite + React app shell (`desktop/`)
 - [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
-- [ ] Setup screen: detect Claude Code installed
+- [x] Setup screen: detect Claude Code installed and signed in (real check, `desktop/src/main/claude.ts`)
 - [ ] First template: feature walkthrough
 - [ ] Size picker + length picker
 - [ ] Generate button runs Claude Code, renders MP4, saves to user's folder
