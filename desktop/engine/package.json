@@ -1,0 +1,25 @@
+{
+  "name": "wrenn-engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Wrenn render engine test: HTML + GSAP scene to MP4.",
+  "type": "module",
+  "scripts": {
+    "render": "tsx src/render.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "gsap": "^3.15.1",
+    "playwright": "^1.65.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "ffmpeg-static@5.3.0": true,
+    "esbuild@0.28.2": true
+  }
+}

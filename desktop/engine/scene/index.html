@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wrenn scene test</title>
+    <style>
+      /* Fonts load from brand/fonts with plain file paths. */
+      @font-face {
+        font-family: "Bubblegum Sans";
+        src: url("../../../brand/fonts/BubblegumSans-Regular.woff2") format("woff2");
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Figtree";
+        src: url("../../../brand/fonts/Figtree-Variable.woff2") format("woff2");
+        font-weight: 300 900;
+        font-display: block;
+      }
+
+      :root {
+        --navy: #023047;
+        --bg: #fcfcfa;
+        --red: #d62828;
+        --orange: #f77f00;
+        --lemon: #f3da2e;
+        --lime: #82b51f;
+        --sky: #8ecae6;
+        --teal: #219ebc;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--navy);
+      }
+
+      .stage {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+
+      /* Blobs sit around the middle, never in the corners. */
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        will-change: transform;
+      }
+      .b1 { width: 300px; height: 300px; background: var(--red);    left: 90px;  top: 520px; }
+      .b2 { width: 220px; height: 220px; background: var(--lemon);  left: 760px; top: 470px; }
+      .b3 { width: 260px; height: 260px; background: var(--teal);   left: 700px; top: 1180px; }
+      .b4 { width: 180px; height: 180px; background: var(--lime);   left: 170px; top: 1260px; }
+      .b5 { width: 140px; height: 140px; background: var(--orange); left: 470px; top: 400px; }
+      .b6 { width: 120px; height: 120px; background: var(--sky);    left: 480px; top: 1420px; }
+
+      .copy {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 760px;
+        text-align: center;
+        color: var(--bg);
+      }
+
+      .line {
+        display: block;
+        font-family: "Bubblegum Sans", system-ui, sans-serif;
+        font-size: 170px;
+        line-height: 1;
+        will-change: transform;
+      }
+      .line.accent { color: var(--lemon); }
+
+      .sub {
+        margin-top: 48px;
+        font-family: "Figtree", system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 60px;
+        color: var(--sky);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="blob b4"></div>
+      <div class="blob b5"></div>
+      <div class="blob b6"></div>
+
+      <div class="copy">
+        <span class="line l1">No prompts.</span>
+        <span class="line l2 accent">Just render.</span>
+        <p class="sub">Tap. Render. Post.</p>
+      </div>
+    </div>
+
+    <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+    <script>
+      // One paused timeline. Nothing moves on its own: the renderer calls
+      // window.seek(t) for every frame, so the same t always gives the same picture.
+      const tl = gsap.timeline({ paused: true });
+
+      // Blobs pop in one after another with overshoot.
+      tl.from(".blob", {
+        scale: 0,
+        duration: 0.6,
+        ease: "back.out(2.2)",
+        stagger: 0.08,
+      }, 0.1);
+
+      // Headline lines rise in with a little overshoot.
+      tl.from(".l1", { y: 140, opacity: 0, duration: 0.7, ease: "back.out(1.8)" }, 0.5);
+      tl.from(".l2", { y: 140, opacity: 0, scale: 0.85, duration: 0.7, ease: "back.out(2)" }, 0.75);
+      tl.from(".sub", { y: 60, opacity: 0, duration: 0.6, ease: "power3.out" }, 1.2);
+
+      // Secondary motion: blobs drift slowly so the frame never feels frozen.
+      tl.to(".b1", { x: 30, y: -40, duration: 3.2, ease: "sine.inOut" }, 1.0);
+      tl.to(".b2", { x: -40, y: 30, duration: 3.2, ease: "sine.inOut" }, 1.0);
+      tl.to(".b3", { x: -30, y: -30, duration: 3.2, ease: "sine.inOut" }, 1.0);
+      tl.to(".b4", { x: 40, y: 20, duration: 3.2, ease: "sine.inOut" }, 1.0);
+
+      // Accent line gets a small punch, like a beat hit.
+      tl.to(".l2", { scale: 1.08, duration: 0.15, ease: "power2.out", yoyo: true, repeat: 1 }, 2.5);
+
+      // Quick exit so the cut to the next scene has somewhere to go.
+      tl.to(".copy", { y: -80, opacity: 0, duration: 0.45, ease: "power3.in" }, 4.45);
+      tl.to(".blob", { scale: 0, duration: 0.4, ease: "back.in(2)", stagger: 0.02 }, 4.45);
+
+      // Make sure the timeline is exactly 5 seconds long.
+      tl.set({}, {}, 5);
+
+      window.duration = tl.duration();
+      window.seek = (t) => {
+        tl.seek(t, false);
+      };
+
+      // Show the first frame right away.
+      window.seek(0);
+    </script>
+  </body>
+</html>
