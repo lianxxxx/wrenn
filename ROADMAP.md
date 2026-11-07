@@ -65,7 +65,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
   - [x] Generating / progress screen
   - [x] Done screen (preview + open folder)
 - [x] Settings screen
-- [ ] Easier setup: "Install Claude Code" and "Sign in" buttons so users never see a terminal (screens first, real later after Anthropic answers)
+- [x] Easier setup screens: "Install Claude Code" and "Sign in" buttons so users never see a terminal (fake for now; real in Phase 4, after Anthropic answers)
 
 ## Phase 3: Research (before building the AI part)
 
