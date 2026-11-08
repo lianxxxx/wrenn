@@ -40,7 +40,7 @@ app.whenReady().then(async () => {
 
     if (soundVibe) {
       console.log(`Adding sound (${soundVibe})...`)
-      const added = await addSound({
+      const { added, note } = await addSound({
         // Any text works as the id: it only picks which of the vibe's songs to use
         jobId: resolve(sceneDir),
         jobDir: dirname(resolve(sceneDir)),
@@ -51,6 +51,7 @@ app.whenReady().then(async () => {
         duration: 0
       })
       console.log(added ? 'Sound added.' : 'No sound found, the video stays silent.')
+      if (note) console.log(note)
     }
 
     const seconds = ((Date.now() - started) / 1000).toFixed(1)

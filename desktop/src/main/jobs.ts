@@ -412,8 +412,10 @@ async function checkForDone(job: RunningJob): Promise<void> {
     const message =
       job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
     send(job, { stage: 'adding-sound', message })
+    // A short note for the Done screen if the sound didn't go as picked
+    let soundNote: string | undefined
     try {
-      await addSound({
+      const sound = await addSound({
         jobId: job.id,
         jobDir: job.dir,
         videoFile: tempFile,
@@ -423,15 +425,19 @@ async function checkForDone(job: RunningJob): Promise<void> {
         ownSongFile: job.ownSongFile,
         signal: job.abort.signal
       })
+      soundNote = sound.note
     } catch (error) {
-      if (!job.abort.signal.aborted) console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
+      if (!job.abort.signal.aborted) {
+        console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
+        soundNote = "Wrenn couldn't add the sound this time, so your video is silent."
+      }
     }
     if (job.abort.signal.aborted) throw new Error('Cancelled')
 
     const filePath = join(outputDir(), videoFileName())
     await moveFile(tempFile, filePath)
     const video = await addVideo({ filePath, kind: 'template', size: job.size, createdAt: new Date() })
-    send(job, { stage: 'done', video })
+    send(job, { stage: 'done', video, message: soundNote })
   } catch (error) {
     // A cancel already told the screen, so only report real errors
     if (!job.abort.signal.aborted) {

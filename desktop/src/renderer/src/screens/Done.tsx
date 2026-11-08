@@ -6,13 +6,15 @@ type Props = {
   video: VideoInfo
   // True right after making it, false when opened again from "Your videos"
   isNew: boolean
+  // Said when the sound didn't go as picked (for example ElevenLabs didn't work)
+  note?: string
   onAnother: () => void
   onHome: () => void
 }
 
 // One finished video: right after it's made, or opened again from Home.
 // It plays from the wrenn-media:// address the main process gives each video.
-export function Done({ video, isNew, onAnother, onHome }: Props) {
+export function Done({ video, isNew, note, onAnother, onHome }: Props) {
   const size = getSize(video.size)
   const wide = size.width > size.height
 
@@ -45,6 +47,7 @@ export function Done({ video, isNew, onAnother, onHome }: Props) {
         ) : (
           <h1 className="font-display text-[3rem] leading-[1.05] text-navy">{videoTitle(video)}</h1>
         )}
+        {note && <p className="mt-md rounded-sm bg-lemon/40 px-md py-sm text-base text-navy">{note}</p>}
         <p className="mt-md text-[1.1875rem] leading-[1.55] text-navy-body">Saved to</p>
         <p className="mt-xs break-all rounded-sm bg-sky-soft px-md py-sm font-semibold text-navy">
           {video.filePath}

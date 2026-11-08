@@ -55,7 +55,8 @@ function App() {
   // "Your videos" on Home, newest first, from the Videos\Wrenn folder
   const [videos, setVideos] = useState<VideoInfo[]>([])
   // The video the Done screen shows, and whether it was just made
-  const [openVideo, setOpenVideo] = useState<{ video: VideoInfo; isNew: boolean } | null>(null)
+  // note: a short message about the sound, if it didn't go as picked
+  const [openVideo, setOpenVideo] = useState<{ video: VideoInfo; isNew: boolean; note?: string } | null>(null)
 
   // The template job being made right now
   const [jobEvent, setJobEvent] = useState<JobEvent | null>(null)
@@ -103,7 +104,7 @@ function App() {
     (event: JobEvent) => {
       if (event.stage === 'done' && event.video) {
         jobIdRef.current = null
-        setOpenVideo({ video: event.video, isNew: true })
+        setOpenVideo({ video: event.video, isNew: true, note: event.message })
         setScreen('done')
         refreshVideos()
       } else if (event.stage === 'done') {
@@ -305,6 +306,7 @@ function App() {
           <Done
             video={openVideo.video}
             isNew={openVideo.isNew}
+            note={openVideo.note}
             onAnother={startOver}
             onHome={() => setScreen('home')}
           />
