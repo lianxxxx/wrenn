@@ -297,6 +297,10 @@
       duration: duration,
     });
     window.seek = seek;
+    if (soundHits.length) {
+      window.WRENN_SOUND = sound();
+      console.log("[wrenn] scene/sound.json:\n" + JSON.stringify(window.WRENN_SOUND, null, 2));
+    }
 
     waitForPageAssets()
       .then(() => seek(0))
@@ -571,6 +575,35 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Sound hits (for scene/sound.json)
+  //   Wrenn.hit(2.0, "whoosh")  -> notes a sound at timeline second 2.0, returns 2.0
+  //   Wrenn.sound()             -> { hits: [...] }, sorted, ready for scene/sound.json
+  // Types: pop, whoosh, click, impact, riser. After Wrenn.install() the list is also
+  // on window.WRENN_SOUND and printed in the console. The page can't write files:
+  // you still write scene/sound.json yourself.
+  // ---------------------------------------------------------------------------
+  const SOUND_TYPES = ["pop", "whoosh", "click", "impact", "riser"];
+  const soundHits = [];
+
+  function hit(t, type) {
+    const time = Number(t);
+    if (!(time >= 0) || SOUND_TYPES.indexOf(type) === -1) {
+      console.warn("[wrenn] Wrenn.hit() skipped: needs a time in seconds and one of " + SOUND_TYPES.join(", ") + ".");
+      return time;
+    }
+    soundHits.push({ t: Math.round(time * 1000) / 1000, type: type });
+    return time;
+  }
+
+  function sound() {
+    const hits = soundHits
+      .filter((h) => !total || h.t <= total)
+      .sort((a, b) => a.t - b.t)
+      .slice(0, 60);
+    return { hits: hits.map((h) => ({ t: h.t, type: h.type })) };
+  }
+
+  // ---------------------------------------------------------------------------
   // Seeded random (Math.random would change every render)
   //   const rand = Wrenn.random(7); rand() -> 0..1, same list every time
   // ---------------------------------------------------------------------------
@@ -695,6 +728,8 @@
     readableOn,
     alpha,
     random,
+    hit,
+    sound,
     checkSafeArea,
     showSafeArea,
   };

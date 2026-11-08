@@ -59,16 +59,12 @@ A scene is a folder with `index.html` that:
   ffmpeg's own error (with its log) instead of reporting a bare `EPIPE`. The engine version
   in `desktop/engine/` still has the bare `EPIPE` behavior.
 
-## Packaging (later)
+## Packaging
 
-ffmpeg can't run from inside the `app.asar` archive. In the electron-builder config add:
+ffmpeg can't run from inside the `app.asar` archive, so `electron-builder.yml` unpacks
+`ffmpeg.exe` with `asarUnpack`. How to build the installer: see `desktop/PACKAGING.md`.
 
-```
-asarUnpack:
-  - node_modules/ffmpeg-static/**
-```
-
-`render.ts` already swaps `app.asar` for `app.asar.unpacked` in the ffmpeg path.
+`render.ts` swaps `app.asar` for `app.asar.unpacked` in the ffmpeg path.
 `ffmpeg-static` is approved under `allowScripts` in `package.json` (its install script downloads ffmpeg).
 
 ## Not done yet

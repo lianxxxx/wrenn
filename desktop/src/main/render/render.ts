@@ -51,7 +51,7 @@ function lockDownSession(): Electron.Session {
 
 // ffmpeg-static points inside app.asar in the packaged app, but a program can't run
 // from inside an asar archive. electron-builder's asarUnpack puts it next to it.
-function getFfmpegPath(): string {
+export function getFfmpegPath(): string {
   if (!ffmpegStatic) throw new Error('ffmpeg-static has no ffmpeg for this computer.')
   return ffmpegStatic.replace('app.asar', 'app.asar.unpacked')
 }
@@ -204,7 +204,20 @@ function toPixels(image: NativeImage, info: SceneInfo): Buffer {
   return sized.toBitmap()
 }
 
-export async function renderScene({ sceneDir, outFile, onProgress, signal }: RenderOptions): Promise<void> {
+// Chromium's GPU sometimes fails for no reason we control ("UnknownVizError",
+// "GPU state invalid"). It's rare and random, so if a render fails we try once more
+// with a fresh window. A cancel never retries.
+export async function renderScene(options: RenderOptions): Promise<void> {
+  try {
+    await renderOnce(options)
+  } catch (error) {
+    if (options.signal?.aborted || (error as Error).name === 'AbortError') throw error
+    console.warn('Render failed, trying once more:', (error as Error).message)
+    await renderOnce(options)
+  }
+}
+
+async function renderOnce({ sceneDir, outFile, onProgress, signal }: RenderOptions): Promise<void> {
   const indexFile = join(resolve(sceneDir), 'index.html')
   if (!existsSync(indexFile)) throw new Error(`No index.html in ${sceneDir}`)
   if (signal?.aborted) throw abortError()

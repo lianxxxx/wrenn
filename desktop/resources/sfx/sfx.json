@@ -1,0 +1,13 @@
+{
+  "pop-1.wav": { "type": "pop", "hit": 0.0, "length": 0.188 },
+  "pop-2.wav": { "type": "pop", "hit": 0.0, "length": 0.126 },
+  "pop-3.wav": { "type": "pop", "hit": 0.0, "length": 0.12 },
+  "whoosh-1.wav": { "type": "whoosh", "hit": 0.3, "length": 0.579 },
+  "whoosh-2.wav": { "type": "whoosh", "hit": 0.48, "length": 0.876 },
+  "click-1.wav": { "type": "click", "hit": 0.0, "length": 0.097 },
+  "click-2.wav": { "type": "click", "hit": 0.0, "length": 0.099 },
+  "impact-1.wav": { "type": "impact", "hit": 0.1, "length": 1.0 },
+  "impact-2.wav": { "type": "impact", "hit": 0.02, "length": 1.2 },
+  "riser-1.wav": { "type": "riser", "hit": 2.0, "length": 2.0 },
+  "riser-2.wav": { "type": "riser", "hit": 1.0, "length": 1.0 }
+}

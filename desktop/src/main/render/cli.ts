@@ -1,14 +1,17 @@
 // Dev tool: render a scene from the terminal, no app window.
-// Usage (from desktop/): npm run render -- <sceneDir> <outFile>
+// Usage (from desktop/): npm run render -- <sceneDir> <outFile> [--sound <vibe>]
+// With --sound, Wrenn's own music for that vibe and the scene's sound.json are mixed in after.
 // Built by electron-vite as a second main entry (out/main/render-cli.js).
 
 import { app } from 'electron'
 import { statSync } from 'fs'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
+import { addSound } from '../audio'
 import { renderScene } from './render'
 
 // Electron's argv is [electron, script, ...our arguments]
-const [sceneDir, outFile] = process.argv.slice(2)
+const [sceneDir, outFile, flag, vibe] = process.argv.slice(2)
+const soundVibe = flag === '--sound' ? vibe || 'playful' : undefined
 
 if (!sceneDir || !outFile) {
   console.error('Usage: npm run render -- <sceneDir> <outFile>')
@@ -34,6 +37,22 @@ app.whenReady().then(async () => {
         }
       }
     })
+
+    if (soundVibe) {
+      console.log(`Adding sound (${soundVibe})...`)
+      const { added, note } = await addSound({
+        // Any text works as the id: it only picks which of the vibe's songs to use
+        jobId: resolve(sceneDir),
+        jobDir: dirname(resolve(sceneDir)),
+        videoFile: resolve(outFile),
+        music: 'wrenn',
+        vibe: soundVibe,
+        // 0 = read the real length from the video
+        duration: 0
+      })
+      console.log(added ? 'Sound added.' : 'No sound found, the video stays silent.')
+      if (note) console.log(note)
+    }
 
     const seconds = ((Date.now() - started) / 1000).toFixed(1)
     const sizeMb = (statSync(resolve(outFile)).size / 1024 / 1024).toFixed(2)

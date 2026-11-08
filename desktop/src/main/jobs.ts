@@ -4,7 +4,8 @@
 // 2. It runs the user's own Claude Code in the background in that folder ("make my video"),
 //    so the user only clicks: no window, no typing ("No prompts. Just render.").
 // 3. Every 2 seconds we look for done.json, which Claude Code writes when it's finished.
-// 4. Then we render scene/index.html to an MP4, add it to the library and tell the screen.
+// 4. Then we render scene/index.html to an MP4, add music and sound effects (audio/),
+//    add it to the library and tell the screen.
 
 import { app, type WebContents } from 'electron'
 import { spawn, type ChildProcess } from 'child_process'
@@ -13,10 +14,12 @@ import { existsSync } from 'fs'
 import { copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
 import { basename, dirname, extname, isAbsolute, join } from 'path'
 
-import type { JobEvent, JobRequest, SizeId } from '../preload'
+import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
+import { addSound } from './audio'
 import { findClaude } from './claude'
 import { addVideo, outputDir } from './library'
 import { renderScene } from './render/render'
+import { getSettings } from './settings'
 
 const isWindows = process.platform === 'win32'
 
@@ -29,6 +32,9 @@ const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 const LENGTHS = ['15', '30', '60']
 const VIBES = ['playful', 'clean', 'bold', 'calm']
 const ROLES = ['photo', 'recording', 'logo']
+const MUSIC_CHOICES: MusicChoice[] = ['wrenn', 'own', 'elevenlabs', 'none']
+const SONG_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
+const MAX_SONG_BYTES = 200 * 1024 * 1024
 
 const POLL_MS = 2000
 // How long Claude Code may work on one video before Wrenn calls it stuck
@@ -46,6 +52,12 @@ type RunningJob = {
   id: string
   dir: string
   size: SizeId
+  // For the sound: where the music comes from, the vibe, and the length in seconds
+  music: MusicChoice
+  vibe: JobRequest['vibe']
+  duration: number
+  // Only for music "own": the song copied into the job folder
+  ownSongFile?: string
   // The window that started the job: progress goes back to it
   sender: WebContents
   timer?: NodeJS.Timeout
@@ -129,6 +141,28 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
   if (files.filter((f) => f.role === 'logo').length > 1) throw new Error('Add just one logo.')
   if (!files.some((f) => f.role !== 'logo')) throw new Error('Add at least one screenshot or recording.')
 
+  // Music: Wrenn's own songs when the page doesn't say
+  const music: MusicChoice = r.music === undefined ? 'wrenn' : (r.music as MusicChoice)
+  if (!MUSIC_CHOICES.includes(music)) throw new Error('Pick where the music comes from.')
+
+  let musicFile: string | undefined
+  if (music === 'own') {
+    const f = r.musicFile
+    if (typeof f !== 'string' || !isAbsolute(f)) throw new Error("Your song couldn't be read. Try adding it again.")
+    const name = basename(f)
+    if (!SONG_EXTS.includes(extname(f).toLowerCase())) {
+      throw new Error(`"${name}" isn't a song Wrenn can use. Use an MP3, WAV, M4A, AAC, OGG or FLAC file.`)
+    }
+    const info = await stat(f).catch(() => null)
+    if (!info || !info.isFile()) throw new Error(`Wrenn can't find "${name}" anymore. Try adding it again.`)
+    if (info.size > MAX_SONG_BYTES) throw new Error(`"${name}" is too big. Use a song under 200 MB.`)
+    musicFile = f
+  }
+
+  if (music === 'elevenlabs' && !(await getSettings()).voiceoverKey) {
+    throw new Error('Add your ElevenLabs key in Settings first, or pick another music option.')
+  }
+
   return {
     templateId: r.templateId,
     size: r.size as SizeId,
@@ -136,7 +170,9 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     vibe: r.vibe as JobRequest['vibe'],
     brandName: r.brandName.trim(),
     endingText: r.endingText.trim(),
-    files
+    files,
+    music,
+    musicFile
   }
 }
 
@@ -371,10 +407,37 @@ async function checkForDone(job: RunningJob): Promise<void> {
       }
     })
 
+    // Music and sound effects. Sound is a bonus: if the mix fails we keep the silent video.
+    // A cancel still stops everything (addSound throws, and the check below catches it too).
+    const message =
+      job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
+    send(job, { stage: 'adding-sound', message })
+    // A short note for the Done screen if the sound didn't go as picked
+    let soundNote: string | undefined
+    try {
+      const sound = await addSound({
+        jobId: job.id,
+        jobDir: job.dir,
+        videoFile: tempFile,
+        music: job.music,
+        vibe: job.vibe,
+        duration: job.duration,
+        ownSongFile: job.ownSongFile,
+        signal: job.abort.signal
+      })
+      soundNote = sound.note
+    } catch (error) {
+      if (!job.abort.signal.aborted) {
+        console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
+        soundNote = "Wrenn couldn't add the sound this time, so your video is silent."
+      }
+    }
+    if (job.abort.signal.aborted) throw new Error('Cancelled')
+
     const filePath = join(outputDir(), videoFileName())
     await moveFile(tempFile, filePath)
     const video = await addVideo({ filePath, kind: 'template', size: job.size, createdAt: new Date() })
-    send(job, { stage: 'done', video })
+    send(job, { stage: 'done', video, message: soundNote })
   } catch (error) {
     // A cancel already told the screen, so only report real errors
     if (!job.abort.signal.aborted) {
@@ -402,11 +465,19 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
 
   const id = newJobId()
   const dir = join(jobsDir(), id)
+  let ownSongFile: string | undefined
   try {
     await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
     const assetsDir = join(dir, 'assets')
     await mkdir(assetsDir, { recursive: true })
     await copyAssets(request.files, assetsDir)
+
+    // The user's own song goes in music/, not assets/, so Claude Code doesn't treat it as a picture
+    if (request.music === 'own' && request.musicFile) {
+      await mkdir(join(dir, 'music'), { recursive: true })
+      ownSongFile = join(dir, 'music', `own${extname(request.musicFile).toLowerCase()}`)
+      await copyFile(request.musicFile, ownSongFile)
+    }
 
     const brief = {
       brandName: request.brandName,
@@ -423,7 +494,18 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     throw new Error("Wrenn couldn't get your files ready. Check they're still there and try again.")
   }
 
-  const job: RunningJob = { id, dir, size: request.size, sender, abort: new AbortController(), busy: false }
+  const job: RunningJob = {
+    id,
+    dir,
+    size: request.size,
+    music: request.music,
+    vibe: request.vibe,
+    duration: Number(request.length),
+    ownSongFile,
+    sender,
+    abort: new AbortController(),
+    busy: false
+  }
   jobs.set(id, job)
   try {
     await runClaude(job)

@@ -10,6 +10,8 @@ type Props = {
   onFiles: (files: File[]) => void
   // Taller box for the main upload on a screen
   big?: boolean
+  // What to suggest when a file type is wrong, e.g. "an MP3 or WAV song"
+  typeHint?: string
 }
 
 // Does this file match an accept string like "image/*,video/*"?
@@ -23,7 +25,7 @@ function matches(file: File, accept: string): boolean {
 
 // Drop files on the box, or click Browse. Files only stay in memory for now:
 // nothing is copied or saved yet.
-export function FileDrop({ label, hint, accept, multiple = false, files, onFiles, big = false }: Props) {
+export function FileDrop({ label, hint, accept, multiple = false, files, onFiles, big = false, typeHint }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   // Shown when a dropped file can't be used, so nothing fails silently
@@ -87,8 +89,8 @@ export function FileDrop({ label, hint, accept, multiple = false, files, onFiles
         />
       </div>
       {rejected && (
-        <p className="mt-sm text-[0.8125rem] font-semibold text-red" role="alert">
-          Wrenn can't use that file type yet. Try {accept.startsWith('video') ? 'an MP4 or MOV video' : 'a PNG or JPG image'}.
+        <p className="mt-sm text-[0.8125rem] font-semibold text-red dark:text-[#FF8A80]" role="alert">
+          Wrenn can't use that file type yet. Try {typeHint ?? (accept.startsWith('video') ? 'an MP4 or MOV video' : 'a PNG or JPG image')}.
         </p>
       )}
       {files.length > 0 && (
@@ -103,7 +105,7 @@ export function FileDrop({ label, hint, accept, multiple = false, files, onFiles
           <button
             type="button"
             onClick={() => onFiles([])}
-            className="shrink-0 cursor-pointer rounded-sm text-[0.8125rem] font-semibold text-navy underline"
+            className="inline-flex min-h-6 shrink-0 cursor-pointer items-center rounded-sm text-[0.8125rem] font-semibold text-navy underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
           >
             {files.length > 1 ? 'Remove all' : 'Remove'}
           </button>

@@ -6,7 +6,9 @@ Date: 2026-11-08. Phase 4, step "Local audio". Size: big feature.
 
 Every Wrenn video gets music and sound effects that land on the cuts, so it feels like a real showreel. No copyright problems, no extra cost, works offline.
 
-## Decisions to make (Lian)
+## Decision (Lian, 2026-11-08): music made in code is out (sounds cheap). Users get 3 options: free CC0 songs inside Wrenn (default, one or more per vibe), ElevenLabs Music with their own key, or their own song. Check HyperFrames first: Lian thinks it may help with editing (not sure).
+
+## Original options (for reference)
 
 1. **Where the music comes from** (pick one or more):
    - **A. Wrenn makes its own music** in code (Web Audio, already the plan in CLAUDE.md). Simple beats and melodies, one style per vibe (playful, clean, bold, calm). No copyright at all. Recommended as the default.
@@ -38,3 +40,26 @@ Voiceover, ElevenLabs music, picking from a music library, editing the sound by 
 ## Done when
 
 Both test videos have music and effects that match the cuts, sound good to Lian, and the type check and build pass.
+
+## Build plan (2026-11-08, after Lian's decision)
+
+Contract: `MusicChoice`, `JobRequest.music` / `musicFile` and the `adding-sound` stage in `desktop/src/preload/index.ts`.
+
+**`scene/sound.json`** (Claude Code writes it next to `scene/index.html`, optional):
+
+```json
+{ "hits": [ { "t": 0.5, "type": "pop" }, { "t": 2.0, "type": "whoosh" } ] }
+```
+
+- `t`: seconds on the video timeline where the sound should land (the moment of the cut or pop).
+- `type`: `pop`, `whoosh`, `click`, `impact`, `riser`. A riser ends at `t` (it builds up to the hit); a whoosh peaks at `t`.
+- Max 60 hits. Missing or broken file: music only, never a failed video.
+
+**Sounds inside Wrenn** (`desktop/resources/`, all CC0, listed in `desktop/resources/CREDITS.md`):
+
+- `music/<vibe>/*.mp3`: 2 songs per vibe (playful, clean, bold, calm).
+- `sfx/<type>.wav` (or a few variants `pop-1.wav`, `pop-2.wav`).
+
+**Mix** (ffmpeg only, after the frames are rendered): music trimmed to the video length, fade in 0.3 s, fade out 1.5 s, music ducked a little under each hit, a limiter, AAC 192k, video stream copied (not re-encoded).
+
+**ElevenLabs:** the user's key from Settings, song made at the exact video length, prompt from the vibe. If it fails, Wrenn uses its own song for that vibe and the video still finishes.

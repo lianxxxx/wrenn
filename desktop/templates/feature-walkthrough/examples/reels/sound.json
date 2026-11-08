@@ -1,0 +1,22 @@
+{
+  "hits": [
+    { "t": 0.25, "type": "pop" },
+    { "t": 0.75, "type": "pop" },
+    { "t": 1.25, "type": "pop" },
+    { "t": 1.7, "type": "whoosh" },
+    { "t": 2.0, "type": "whoosh" },
+    { "t": 2.6, "type": "click" },
+    { "t": 4.25, "type": "whoosh" },
+    { "t": 4.85, "type": "click" },
+    { "t": 6.5, "type": "whoosh" },
+    { "t": 7.1, "type": "click" },
+    { "t": 8.75, "type": "whoosh" },
+    { "t": 9.35, "type": "click" },
+    { "t": 10.8, "type": "whoosh" },
+    { "t": 11.5, "type": "riser" },
+    { "t": 11.5, "type": "impact" },
+    { "t": 12.6, "type": "pop" },
+    { "t": 12.85, "type": "pop" },
+    { "t": 13.5, "type": "pop" }
+  ]
+}

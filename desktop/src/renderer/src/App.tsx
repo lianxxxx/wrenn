@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from './components/BlobWord'
 import { Header } from './components/Header'
+import { UpdateBanner } from './components/UpdateBanner'
 import {
   cleanError,
   draftFiles,
+  draftMusic,
   emptyEditDraft,
   emptyTemplateDraft,
   fakeEditVideo,
@@ -54,7 +56,8 @@ function App() {
   // "Your videos" on Home, newest first, from the Videos\Wrenn folder
   const [videos, setVideos] = useState<VideoInfo[]>([])
   // The video the Done screen shows, and whether it was just made
-  const [openVideo, setOpenVideo] = useState<{ video: VideoInfo; isNew: boolean } | null>(null)
+  // note: a short message about the sound, if it didn't go as picked
+  const [openVideo, setOpenVideo] = useState<{ video: VideoInfo; isNew: boolean; note?: string } | null>(null)
 
   // The template job being made right now
   const [jobEvent, setJobEvent] = useState<JobEvent | null>(null)
@@ -65,6 +68,11 @@ function App() {
   const startingRef = useRef(false)
   // Events that arrive before startJob answers with the job id
   const earlyEvents = useRef(new Map<string, JobEvent>())
+
+  // A newer Wrenn is downloaded and ready (installed app only). Null until then.
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null)
+  const [updateDismissed, setUpdateDismissed] = useState(false)
+  useEffect(() => window.api.onUpdateReady(setUpdateVersion), [])
 
   const updateTemplate = (changes: Partial<TemplateDraft>) => setTemplateDraft((d) => ({ ...d, ...changes }))
   const updateEdit = (changes: Partial<EditDraft>) => setEditDraft((d) => ({ ...d, ...changes }))
@@ -102,7 +110,7 @@ function App() {
     (event: JobEvent) => {
       if (event.stage === 'done' && event.video) {
         jobIdRef.current = null
-        setOpenVideo({ video: event.video, isNew: true })
+        setOpenVideo({ video: event.video, isNew: true, note: event.message })
         setScreen('done')
         refreshVideos()
       } else if (event.stage === 'done') {
@@ -141,7 +149,8 @@ function App() {
         vibe: templateDraft.vibe,
         brandName: templateDraft.brandName.trim(),
         endingText: templateDraft.cta.trim(),
-        files: draftFiles(templateDraft)
+        files: draftFiles(templateDraft),
+        ...draftMusic(templateDraft)
       }
       const { jobId } = await window.api.startJob(request)
       jobIdRef.current = jobId
@@ -214,6 +223,11 @@ function App() {
         onLogo={busy ? undefined : () => setScreen('home')}
         onSettings={busy || screen === 'settings' ? undefined : openSettings}
       />
+      {/* Hidden while a video is being made, so a restart can't cut a job short.
+          If they never click Restart, the update installs when Wrenn closes. */}
+      {updateVersion && !updateDismissed && !busy && !starting && (
+        <UpdateBanner onDismiss={() => setUpdateDismissed(true)} />
+      )}
       {/* The key makes each new screen play its small entrance */}
       <main
         key={screen}
@@ -260,6 +274,8 @@ function App() {
           <TemplateOptions
             draft={templateDraft}
             onChange={updateTemplate}
+            hasElevenLabsKey={settings.voiceoverKey.trim() !== ''}
+            onOpenSettings={openSettings}
             onBack={() => setScreen('template-pick')}
             onNext={() => setScreen('template-upload')}
           />
@@ -301,6 +317,7 @@ function App() {
           <Done
             video={openVideo.video}
             isNew={openVideo.isNew}
+            note={openVideo.note}
             onAnother={startOver}
             onHome={() => setScreen('home')}
           />

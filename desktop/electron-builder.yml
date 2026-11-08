@@ -1,0 +1,78 @@
+# Packages Wrenn as a Windows installer. Build with: npm run dist (see PACKAGING.md)
+appId: com.wrenn.app # same as setAppUserModelId in src/main/index.ts
+productName: Wrenn
+copyright: Copyright (c) 2026 Lian
+
+directories:
+  output: dist
+
+# What goes inside app.asar. Production dependencies from node_modules are added on top.
+# electron-vite already bundles our code into out/, so the source files stay out.
+files:
+  - out/**
+  # The window icon: index.ts loads ../../resources/icon.png from out/main
+  - resources/icon.png
+  - "!out/main/render-cli.js" # dev-only terminal tool
+
+# A program can't run from inside app.asar, so ffmpeg.exe goes to app.asar.unpacked
+# (render.ts swaps the path). Only the Windows binary is installed, so only it ships.
+asarUnpack:
+  - node_modules/ffmpeg-static/ffmpeg.exe
+  # Its license and build notes stay right next to it (a copy is also in resources/licenses)
+  - node_modules/ffmpeg-static/ffmpeg.exe.LICENSE
+  - node_modules/ffmpeg-static/ffmpeg.exe.README
+
+# Copied next to the app, into process.resourcesPath
+extraResources:
+  # jobs.ts templatesDir(): resources/templates/<id>/template (sample-job and examples are dev-only)
+  - from: templates
+    to: templates
+    filter:
+      - "*/template/**"
+  # audio/sounds.ts soundsDir(): resources/music and resources/sfx
+  - from: resources/music
+    to: music
+  - from: resources/sfx
+    to: sfx
+  - from: resources/CREDITS.md
+    to: CREDITS.md
+  # FFmpeg is GPL: ship its license, its build notes, and where to get its source
+  # (resources/licenses/FFMPEG.md says what each file is)
+  - from: resources/licenses
+    to: licenses
+  - from: node_modules/ffmpeg-static
+    to: licenses
+    filter:
+      - ffmpeg.exe.LICENSE
+      - ffmpeg.exe.README
+
+# Only the English language pack from Electron (the app is English only). Saves about 40 MB.
+electronLanguages:
+  - en-US
+
+win:
+  target: nsis
+  # Placeholder icon from Lian (1024 px PNG, electron-builder turns it into an .ico)
+  icon: resources/icon.png
+  # Not code signed yet, so Windows SmartScreen will warn
+  # ("Windows protected your PC") until the app is signed.
+  # Auto updates: don't check the update's signature, because there is none yet.
+  # (With no publisherName, electron-updater already skips the check. This makes it explicit.)
+  # Turn this back on once the app is signed.
+  verifyUpdateCodeSignature: false
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Wrenn
+  artifactName: Wrenn-Setup-${version}.${ext}
+
+# Auto updates (src/main/updates.ts): the app looks for new versions in this repo's
+# GitHub Releases. npm run dist writes latest.yml next to the installer.
+# No token and no auto upload: releases are uploaded by hand (see PACKAGING.md).
+publish:
+  provider: github
+  owner: lianxxxx
+  repo: wrenn
