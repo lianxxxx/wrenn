@@ -1,10 +1,10 @@
 // Shared types and the fixed lists the screens use (sizes, templates, vibes).
 // Types the main process also uses come from the preload (the contract), so both sides agree.
-import type { JobRequest, SizeId, VideoInfo } from '../../preload'
+import type { JobRequest, MusicChoice, SizeId, VideoInfo } from '../../preload'
 // Placeholder video for the fake edit path
 import sampleVideo from './assets/sample.mp4'
 
-export type { JobEvent, JobRequest, Settings, SizeId, VideoInfo } from '../../preload'
+export type { JobEvent, JobRequest, MusicChoice, Settings, SizeId, VideoInfo } from '../../preload'
 
 export type Size = {
   id: SizeId
@@ -82,6 +82,17 @@ export const vibes: { id: VibeId; name: string; hint: string }[] = [
   { id: 'calm', name: 'Calm', hint: 'Slow and soft' }
 ]
 
+// Where the music comes from. Wrenn's own songs are the default.
+export const musicChoices: { id: MusicChoice; name: string; hint: string }[] = [
+  { id: 'wrenn', name: "Wrenn's music", hint: 'Free songs that fit your vibe' },
+  { id: 'own', name: 'Your own song', hint: 'Add a song from your computer' },
+  { id: 'elevenlabs', name: 'ElevenLabs', hint: 'Made for your video, uses your key' },
+  { id: 'none', name: 'No music', hint: 'Just the sound effects' }
+]
+
+// Song files Wrenn can mix in (used as a file input accept string)
+export const songTypes = '.mp3,.wav,.m4a,.aac,.ogg,.flac'
+
 export type SubtitleId = 'bold-pop' | 'clean' | 'boxed'
 
 export const subtitleStyles: { id: SubtitleId; name: string; hint: string }[] = [
@@ -101,6 +112,9 @@ export type TemplateDraft = {
   logo: File[]
   brandName: string
   cta: string
+  music: MusicChoice
+  // Only used when music is "own": one song file
+  musicFile: File[]
 }
 
 export const emptyTemplateDraft: TemplateDraft = {
@@ -112,7 +126,9 @@ export const emptyTemplateDraft: TemplateDraft = {
   recordings: [],
   logo: [],
   brandName: '',
-  cta: ''
+  cta: '',
+  music: 'wrenn',
+  musicFile: []
 }
 
 // Everything picked on the edit path. Automatic is the default.
@@ -153,6 +169,13 @@ export function draftFiles(draft: TemplateDraft): JobRequest['files'] {
   const toPaths = (files: File[], role: 'photo' | 'recording' | 'logo') =>
     files.map((file) => ({ path: window.api.getPathForFile(file), role }))
   return [...toPaths(draft.photos, 'photo'), ...toPaths(draft.recordings, 'recording'), ...toPaths(draft.logo, 'logo')]
+}
+
+// The music choice for startJob. The song's real path only goes along with "Your own song".
+export function draftMusic(draft: TemplateDraft): Pick<JobRequest, 'music' | 'musicFile'> {
+  const song = draft.musicFile[0]
+  if (draft.music === 'own' && song) return { music: 'own', musicFile: window.api.getPathForFile(song) }
+  return { music: draft.music }
 }
 
 // The folder a file sits in (everything before the last slash)

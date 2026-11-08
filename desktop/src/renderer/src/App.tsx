@@ -4,6 +4,7 @@ import { Header } from './components/Header'
 import {
   cleanError,
   draftFiles,
+  draftMusic,
   emptyEditDraft,
   emptyTemplateDraft,
   fakeEditVideo,
@@ -141,7 +142,8 @@ function App() {
         vibe: templateDraft.vibe,
         brandName: templateDraft.brandName.trim(),
         endingText: templateDraft.cta.trim(),
-        files: draftFiles(templateDraft)
+        files: draftFiles(templateDraft),
+        ...draftMusic(templateDraft)
       }
       const { jobId } = await window.api.startJob(request)
       jobIdRef.current = jobId
@@ -260,6 +262,8 @@ function App() {
           <TemplateOptions
             draft={templateDraft}
             onChange={updateTemplate}
+            hasElevenLabsKey={settings.voiceoverKey.trim() !== ''}
+            onOpenSettings={openSettings}
             onBack={() => setScreen('template-pick')}
             onNext={() => setScreen('template-upload')}
           />
