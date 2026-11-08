@@ -58,7 +58,7 @@ export default function PrivacyPage() {
 
       <h2>Updates</h2>
       <p>
-        Wrenn will soon check GitHub Releases for new versions. That&apos;s a normal request to GitHub, like opening a
+        When Wrenn starts, it checks GitHub Releases for a new version and downloads it in the background. That&apos;s a normal request to GitHub, like opening a
         web page, so GitHub sees your IP address. It doesn&apos;t include your files or anything about your videos.
       </p>
 
