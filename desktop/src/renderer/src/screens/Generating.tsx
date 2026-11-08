@@ -14,6 +14,7 @@ type Props = {
 // The user only waits here: Claude Code runs in the background, no typing.
 //   waiting-for-claude -> Claude Code is building the scenes (message says what it's doing)
 //   rendering          -> the MP4 is being made, with a real progress bar
+//   adding-sound       -> music and sound effects are mixed in (message may say e.g. "Making your song")
 //   failed             -> a plain message and Try again
 export function Generating({ event, onCancel, onTryAgain }: Props) {
   if (event.stage === 'failed') {
@@ -31,7 +32,9 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
     )
   }
 
+  const building = event.stage === 'waiting-for-claude'
   const rendering = event.stage === 'rendering'
+  const addingSound = event.stage === 'adding-sound'
   const percent =
     rendering && event.total ? Math.min(100, Math.round(((event.frame ?? 0) / event.total) * 100)) : 0
 
@@ -46,24 +49,31 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
 
       <div className="mt-xl rounded-lg border-2 border-line bg-card p-lg">
         <Step
-          active={!rendering}
-          done={rendering}
+          active={building}
+          done={!building}
           title="Building your scenes"
           // Screen readers hear what Claude Code is doing as it changes
-          text={!rendering ? `${event.message || 'Getting started'}...` : 'Done'}
+          text={building ? `${event.message || 'Getting started'}...` : 'Done'}
         />
         <div className="my-md border-t-2 border-line" />
         <Step
           active={rendering}
-          done={false}
+          done={addingSound}
           title="Putting your video together"
-          text={rendering ? `${percent}% done` : 'Next'}
+          text={rendering ? `${percent}% done` : addingSound ? 'Done' : 'Next'}
         />
         {rendering && (
           <div className="mt-md ml-[56px]">
             <ProgressBar percent={percent} />
           </div>
         )}
+        <div className="my-md border-t-2 border-line" />
+        <Step
+          active={addingSound}
+          done={false}
+          title="Adding music and sound"
+          text={addingSound ? `${event.message || 'Mixing it in'}...` : 'Next'}
+        />
       </div>
 
       <div className="mt-xl text-center">
