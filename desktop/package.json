@@ -14,6 +14,7 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "render": "electron-vite build && electron out/main/render-cli.js",
+    "test": "electron-vite build && playwright test",
     "pack": "npm run build && electron-builder --win --dir",
     "dist": "npm run build && electron-builder --win"
   },
