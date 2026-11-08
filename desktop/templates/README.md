@@ -5,7 +5,7 @@ A template is a kit that turns a user's screenshots, logo and a few words into a
 How a video gets made:
 
 1. Wrenn copies a template's `template/` folder into a new **job folder** and adds the user's files.
-2. The user opens Claude Code in that folder and types "make my video".
+2. Wrenn runs the user's own Claude Code in the background in that folder with one line, "make my video". The user never types anything.
 3. Claude Code reads `CLAUDE.md`, looks at the assets, and writes the video as a web page in `scene/`. It writes `done.json` when it's finished.
 4. Wrenn opens `scene/index.html`, steps through it frame by frame, and saves an MP4.
 
