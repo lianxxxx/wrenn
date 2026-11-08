@@ -51,7 +51,7 @@ function lockDownSession(): Electron.Session {
 
 // ffmpeg-static points inside app.asar in the packaged app, but a program can't run
 // from inside an asar archive. electron-builder's asarUnpack puts it next to it.
-function getFfmpegPath(): string {
+export function getFfmpegPath(): string {
   if (!ffmpegStatic) throw new Error('ffmpeg-static has no ffmpeg for this computer.')
   return ffmpegStatic.replace('app.asar', 'app.asar.unpacked')
 }
