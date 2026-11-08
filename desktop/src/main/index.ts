@@ -8,6 +8,9 @@ import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
 import { getSettings, saveSettings } from './settings'
 
+// Test-only: Playwright tests point settings at a temp folder, so they never touch real settings
+if (process.env.WRENN_TEST_USER_DATA) app.setPath('userData', process.env.WRENN_TEST_USER_DATA)
+
 // The wrenn-media:// address for playing videos has to be announced before the app is ready
 registerMediaScheme()
 

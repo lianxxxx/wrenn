@@ -19,7 +19,8 @@ type Sidecar = {
 
 // Where Wrenn saves videos. Makes the folder if it isn't there yet.
 export function outputDir(): string {
-  const dir = join(app.getPath('videos'), 'Wrenn')
+  // Test-only: Playwright tests use a temp folder, so they never write in the real Videos folder
+  const dir = process.env.WRENN_TEST_OUTPUT_DIR || join(app.getPath('videos'), 'Wrenn')
   mkdirSync(dir, { recursive: true })
   return dir
 }
