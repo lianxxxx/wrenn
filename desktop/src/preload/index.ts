@@ -108,7 +108,19 @@ const api = {
     return () => {
       ipcRenderer.removeListener('job-event', listener)
     }
-  }
+  },
+
+  // A newer Wrenn was downloaded in the background (installed app only, see main/updates.ts).
+  // Gets the new version number. Returns a function that stops listening.
+  onUpdateReady: (callback: (version: string) => void): (() => void) => {
+    const listener = (_: unknown, version: string): void => callback(version)
+    ipcRenderer.on('update-ready', listener)
+    return () => {
+      ipcRenderer.removeListener('update-ready', listener)
+    }
+  },
+  // Closes Wrenn, installs the downloaded update, and opens Wrenn again
+  installUpdate: (): Promise<void> => ipcRenderer.invoke('install-update')
 }
 
 export type Api = typeof api

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MarkerFilters } from './components/BlobWord'
 import { Header } from './components/Header'
+import { UpdateBanner } from './components/UpdateBanner'
 import {
   cleanError,
   draftFiles,
@@ -67,6 +68,11 @@ function App() {
   const startingRef = useRef(false)
   // Events that arrive before startJob answers with the job id
   const earlyEvents = useRef(new Map<string, JobEvent>())
+
+  // A newer Wrenn is downloaded and ready (installed app only). Null until then.
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null)
+  const [updateDismissed, setUpdateDismissed] = useState(false)
+  useEffect(() => window.api.onUpdateReady(setUpdateVersion), [])
 
   const updateTemplate = (changes: Partial<TemplateDraft>) => setTemplateDraft((d) => ({ ...d, ...changes }))
   const updateEdit = (changes: Partial<EditDraft>) => setEditDraft((d) => ({ ...d, ...changes }))
@@ -217,6 +223,11 @@ function App() {
         onLogo={busy ? undefined : () => setScreen('home')}
         onSettings={busy || screen === 'settings' ? undefined : openSettings}
       />
+      {/* Hidden while a video is being made, so a restart can't cut a job short.
+          If they never click Restart, the update installs when Wrenn closes. */}
+      {updateVersion && !updateDismissed && !busy && !starting && (
+        <UpdateBanner onDismiss={() => setUpdateDismissed(true)} />
+      )}
       {/* The key makes each new screen play its small entrance */}
       <main
         key={screen}
