@@ -6,7 +6,9 @@ Date: 2026-11-08. Phase 4, step "Local audio". Size: big feature.
 
 Every Wrenn video gets music and sound effects that land on the cuts, so it feels like a real showreel. No copyright problems, no extra cost, works offline.
 
-## Decisions to make (Lian)
+## Decision (Lian, 2026-11-08): music made in code is out (sounds cheap). Users get 3 options: free CC0 songs inside Wrenn (default, one or more per vibe), ElevenLabs Music with their own key, or their own song. Check HyperFrames first: Lian thinks it may help with editing (not sure).
+
+## Original options (for reference)
 
 1. **Where the music comes from** (pick one or more):
    - **A. Wrenn makes its own music** in code (Web Audio, already the plan in CLAUDE.md). Simple beats and melodies, one style per vibe (playful, clean, bold, calm). No copyright at all. Recommended as the default.

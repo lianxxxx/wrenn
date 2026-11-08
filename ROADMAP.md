@@ -76,7 +76,8 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 4: Build v1
 
 - [x] Render engine proof of concept: 5s HTML animation to MP4 (`desktop/engine/`, Playwright, about 29s to render)
-- [ ] Local audio: Web Audio music + SFX, merged into MP4
+- [ ] Sound: 3 music options for users (free CC0 songs in Wrenn as the default, ElevenLabs Music with their own key, or their own song) + sound effects on the cuts, merged into the MP4. No code-made music (Lian: sounds cheap). Plan: docs/superpowers/specs/2026-11-08-sound-design.md
+- [ ] Check HyperFrames: does it help with sound or with the video editor later?
 - [x] Electron + Vite + React app shell (`desktop/`)
 - [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
 - [x] Setup screen: detect Claude Code installed and signed in (real check, `desktop/src/main/claude.ts`)
@@ -113,6 +114,10 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [ ] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
 - [ ] Post on TikTok, X, Reddit, Product Hunt, Facebook dev groups (PH)
 - [ ] Collect feedback, plan v2
+
+## Plan after launch
+
+Release v1 first, then improve with the features below (Lian, 2026-11-08).
 
 ## Later
 
