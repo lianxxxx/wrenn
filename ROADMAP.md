@@ -100,11 +100,11 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 - [x] Package app with electron-builder (Windows `.exe` first, Mac later). `npm run dist`, see desktop/PACKAGING.md
 - [ ] Note: unsigned apps show warnings (Windows SmartScreen, Mac blocks unsigned). Decide: ship unsigned with a "how to open" guide for v1, or pay for code signing later
-- [ ] Auto updates via GitHub Releases (electron-updater)
+- [x] Auto updates via GitHub Releases (electron-updater). Repo must be public for it to work
 - [ ] Upload installer to GitHub Releases
 - [ ] Deploy landing page to Vercel, connect domain
 - [ ] Download button points to latest GitHub Release
-- [ ] README: setup guide, screenshots, credits to prompt sources, license (MIT), ElevenLabs terms note
+- [x] README: setup guide, screenshots, credits to prompt sources, license (MIT), ElevenLabs terms note
 
 ## Phase 7: Launch
 
