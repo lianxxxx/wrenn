@@ -116,7 +116,7 @@ The video never plays on its own: each `seek` sets its `currentTime`. Use only t
 
 ## Step 6: Sound effects (scene/sound.json)
 
-Wrenn adds music and sound effects after the render. Music is added for you: don't pick or make any. It lands on a 0.5 second beat grid, so keep your hits on that grid where you can (0.5, 1.0, 1.5 ...).
+Wrenn adds music and sound effects after the render. Music is added for you: don't pick or make any. Keep your hits on a steady 0.5 second grid where you can (0.5, 1.0, 1.5 ...), so the video feels on the beat.
 
 Your job is to say where the sound effects go. Write `scene/sound.json` next to `scene/index.html`:
 
