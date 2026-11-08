@@ -79,11 +79,11 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [ ] Sound: 3 music options for users (free CC0 songs in Wrenn as the default, ElevenLabs Music with their own key, or their own song) + sound effects on the cuts, merged into the MP4. No code-made music (Lian: sounds cheap). Plan: docs/superpowers/specs/2026-11-08-sound-design.md (Built 2026-11-08, waiting for Lian to listen.)
 - [x] Check HyperFrames: does it help with sound or with the video editor later? (No for sound, we do the same with ffmpeg. Borrow its timeline ideas for the editor later. docs/research/2026-11-08-hyperframes.md)
 - [x] Electron + Vite + React app shell (`desktop/`)
-- [ ] Install Playwright in `desktop/` (app tests, maybe the render engine too)
+- [x] Playwright tests in `desktop/` (`npm test`: home, template path, music, settings, job checks, sound). See desktop/tests/README.md
 - [x] Setup screen: detect Claude Code installed and signed in (real check, `desktop/src/main/claude.ts`)
 - [x] First template: feature walkthrough (`desktop/templates/feature-walkthrough/`, examples Lian liked in `examples/`)
   - Source: https://motion-graphics.org/ (gallery + /prompts). Credit every creator and the site in the README and /credits. The site has no license and says prompts belong to their creators: use it for inspiration and write our own prompts, or get the creator's OK before copying a prompt word for word
-- [ ] Size picker + length picker
+- [x] Size picker + length picker
 - [x] Make my video: Wrenn makes the job folder, runs Claude Code in the background, Wrenn renders the MP4 (Electron capture) into the Videos/Wrenn folder
 - [x] Real "Your videos" list and saved settings (setup only once)
 - [ ] Landing page (`web/`)
@@ -98,7 +98,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 ## Phase 6: Package + Deploy
 
-- [ ] Package app with electron-builder (Windows `.exe` first, Mac later)
+- [x] Package app with electron-builder (Windows `.exe` first, Mac later). `npm run dist`, see desktop/PACKAGING.md
 - [ ] Note: unsigned apps show warnings (Windows SmartScreen, Mac blocks unsigned). Decide: ship unsigned with a "how to open" guide for v1, or pay for code signing later
 - [ ] Auto updates via GitHub Releases (electron-updater)
 - [ ] Upload installer to GitHub Releases
