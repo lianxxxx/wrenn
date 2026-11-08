@@ -155,8 +155,8 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
 
       <TextField
         className="mt-xl"
-        label="ElevenLabs key"
-        hint="Optional. For music made by ElevenLabs, and voiceovers later. You can skip this and add it later in Settings."
+        label="ElevenLabs key (optional)"
+        hint="Lets ElevenLabs make a new song for your videos. You can skip this and add it later in Settings."
         type="password"
         autoComplete="off"
         spellCheck={false}

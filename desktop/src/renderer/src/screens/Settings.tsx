@@ -50,8 +50,8 @@ export function Settings({ voiceoverKey, onSaveKey, outputFolder, onBack }: Prop
       <div className="flex flex-col gap-xl">
         <div>
           <TextField
-            label="ElevenLabs key"
-            hint="Optional. For music made by ElevenLabs, and voiceovers later. It stays on this computer and saves when you click away."
+            label="ElevenLabs key (optional)"
+            hint="Lets ElevenLabs make a new song for your videos. Voiceovers are coming soon. Your key stays on this computer and saves when you click away."
             type="password"
             autoComplete="off"
             spellCheck={false}
