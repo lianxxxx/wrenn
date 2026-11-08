@@ -114,9 +114,31 @@ The video never plays on its own: each `seek` sets its `currentTime`. Use only t
 
 **Safe area check:** if you can open the page in a browser, run `await Wrenn.checkSafeArea()` in the console; it lists anything in a corner or text outside the safe box. Opening `scene/index.html#debug` shows the safe box. Don't install anything to do this.
 
+## Step 6: Sound effects (scene/sound.json)
+
+Wrenn adds music and sound effects after the render. Music is added for you: don't pick or make any. It lands on a 0.5 second beat grid, so keep your hits on that grid where you can (0.5, 1.0, 1.5 ...).
+
+Your job is to say where the sound effects go. Write `scene/sound.json` next to `scene/index.html`:
+
+```json
+{ "hits": [ { "t": 0.5, "type": "pop" }, { "t": 2.0, "type": "whoosh" } ] }
+```
+
+- `t` is the second on the timeline where the sound lands. It must match the exact time of that moment in your timeline (the same number you passed to `tl.to`, `Wrenn.reveal` or `device.focus`), not a guess.
+- One hit for each moment that matters: every cut, pop, scale punch, text reveal and the logo hit. Skip the small stuff (drifts, breathing shapes, each single word of a reveal).
+- Types, used with taste:
+  - `whoosh`: big moves and scene changes. It peaks at `t`.
+  - `pop`: things appearing (a label, a shape, a screen).
+  - `click`: a zoom or focus stop on a screenshot.
+  - `impact`: the logo moment. Usually once.
+  - `riser`: builds up and ends at `t`. One or two at most, for example building into the logo (same `t` as the impact).
+- Not too many: about one hit every 0.5 to 1.5 seconds. Never more than 60. Two hits less than 0.2 seconds apart sound messy, so keep the more important one (a riser ending on its impact is fine).
+
+Tip: `Wrenn.hit(t, type)` notes a hit and gives `t` back, so you can write it right where the tween is: `tl.to(logo, {...}, Wrenn.hit(T_LOGO, "impact"))`. After `Wrenn.install()`, `Wrenn.sound()` (also `window.WRENN_SOUND`) returns the sorted list. The page can't write files, so you still write `scene/sound.json` yourself, with the same times.
+
 ## Rules for this folder
 
-- Only create or edit files inside `scene/`. Mostly that's `scene/index.html`; you may add more `.css`, `.js` or `.svg` files in `scene/`.
+- Only create or edit files inside `scene/`. Mostly that's `scene/index.html` and `scene/sound.json`; you may add more `.css`, `.js` or `.svg` files in `scene/`.
 - Don't change `scene/vendor/`, `scene/fonts/` or `scene/wrenn.js`. Never change `assets/` or `brief.json`.
 - Never use the network: no CDNs, no web fonts from the internet, no npm installs, no downloads. Everything you need is here.
 - Don't try to render the MP4. Wrenn does that.
@@ -128,4 +150,6 @@ Write `done.json` in this folder (next to `brief.json`, the one file you write o
 - It worked: `{"ok": true}`
 - You couldn't make it: `{"ok": false, "reason": "short plain reason the user can understand"}`
 
-Write `done.json` last, only after `scene/index.html` is complete. Then tell the user, in a line or two, that their video is ready in Wrenn.
+Before that, check `scene/sound.json`: it's valid JSON, every `t` is inside the video length and matches your timeline, and there are 60 hits or fewer.
+
+Write `done.json` last, only after `scene/index.html` and `scene/sound.json` are complete. Then tell the user, in a line or two, that their video is ready in Wrenn.
