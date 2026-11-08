@@ -84,10 +84,11 @@ export const vibes: { id: VibeId; name: string; hint: string }[] = [
 
 // Where the music comes from. Wrenn's own songs are the default.
 export const musicChoices: { id: MusicChoice; name: string; hint: string }[] = [
-  { id: 'wrenn', name: "Wrenn's music", hint: 'Free songs that fit your vibe' },
-  { id: 'own', name: 'Your own song', hint: 'Add a song from your computer' },
-  { id: 'elevenlabs', name: 'ElevenLabs', hint: 'Made for your video, uses your key' },
-  { id: 'none', name: 'No music', hint: 'Just the sound effects' }
+  { id: 'wrenn', name: "Wrenn's music", hint: 'Free songs for your vibe' },
+  { id: 'own', name: 'Your own song', hint: 'A song on your computer' },
+  // Non-techy users may not know ElevenLabs, so the name says what they get
+  { id: 'elevenlabs', name: 'A new song', hint: 'Made by ElevenLabs' },
+  { id: 'none', name: 'No music', hint: 'Just sound effects' }
 ]
 
 // Song files Wrenn can mix in (used as a file input accept string)

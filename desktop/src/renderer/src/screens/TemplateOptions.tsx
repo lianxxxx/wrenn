@@ -65,23 +65,29 @@ export function TemplateOptions({ draft, onChange, hasElevenLabsKey, onOpenSetti
             />
           )}
 
-          {needsKey && (
-            <p className="text-[0.9375rem] text-navy-body">
-              Add your ElevenLabs key in Settings to use this.{' '}
-              <button
-                type="button"
-                onClick={onOpenSettings}
-                className="cursor-pointer rounded-sm font-semibold text-navy underline"
-              >
-                Open Settings
-              </button>
-            </p>
-          )}
+          {/* Always on the page so screen readers hear the line when it appears */}
+          <div aria-live="polite">
+            {needsKey && (
+              <p className="text-[0.9375rem] text-navy-body">
+                To make a new song, Wrenn needs your ElevenLabs key.{' '}
+                <button
+                  type="button"
+                  onClick={onOpenSettings}
+                  className="inline-flex min-h-6 cursor-pointer items-center rounded-sm font-semibold text-navy underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
+                >
+                  Add it in Settings
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="mt-xl flex items-center justify-end gap-md">
-        {needsSong && <p className="text-[0.9375rem] text-navy-body">Add your song, or pick other music.</p>}
+        {/* Says why Next is greyed out. Always on the page so the change is announced. */}
+        <p aria-live="polite" className="text-[0.9375rem] text-navy-body">
+          {needsSong ? 'Add your song, or pick other music.' : needsKey ? 'Add your ElevenLabs key, or pick other music.' : ''}
+        </p>
         <Button onClick={onNext} disabled={!ready}>
           Next
         </Button>
