@@ -18,6 +18,9 @@ files:
 # (render.ts swaps the path). Only the Windows binary is installed, so only it ships.
 asarUnpack:
   - node_modules/ffmpeg-static/ffmpeg.exe
+  # Its license and build notes stay right next to it (a copy is also in resources/licenses)
+  - node_modules/ffmpeg-static/ffmpeg.exe.LICENSE
+  - node_modules/ffmpeg-static/ffmpeg.exe.README
 
 # Copied next to the app, into process.resourcesPath
 extraResources:
@@ -33,6 +36,15 @@ extraResources:
     to: sfx
   - from: resources/CREDITS.md
     to: CREDITS.md
+  # FFmpeg is GPL: ship its license, its build notes, and where to get its source
+  # (resources/licenses/FFMPEG.md says what each file is)
+  - from: resources/licenses
+    to: licenses
+  - from: node_modules/ffmpeg-static
+    to: licenses
+    filter:
+      - ffmpeg.exe.LICENSE
+      - ffmpeg.exe.README
 
 # Only the English language pack from Electron (the app is English only). Saves about 40 MB.
 electronLanguages:

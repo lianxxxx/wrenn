@@ -40,6 +40,11 @@ Next to it, in the app's `resources` folder:
   Only the Windows ffmpeg is installed, so only that one ships.
 - `templates/<id>/template/`: what a job copies. `sample-job/` and `examples/` stay out (dev only).
 - `music/`, `sfx/` and `CREDITS.md`: the songs and sound effects (about 36 MB).
+- `licenses/`: FFmpeg is GPL, so its license (`ffmpeg.exe.LICENSE`), build notes (`ffmpeg.exe.README`)
+  and `FFMPEG.md` (what it is and where to get its source) ship with the app. The license and
+  build notes also sit next to `ffmpeg.exe` in `app.asar.unpacked`. Both come from `ffmpeg-static`,
+  so they always match the ffmpeg that ships. If you update `ffmpeg-static`, update the version
+  and source link in `resources/licenses/FFMPEG.md`.
 
 Only the English language pack from Electron is kept, which saves about 40 MB.
 
