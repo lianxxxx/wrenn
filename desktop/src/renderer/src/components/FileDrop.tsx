@@ -89,7 +89,7 @@ export function FileDrop({ label, hint, accept, multiple = false, files, onFiles
         />
       </div>
       {rejected && (
-        <p className="mt-sm text-[0.8125rem] font-semibold text-red" role="alert">
+        <p className="mt-sm text-[0.8125rem] font-semibold text-red dark:text-[#FF8A80]" role="alert">
           Wrenn can't use that file type yet. Try {typeHint ?? (accept.startsWith('video') ? 'an MP4 or MOV video' : 'a PNG or JPG image')}.
         </p>
       )}
@@ -105,7 +105,7 @@ export function FileDrop({ label, hint, accept, multiple = false, files, onFiles
           <button
             type="button"
             onClick={() => onFiles([])}
-            className="shrink-0 cursor-pointer rounded-sm text-[0.8125rem] font-semibold text-navy underline"
+            className="inline-flex min-h-6 shrink-0 cursor-pointer items-center rounded-sm text-[0.8125rem] font-semibold text-navy underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
           >
             {files.length > 1 ? 'Remove all' : 'Remove'}
           </button>

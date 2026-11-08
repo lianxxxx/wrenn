@@ -60,7 +60,7 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
           active={rendering}
           done={addingSound}
           title="Putting your video together"
-          text={rendering ? `${percent}% done` : addingSound ? 'Done' : 'Next'}
+          text={rendering ? `${percent}% done` : addingSound ? 'Done' : 'Up next'}
         />
         {rendering && (
           <div className="mt-md ml-[56px]">
@@ -72,7 +72,7 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
           active={addingSound}
           done={false}
           title="Adding music and sound"
-          text={addingSound ? `${event.message || 'Mixing it in'}...` : 'Next'}
+          text={addingSound ? `${event.message || 'Mixing it in'}...` : 'Up next'}
         />
       </div>
 
