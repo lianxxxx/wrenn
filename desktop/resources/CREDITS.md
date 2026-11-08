@@ -6,24 +6,28 @@ CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
 
 ## Music (`music/`)
 
-All songs come from **FreePD.com**, a CC0 music library run by Kevin MacLeod. FreePD closed in 2025, so the links below go to archived copies.
+All songs come from **Free Music Archive** (freemusicarchive.org). Each track page shows the CC0 1.0 badge ("Public Domain Dedication"), so the track page is the license proof. Checked on 2026-11-08.
 
-- License proof: every FreePD page says "Free Of Attribution, Creative Commons 0" in its header and footer, for example the archived upbeat page: https://web.archive.org/web/20240528012725/https://freepd.com/upbeat.php (and the site's legal note: https://web.archive.org/web/20240528005223/https://freepd.com/legal.php).
-- Files were downloaded from the Internet Archive's FreePD mirror (checked for malware by archive.org): https://archive.org/details/freepd
-- Changes we made: cut silence at the start, trimmed songs longer than 150 s to 120 s with a 2 s fade out, leveled to about -16 LUFS, re-encoded to 160 kbps MP3, removed tags and cover art.
+- Changes we made: cut silence at the start, trimmed to 120 s with a 2 s fade out, leveled to about -16 LUFS, re-encoded to 160 kbps MP3, removed tags and cover art.
 
-| File | Title | Creator | FreePD page (archived) | File source |
-| - | - | - | - | - |
-| music/playful/and-just-like-that.mp3 | And Just Like That | Bryan Teoh | https://web.archive.org/web/20240528012725/https://freepd.com/upbeat.php | https://archive.org/download/freepd/upbeat/And%20Just%20Like%20That.mp3 |
-| music/playful/screen-saver.mp3 | Screen Saver | Kevin MacLeod | https://web.archive.org/web/20240528012725/https://freepd.com/upbeat.php | https://archive.org/download/freepd/upbeat/Screen%20Saver.mp3 |
-| music/clean/arpent.mp3 | Arpent | Kevin MacLeod | https://web.archive.org/web/20240401042450/https://freepd.com/electronic.php | https://archive.org/download/freepd/electronic/Arpent.mp3 |
-| music/clean/meditating-beat.mp3 | Meditating Beat | Kevin MacLeod | https://web.archive.org/web/20240401042450/https://freepd.com/electronic.php | https://archive.org/download/freepd/electronic/Meditating%20Beat.mp3 |
-| music/bold/goodnightmare.mp3 | Goodnightmare | Kevin MacLeod | https://web.archive.org/web/20240401042450/https://freepd.com/electronic.php | https://archive.org/download/freepd/electronic/Goodnightmare.mp3 |
-| music/bold/beat-one.mp3 | Beat One | Kevin MacLeod | https://web.archive.org/web/20240401042450/https://freepd.com/electronic.php | https://archive.org/download/freepd/electronic/Beat%20One.mp3 |
-| music/calm/wisdom-in-the-sun.mp3 | Wisdom in the Sun | Kevin MacLeod | https://web.archive.org/web/20240804230525/https://freepd.com/misc.php | https://archive.org/download/freepd/misc/Wisdom%20in%20the%20Sun.mp3 |
-| music/calm/la-citadelle.mp3 | La Citadelle | Komiku | https://web.archive.org/web/20240720115205/https://freepd.com/romantic.php | https://archive.org/download/freepd/romantic/La%20Citadelle.mp3 |
-
-License for all songs: CC0 1.0, https://creativecommons.org/publicdomain/zero/1.0/
+| File | Title | Creator | Track page (license proof) |
+| - | - | - | - |
+| music/playful/funky-pop-holiznacc0.mp3 | Funky Pop | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/power-pop/funky-pop/ |
+| music/playful/earth-holiznacc0.mp3 | Earth | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/interstellar-pop-songs/earth/ |
+| music/playful/pop-city-komiku.mp3 | Pop City | Komiku | https://freemusicarchive.org/music/Komiku/Helice_Awesome_Dance_Adventure_/pop-city/ |
+| music/playful/cant-stop-my-feet-loyalty-freak-music.mp3 | Can't Stop My Feet ! | Loyalty Freak Music | https://freemusicarchive.org/music/Loyalty_Freak_Music/ROLLER_DISCO_DANCE_DANCE/Loyalty_Freak_Music_-_ROLLER_DISCO_DANCE_DANCE_-_04_Cant_Stop_My_Feet_/ |
+| music/clean/path-metre.mp3 | Path | Metre | https://freemusicarchive.org/music/Metre/conduit/path-1/ |
+| music/clean/drama-holiznacc0.mp3 | Drama | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/power-pop/drama/ |
+| music/clean/sunlit-groove-ondrosik.mp3 | Sunlit Groove | Ondrosik | https://freemusicarchive.org/music/Ondrosik/burnout/sunlit-groove/ |
+| music/clean/static-shoes-loyalty-freak-music.mp3 | Static Shoes | Loyalty Freak Music | https://freemusicarchive.org/music/Loyalty_Freak_Music/MINIMAL_AMBIENT_BOUNCE/Loyalty_Freak_Music_-_MINIMAL_AMBIENT_BOUNCE_-_04_Static_Shoes/ |
+| music/bold/saturn-holiznacc0.mp3 | Saturn | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/interstellar-pop-songs/saturn-1/ |
+| music/bold/its-a-trap-holiznacc0.mp3 | ITS A TRAP | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/after-dark/its-a-trap-1/ |
+| music/bold/road-3-fight-komiku.mp3 | Road 3 Fight | Komiku | https://freemusicarchive.org/music/Komiku/Helice_Awesome_Dance_Adventure_/road-3-fight/ |
+| music/bold/hood-rat-john-bartmann.mp3 | Hood Rat | John Bartmann | https://freemusicarchive.org/music/John_Bartmann/moody-beats/hood-rat/ |
+| music/calm/tranquil-mindscape-holiznacc0.mp3 | Tranquil Mindscape | HoliznaCC0 | https://freemusicarchive.org/music/holiznacc0/public-domain-lofi/tranquil-mindscape-lofi-happy-reflection/ |
+| music/calm/everyone-loyalty-freak-music.mp3 | Everyone | Loyalty Freak Music | https://freemusicarchive.org/music/Loyalty_Freak_Music/TO_CHILL_AND_STAY_AWAKE/Loyalty_Freak_Music_-_TO_CHILL_AND_STAY_AWAKE_-_02_Everyone/ |
+| music/calm/start-to-play-anonymous420.mp3 | Start to play | Anonymous420 | https://freemusicarchive.org/music/Anonymous420/Nostalgia/Anonymous420_-_Nostalgia_-_07_Start_to_play/ |
+| music/calm/city-lights-at-night-ondrosik.mp3 | City lights at night | Ondrosik | https://freemusicarchive.org/music/Ondrosik/burnout/city-lights-at-night/ |
 
 ## Sound effects (`sfx/`)
 
