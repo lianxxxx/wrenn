@@ -9,6 +9,7 @@
 //    The picture is copied as it is (not encoded again), so it stays sharp and it's fast.
 
 import { spawn } from 'child_process'
+import { existsSync } from 'fs'
 import { rename, rm } from 'fs/promises'
 
 import { getFfmpegPath } from '../render/render'
@@ -167,7 +168,9 @@ export async function mixSound({ videoFile, duration, musicFile, hits, sfx, sign
   if (musicLabel && sfxLabel) {
     // One copy of the effects goes into the mix, the other tells the compressor when to dip the music.
     // Gentle: about 4:1 above the threshold, quick to dip, slow to come back.
-    filters.push(`${sfxLabel}asplit=2[sfxmix][sfxkey]`)
+    // The key copy is padded with silence: if it ended, the compressor would stop the music too
+    filters.push(`${sfxLabel}asplit=2[sfxmix][key0]`)
+    filters.push(`[key0]apad[sfxkey]`)
     filters.push(`${musicLabel}[sfxkey]sidechaincompress=threshold=0.05:ratio=4:attack=5:release=300[ducked]`)
     filters.push(`[ducked][sfxmix]amix=inputs=2:duration=longest:normalize=0[mixed]`)
     mixLabel = '[mixed]'
@@ -200,12 +203,12 @@ export async function mixSound({ videoFile, duration, musicFile, hits, sfx, sign
 
   try {
     await runFfmpeg(args, signal)
-    // Swap the silent video for the one with sound
-    await rm(videoFile, { force: true })
+    // Swap the silent video for the one with sound (rename replaces the old file)
     await rename(tempFile, videoFile)
     return true
   } catch (error) {
-    await rm(tempFile, { force: true }).catch(() => {})
+    // Only delete the new file if the silent one is still there, so one video always survives
+    if (existsSync(videoFile)) await rm(tempFile, { force: true }).catch(() => {})
     throw error
   }
 }
