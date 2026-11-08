@@ -44,6 +44,10 @@ win:
   icon: resources/icon.png
   # Not code signed yet, so Windows SmartScreen will warn
   # ("Windows protected your PC") until the app is signed.
+  # Auto updates: don't check the update's signature, because there is none yet.
+  # (With no publisherName, electron-updater already skips the check. This makes it explicit.)
+  # Turn this back on once the app is signed.
+  verifyUpdateCodeSignature: false
 
 nsis:
   oneClick: false
@@ -52,3 +56,11 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: Wrenn
   artifactName: Wrenn-Setup-${version}.${ext}
+
+# Auto updates (src/main/updates.ts): the app looks for new versions in this repo's
+# GitHub Releases. npm run dist writes latest.yml next to the installer.
+# No token and no auto upload: releases are uploaded by hand (see PACKAGING.md).
+publish:
+  provider: github
+  owner: lianxxxx
+  repo: wrenn

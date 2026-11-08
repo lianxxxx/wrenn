@@ -7,6 +7,7 @@ import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from 
 import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
 import { getSettings, saveSettings } from './settings'
+import { startUpdateChecks } from './updates'
 
 // Test-only: Playwright tests point settings at a temp folder, so they never touch real settings
 if (process.env.WRENN_TEST_USER_DATA) app.setPath('userData', process.env.WRENN_TEST_USER_DATA)
@@ -78,6 +79,8 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    // Look for a newer Wrenn a few seconds later (installed app only, see updates.ts)
+    startUpdateChecks()
   })
 
   // Links that try to open a new window go to the normal browser, but only https links
