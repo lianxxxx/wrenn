@@ -124,11 +124,12 @@ export async function readHits(sceneDir: string, duration: number): Promise<Hit[
       }
       hits.push({ t: h.t, type: h.type })
     }
+    hits.sort((a, b) => a.t - b.t)
     if (hits.length > MAX_HITS) {
       console.warn(`sound.json: ${hits.length} hits, only the first ${MAX_HITS} are used`)
       hits.length = MAX_HITS
     }
-    return hits.sort((a, b) => a.t - b.t)
+    return hits
   } catch (error) {
     console.warn('sound.json is broken, the video gets no sound effects:', (error as Error).message)
     return []
