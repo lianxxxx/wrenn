@@ -1,5 +1,6 @@
 import { BlobWords } from "@/components/blob-words";
 import { Stars } from "@/components/stars";
+import { DOWNLOAD_URL } from "@/lib/links";
 
 // Hero (inspo: Cloudroom). Centered blob headline, short sub, one button,
 // soft clouds behind. The phone video frame was removed for now; a hero visual
@@ -46,7 +47,7 @@ export function Hero() {
 
       <div style={heroStep(2)} className="hero-rise mt-xl flex flex-col items-center gap-sm">
         <a
-          href="#"
+          href={DOWNLOAD_URL}
           className="rounded-pill bg-navy px-[22px] py-2.5 font-display text-xl text-cream transition-transform active:translate-y-0.5"
         >
           Download for Windows
