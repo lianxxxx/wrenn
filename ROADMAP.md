@@ -86,7 +86,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [x] Size picker + length picker
 - [x] Make my video: Wrenn makes the job folder, runs Claude Code in the background, Wrenn renders the MP4 (Electron capture) into the Videos/Wrenn folder
 - [x] Real "Your videos" list and saved settings (setup only once)
-- [ ] Landing page (`web/`)
+- [x] Landing page (`web/`)
 
 ## Phase 5: Test
 
@@ -99,19 +99,19 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 6: Package + Deploy
 
 - [x] Package app with electron-builder (Windows `.exe` first, Mac later). `npm run dist`, see desktop/PACKAGING.md
-- [ ] Note: unsigned apps show warnings (Windows SmartScreen, Mac blocks unsigned). Decide: ship unsigned with a "how to open" guide for v1, or pay for code signing later
+- [x] Unsigned for v1: "More info, Run anyway" note on the landing page and in the README. Code signing maybe later
 - [x] Auto updates via GitHub Releases (electron-updater). Repo must be public for it to work
 - [ ] Upload installer to GitHub Releases
 - [ ] Deploy landing page to Vercel, connect domain
-- [ ] Download button points to latest GitHub Release
+- [x] Download button points to latest GitHub Release (`web/src/lib/links.ts`, installer is always `Wrenn-Setup.exe`)
 - [x] README: setup guide, screenshots, credits to prompt sources, license (MIT), ElevenLabs terms note
 
 ## Phase 7: Launch
 
 - [ ] Make the launch video WITH Wrenn (dogfooding)
 - [ ] Make repo public
-- [ ] Footer: point "GitHub" and "Report a problem" to the public repo and its Issues page (they are "#" until then, in `web/src/components/site-footer.tsx`)
-- [ ] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
+- [x] Footer: point "GitHub" and "Report a problem" to the public repo and its Issues page (they are "#" until then, in `web/src/components/site-footer.tsx`)
+- [x] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
 - [ ] Post on TikTok, X, Reddit, Product Hunt, Facebook dev groups (PH)
 - [ ] Collect feedback, plan v2
 
