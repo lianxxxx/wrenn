@@ -20,7 +20,7 @@ type Props = {
 type Status = 'checking' | 'missing' | 'signed-out' | 'waiting' | 'found'
 
 // Placeholder link: double check the exact Anthropic install page before launch
-const INSTALL_URL = 'https://docs.anthropic.com/en/docs/claude-code/setup'
+const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
 
 // How often to check again while waiting for the user to install or sign in
 const RECHECK_MS = 4000
