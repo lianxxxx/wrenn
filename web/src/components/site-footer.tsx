@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FooterCloud } from "@/components/footer-cloud";
 import { Stars } from "@/components/stars";
 import { Cloud } from "@/components/hero";
+import { ISSUES_URL, REPO_URL } from "@/lib/links";
 
 // Footer: one big sky-soft cloud (FooterCloud) with white clouds, logo and link columns.
 // The copyright line sits below it, on the page background.
@@ -19,10 +20,10 @@ const columns = [
   },
   {
     title: "More",
-    // GitHub and Report a problem stay "#" until the repo is public (see ROADMAP Phase 7)
+    // These work once the repo is public (see ROADMAP Phase 7)
     links: [
-      { label: "GitHub", href: "#" },
-      { label: "Report a problem", href: "#" },
+      { label: "GitHub", href: REPO_URL },
+      { label: "Report a problem", href: ISSUES_URL },
       { label: "Privacy", href: "/privacy" },
       { label: "Credits", href: "/credits" },
     ],
