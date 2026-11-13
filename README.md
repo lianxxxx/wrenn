@@ -30,7 +30,7 @@ Tap. Render. Post.
 
 ## Download and install
 
-1. Go to the [Releases page](https://github.com/lianxxxx/wrenn/releases) and download the latest `Wrenn-Setup-<version>.exe`.
+1. Go to the [Releases page](https://github.com/lianxxxx/wrenn/releases) and download `Wrenn-Setup.exe` from the latest release.
 2. Run it.
 3. Windows will probably show "Windows protected your PC". That's because the app isn't code signed yet (signing costs money every year). Click **More info**, then **Run anyway**.
 4. Wrenn installs for your user only, so it won't ask for admin rights. It adds a desktop shortcut and a Start menu shortcut.

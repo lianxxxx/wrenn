@@ -19,7 +19,7 @@ The first run downloads Electron and NSIS, so it needs internet and takes a few 
 
 Everything lands in `desktop/dist/` (ignored by git, never commit it):
 
-- `dist/Wrenn-Setup-<version>.exe`: the installer to share. About 175 MB.
+- `dist/Wrenn-Setup.exe`: the installer to share. About 175 MB.
 - `dist/win-unpacked/Wrenn.exe`: the app without installing. Run this to test a build.
 
 The installer lets the user pick a folder, and adds a desktop shortcut and a Start menu shortcut.
@@ -81,8 +81,8 @@ No pop ups, no crash. It never runs in `npm run dev` or in the tests.
 2. `npm run dist`. It never uploads anything by itself (`--publish never`, and there's no token).
 3. On GitHub, make a new Release in `lianxxxx/wrenn` with the tag `v0.2.0` (a `v` and the same version),
    and upload these three files from `dist/`:
-   - `Wrenn-Setup-0.2.0.exe`: the installer
-   - `Wrenn-Setup-0.2.0.exe.blockmap`: lets the app download only the parts that changed
+   - `Wrenn-Setup.exe`: the installer (always this name, so the website download link never changes)
+   - `Wrenn-Setup.exe.blockmap`: lets the app download only the parts that changed
    - `latest.yml`: tells the app which version is newest and where the installer is
 4. Publish the release (not a draft, not a pre-release). Installed apps pick it up the next time they open.
 
