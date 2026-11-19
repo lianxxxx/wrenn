@@ -3,6 +3,7 @@ import { Button } from '../components/Button'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import { TextField } from '../components/TextField'
+import { keyWarning } from '../elevenlabsKey'
 
 type Props = {
   voiceoverKey: string
@@ -161,6 +162,7 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
         autoComplete="off"
         spellCheck={false}
         placeholder="Paste your key here"
+        warning={keyWarning(voiceoverKey)}
         value={voiceoverKey}
         onChange={(e) => onKeyChange(e.target.value)}
       />
