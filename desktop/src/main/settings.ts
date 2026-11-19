@@ -34,10 +34,12 @@ function settingsPath(): string {
 
 // Turns the key back into plain text. Returns '' if it can't (for example the file
 // was copied from another computer, where the encryption doesn't match).
-function decryptKey(file: SettingsFile): string {
+// Uses the async version: Electron is removing the old one. It still opens keys saved the old way.
+async function decryptKey(file: SettingsFile): Promise<string> {
   if (typeof file.voiceoverKeyEncrypted === 'string' && file.voiceoverKeyEncrypted) {
     try {
-      return safeStorage.decryptString(Buffer.from(file.voiceoverKeyEncrypted, 'base64'))
+      const { result } = await safeStorage.decryptStringAsync(Buffer.from(file.voiceoverKeyEncrypted, 'base64'))
+      return result
     } catch {
       return ''
     }
@@ -56,7 +58,7 @@ export async function getSettings(): Promise<Settings> {
     if (file && typeof file === 'object') {
       settings = {
         setupDone: typeof file.setupDone === 'boolean' ? file.setupDone : DEFAULTS.setupDone,
-        voiceoverKey: decryptKey(file)
+        voiceoverKey: await decryptKey(file)
       }
     }
   } catch {
@@ -83,8 +85,8 @@ function cleanChanges(changes: unknown): Partial<Settings> {
 async function writeFile(settings: Settings): Promise<void> {
   const file: SettingsFile = { setupDone: settings.setupDone }
   if (settings.voiceoverKey) {
-    if (safeStorage.isEncryptionAvailable()) {
-      file.voiceoverKeyEncrypted = safeStorage.encryptString(settings.voiceoverKey).toString('base64')
+    if (await safeStorage.isAsyncEncryptionAvailable()) {
+      file.voiceoverKeyEncrypted = (await safeStorage.encryptStringAsync(settings.voiceoverKey)).toString('base64')
     } else {
       // Fallback: this computer can't encrypt, so the key is saved as plain text
       file.voiceoverKey = settings.voiceoverKey
