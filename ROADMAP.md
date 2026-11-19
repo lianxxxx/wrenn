@@ -129,3 +129,4 @@ Release v1 first, then improve with the features below (Lian, 2026-11-08).
   - Choose the AI: Claude Code or GPT (Codex CLI), plus a model picker (for example Opus). Same Option B flow: the user runs it themselves
   - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
   - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first
+- Voiceover (Lian, 2026-11-19, after testing 2 videos): the videos feel like they're missing a voice. Two options for the user: record or upload their own voiceover, or let AI write the script and read it (ElevenLabs with their own key, local TTS later)
