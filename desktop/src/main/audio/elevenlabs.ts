@@ -12,16 +12,18 @@ const MIN_MS = 3000
 const MAX_MS = 600000
 
 // What each vibe sounds like. Always instrumental: no singing over the brand's video.
+// Even "calm" keeps a clear beat: the video's cuts land on it.
 const VIBE_PROMPTS: Record<string, string> = {
-  playful: 'Playful, bouncy, upbeat pop with bright plucks, claps and a fun bass line',
-  clean: 'Clean, modern, minimal electronic with soft synths and a tight steady beat',
-  bold: 'Bold, energetic, punchy electronic with big drums and a driving bass',
-  calm: 'Calm, warm, gentle lo-fi with soft keys and a relaxed beat'
+  playful: 'Playful, bouncy, upbeat pop with bright plucks, claps, snappy percussion and a fun bass line',
+  clean: 'Modern, confident tech product launch music, crisp electronic drums, punchy synth bass, bright stabs, clean and polished',
+  bold: 'Bold, high-energy, punchy electronic with big drums, hard-hitting kicks, risers and a driving bass',
+  calm: 'Warm, smooth, uplifting electronic with soft keys, a light groove and a steady beat'
 }
 
+// 120 BPM: one beat every 0.5 seconds, the same grid the template lands its cuts and hits on
 export function musicPrompt(vibe: string): string {
   const style = VIBE_PROMPTS[vibe] ?? VIBE_PROMPTS.clean
-  return `${style}. Instrumental only, no vocals. Background music for a short product showreel video, with a clear ending.`
+  return `${style}. Exactly 120 BPM, steady tempo. Starts right away on the first beat with drums, no slow intro and no fade-in. Instrumental only, no vocals. Energetic background music for a fast motion graphics product showreel with quick cuts, with a strong final hit at the very end.`
 }
 
 // Plain reason for the log (never includes the key)
