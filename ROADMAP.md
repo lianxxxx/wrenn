@@ -109,7 +109,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 ## Phase 7: Launch
 
 - [ ] Make the launch video WITH Wrenn (dogfooding)
-- [ ] Make repo public
+- [x] Make repo public
 - [x] Footer: point "GitHub" and "Report a problem" to the public repo and its Issues page (they are "#" until then, in `web/src/components/site-footer.tsx`)
 - [x] Review the Privacy page (`/privacy`) once Phase 3 confirms how Wrenn runs Claude Code, and the Credits page (`/credits`) so every font, library, prompt source and asset is listed
 - [ ] Post on TikTok, X, Reddit, Product Hunt, Facebook dev groups (PH)
@@ -129,4 +129,6 @@ Release v1 first, then improve with the features below (Lian, 2026-11-08).
   - Choose the AI: Claude Code or GPT (Codex CLI), plus a model picker (for example Opus). Same Option B flow: the user runs it themselves
   - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
   - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first
+- Fonts upload (Lian, 2026-11-20, making the Trackr sample): add a "Fonts (optional)" field on the upload screen (.woff2, .woff, .ttf, .otf). The template already uses fonts from assets/, only the screen is missing it
+- "What does your app do?" box (optional, one or two sentences): gives Claude Code the context a repo would give, so videos feel more like the TikTok showreel prompt
 - Voiceover (Lian, 2026-11-19, after testing 2 videos): the videos feel like they're missing a voice. Two options for the user: record or upload their own voiceover, or let AI write the script and read it (ElevenLabs with their own key, local TTS later)
