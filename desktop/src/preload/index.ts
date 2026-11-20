@@ -41,6 +41,8 @@ export type VideoInfo = {
   size: SizeId
   // ISO date string
   createdAt: string
+  // The brand name, e.g. "Trackr". Older videos don't have one.
+  title?: string
 }
 
 // Everything the template path collected

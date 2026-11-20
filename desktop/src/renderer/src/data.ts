@@ -185,10 +185,11 @@ export function folderOf(filePath: string): string {
   return cut > 0 ? filePath.slice(0, cut) : filePath
 }
 
-// A friendly name for a video, like "Reels video, Nov 6". The file name stays in "Saved to".
+// A friendly name for a video, like "Trackr, Nov 6". Older videos have no brand name: "Video, Nov 6".
+// The file name stays in "Saved to".
 export function videoTitle(video: VideoInfo): string {
   const day = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(video.createdAt))
-  return `${getSize(video.size).name} video, ${day}`
+  return `${video.title || 'Video'}, ${day}`
 }
 
 // Electron wraps errors from the main process like "Error invoking remote method 'start-job': Error: ...".

@@ -52,6 +52,8 @@ type RunningJob = {
   id: string
   dir: string
   size: SizeId
+  // The brand name the user typed: the video's title and the start of its file name
+  brandName: string
   // For the sound: where the music comes from, the vibe, and the length in seconds
   music: MusicChoice
   vibe: JobRequest['vibe']
@@ -338,13 +340,28 @@ function finish(job: RunningJob): void {
 // Waiting for done.json, then rendering
 // ---------------------------------------------------------------------------
 
-// "wrenn 2026-11-07 14-03-22.mp4" (local time). Adds " (2)" if that name is taken.
-function videoFileName(): string {
+// Turns the brand name into something Windows allows in a file name.
+// Drops characters like \ / : * ? " < > |, and falls back to "wrenn" if nothing is left.
+function fileNamePart(brandName: string): string {
+  const clean = brandName
+    // eslint-disable-next-line no-control-regex
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60)
+    // Windows doesn't allow a name ending in a dot or a space
+    .replace(/[. ]+$/, '')
+  return clean || 'wrenn'
+}
+
+// "Trackr 2026-11-07 14-03-22.mp4" (local time). Adds " (2)" if that name is taken.
+function videoFileName(brandName: string): string {
   const d = new Date()
   const two = (n: number): string => String(n).padStart(2, '0')
   const stamp = `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())} ${two(d.getHours())}-${two(d.getMinutes())}-${two(d.getSeconds())}`
-  let name = `wrenn ${stamp}.mp4`
-  for (let n = 2; existsSync(join(outputDir(), name)); n++) name = `wrenn ${stamp} (${n}).mp4`
+  const start = fileNamePart(brandName)
+  let name = `${start} ${stamp}.mp4`
+  for (let n = 2; existsSync(join(outputDir(), name)); n++) name = `${start} ${stamp} (${n}).mp4`
   return name
 }
 
@@ -434,9 +451,15 @@ async function checkForDone(job: RunningJob): Promise<void> {
     }
     if (job.abort.signal.aborted) throw new Error('Cancelled')
 
-    const filePath = join(outputDir(), videoFileName())
+    const filePath = join(outputDir(), videoFileName(job.brandName))
     await moveFile(tempFile, filePath)
-    const video = await addVideo({ filePath, kind: 'template', size: job.size, createdAt: new Date() })
+    const video = await addVideo({
+      filePath,
+      kind: 'template',
+      size: job.size,
+      title: job.brandName,
+      createdAt: new Date()
+    })
     send(job, { stage: 'done', video, message: soundNote })
   } catch (error) {
     // A cancel already told the screen, so only report real errors
@@ -498,6 +521,7 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     id,
     dir,
     size: request.size,
+    brandName: request.brandName,
     music: request.music,
     vibe: request.vibe,
     duration: Number(request.length),
