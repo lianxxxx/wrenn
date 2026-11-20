@@ -51,7 +51,8 @@ test('Home shows both cards and the videos in the output folder', async () => {
   await expect(edit).toContainText('Coming soon')
 
   await expect(page.getByRole('heading', { name: 'Your videos' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Square video/ })).toBeVisible()
+  // No sidecar, so no brand name: the title is "Video, <date>"
+  await expect(page.getByRole('button', { name: /Video, / })).toBeVisible()
   await expect(page.getByText('Videos you make will show up here.')).toHaveCount(0)
 })
 
