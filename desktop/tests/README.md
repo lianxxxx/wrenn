@@ -38,6 +38,10 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 
 - **startJob turns down bad requests.** Sends broken requests (no brand name, "own" music with no song, unknown music, no files, a fake template, ElevenLabs with no key) and checks each gets a plain message, and that no job folder was made.
 
+`eta.spec.ts` (the time left, no window)
+
+- **Progress math.** The guess per part comes from past videos (or a first-time guess), a part that runs long never says zero, rendering uses the real frame speed, the screen never steps back, and the time left reads as "About 3 min left" or "Almost done".
+
 `sound.spec.ts` (the sound engine, no window)
 
 - **Render CLI adds music.** Renders the small test scene (`src/main/render/test-scene`) to an MP4 with Wrenn's playful music, the same way `npm run render` does. Then checks with ffmpeg: the video has sound, the sound is as long as the picture, and it's still loud a second before the end (so the music doesn't run out early). This one is slow, about 15 to 30 seconds.

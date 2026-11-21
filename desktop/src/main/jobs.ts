@@ -17,10 +17,12 @@ import { basename, dirname, extname, isAbsolute, join } from 'path'
 import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
+import { estimate, type EtaStage, type StageTimes } from './eta'
 import { addVideo, outputDir } from './library'
 import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
+import { expectedTimes, recordRun } from './timings'
 
 const isWindows = process.platform === 'win32'
 
@@ -47,6 +49,8 @@ const CLAUDE_TIME_LIMIT_MS = 20 * 60 * 1000
 const KEEP_JOBS_MS = 7 * 24 * 60 * 60 * 1000
 // Send at most about 10 progress updates per second to the screen
 const PROGRESS_EVERY_MS = 100
+// Between real updates, send the time left again every second so it keeps counting down
+const TICK_MS = 1000
 
 // A job id looks like "1762500000000-a1b2c3" (time + short random part)
 const JOB_ID = /^\d{13}-[0-9a-f]{6}$/
@@ -73,6 +77,24 @@ type RunningJob = {
   busy: boolean
   // The background Claude Code process, while it's working
   claude?: ChildProcess
+  // For the progress bar (see eta.ts): the video length, the expected seconds per part,
+  // which part is running and since when, and how long the finished parts took
+  length: JobRequest['length']
+  times: StageTimes
+  startedAt: number
+  part: EtaStage
+  partStartedAt: number
+  partTimes: Partial<StageTimes>
+  // The last progress event, sent again by the ticker
+  lastEvent?: Omit<JobEvent, 'jobId'>
+  ticker?: NodeJS.Timeout
+}
+
+// Which part of the time estimate each screen stage is
+const PARTS: Partial<Record<JobEvent['stage'], EtaStage>> = {
+  'waiting-for-claude': 'claude',
+  rendering: 'render',
+  'adding-sound': 'sound'
 }
 
 const jobs = new Map<string, RunningJob>()
@@ -338,18 +360,52 @@ function stopClaude(job: RunningJob): void {
 // ---------------------------------------------------------------------------
 
 function send(job: RunningJob, event: Omit<JobEvent, 'jobId'>): void {
+  const full: JobEvent = { jobId: job.id, ...event }
+
+  // Progress events also carry how far along the whole video is and the time left
+  const part = PARTS[event.stage]
+  if (part) {
+    const now = Date.now()
+    // A new part started: remember how long the last one took
+    if (part !== job.part) {
+      job.partTimes[job.part] = (now - job.partStartedAt) / 1000
+      job.part = part
+      job.partStartedAt = now
+    }
+    job.lastEvent = event
+    const eta = estimate({
+      stage: part,
+      times: job.times,
+      elapsed: (now - job.startedAt) / 1000,
+      stageElapsed: (now - job.partStartedAt) / 1000,
+      frame: event.frame,
+      total: event.total
+    })
+    full.progress = eta.progress
+    full.secondsLeft = Math.round(eta.secondsLeft)
+  }
+
   // The window may have been closed while we worked
-  if (!job.sender.isDestroyed()) job.sender.send('job-event', { jobId: job.id, ...event })
+  if (!job.sender.isDestroyed()) job.sender.send('job-event', full)
   // A Windows notification if the user is in another app (see notify.ts)
   if (event.stage === 'done' || event.stage === 'failed') {
     notifyJobEnd(job.sender, event.stage === 'done', job.brandName)
   }
 }
 
-// Stop the timer and forget the job
+// Stop the timers and forget the job
 function finish(job: RunningJob): void {
   if (job.timer) clearInterval(job.timer)
+  if (job.ticker) clearInterval(job.ticker)
   jobs.delete(job.id)
+}
+
+// Saves how long each part of a finished video took, for the next time estimate
+function saveTimings(job: RunningJob): void {
+  const { claude, render } = job.partTimes
+  if (job.part !== 'sound' || claude === undefined || render === undefined) return
+  const sound = (Date.now() - job.partStartedAt) / 1000
+  void recordRun(job.length, { claude, render, sound })
 }
 
 // ---------------------------------------------------------------------------
@@ -476,6 +532,7 @@ async function checkForDone(job: RunningJob): Promise<void> {
       title: job.brandName,
       createdAt: new Date()
     })
+    saveTimings(job)
     send(job, { stage: 'done', video, message: soundNote })
   } catch (error) {
     // A cancel already told the screen, so only report real errors
@@ -546,7 +603,13 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     ownSongFile,
     sender,
     abort: new AbortController(),
-    busy: false
+    busy: false,
+    length: request.length,
+    times: await expectedTimes(request.length),
+    startedAt: Date.now(),
+    part: 'claude',
+    partStartedAt: Date.now(),
+    partTimes: {}
   }
   jobs.set(id, job)
   try {
@@ -557,6 +620,9 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
   }
   job.timer = setInterval(() => void checkForDone(job), POLL_MS)
   send(job, { stage: 'waiting-for-claude', message: 'Getting started' })
+  job.ticker = setInterval(() => {
+    if (job.lastEvent) send(job, job.lastEvent)
+  }, TICK_MS)
 
   return { jobId: id }
 }
@@ -601,6 +667,7 @@ export function stopAllJobs(): void {
     job.abort.abort()
     stopClaude(job)
     if (job.timer) clearInterval(job.timer)
+    if (job.ticker) clearInterval(job.ticker)
   }
   jobs.clear()
 }

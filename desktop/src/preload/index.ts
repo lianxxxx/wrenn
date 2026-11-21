@@ -76,6 +76,10 @@ export type JobEvent = {
   total?: number
   video?: VideoInfo
   message?: string
+  // Only while it's being made: how far along the whole video is (0 to 1),
+  // and about how many seconds are left (a guess from past videos, see main/eta.ts)
+  progress?: number
+  secondsLeft?: number
 }
 
 // ---------------------------------------------------------------------------
