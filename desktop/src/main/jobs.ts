@@ -305,7 +305,8 @@ async function runClaude(job: RunningJob): Promise<void> {
         if (msg?.type !== 'assistant' || !Array.isArray(parts)) continue
         for (const part of parts) {
           const activity = part?.type === 'tool_use' ? activityFor(String(part.name)) : undefined
-          if (activity && activity !== lastActivity) {
+          // Once rendering started, Claude Code's last tool calls must not move the screen back
+          if (activity && activity !== lastActivity && !job.busy) {
             lastActivity = activity
             send(job, { stage: 'waiting-for-claude', message: activity })
           }
