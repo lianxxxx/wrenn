@@ -2,7 +2,7 @@
 // Wrenn never reads the user's Claude login files: it only asks Claude Code itself,
 // and only passes "installed / version / signed in" to the screens (no email, no account info).
 
-import { execFile, spawn } from 'child_process'
+import { exec, execFile, spawn } from 'child_process'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
@@ -12,15 +12,18 @@ import type { ClaudeStatus } from '../preload'
 const isWindows = process.platform === 'win32'
 
 // Runs a command and resolves with what it printed. Never throws: a failure resolves
-// with ok: false. Windows needs shell mode because npm installs Claude Code as "claude.cmd".
+// with ok: false. Windows needs a shell because npm installs Claude Code as "claude.cmd".
+// There we build the line ourselves: every part is fixed text (no user input), and
+// passing a list of args together with a shell is deprecated in Node.
 function run(command: string, args: string[], timeoutMs = 15000): Promise<{ ok: boolean; out: string }> {
   return new Promise((resolve) => {
-    execFile(
-      command,
-      args,
-      { timeout: timeoutMs, windowsHide: true, shell: isWindows },
-      (error, stdout) => resolve({ ok: !error, out: String(stdout).trim() })
-    )
+    const done = (error: Error | null, stdout: string | Buffer): void =>
+      resolve({ ok: !error, out: String(stdout).trim() })
+    if (isWindows) {
+      exec([command, ...args].join(' '), { timeout: timeoutMs, windowsHide: true }, done)
+    } else {
+      execFile(command, args, { timeout: timeoutMs, windowsHide: true }, done)
+    }
   })
 }
 

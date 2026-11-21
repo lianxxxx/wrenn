@@ -1,6 +1,7 @@
 import { Button } from '../components/Button'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
+import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
 import type { TemplateDraft } from '../data'
 
@@ -37,6 +38,14 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           value={draft.brandName}
           onChange={(e) => onChange({ brandName: e.target.value })}
         />
+        <TextArea
+          label="What does it do? (optional)"
+          hint="One or two sentences. Helps Wrenn show the right things."
+          placeholder="e.g. Turns your app screenshots into short videos for social media."
+          maxLength={300}
+          value={draft.about}
+          onChange={(e) => onChange({ about: e.target.value })}
+        />
         <FileDrop
           label="Photos and screenshots"
           accept="image/*"
@@ -57,6 +66,15 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           accept="image/*"
           files={draft.logo}
           onFiles={(logo) => onChange({ logo })}
+        />
+        <FileDrop
+          label="Fonts (optional)"
+          hint="Your brand's font files. Skip this and Wrenn picks a font for you."
+          accept=".woff2,.woff,.ttf,.otf"
+          multiple
+          files={draft.fonts}
+          onFiles={(fonts) => onChange({ fonts })}
+          typeHint="a WOFF2, WOFF, TTF or OTF font"
         />
         <TextField
           label="Ending text (optional)"

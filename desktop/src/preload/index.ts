@@ -41,6 +41,8 @@ export type VideoInfo = {
   size: SizeId
   // ISO date string
   createdAt: string
+  // The brand name, e.g. "Trackr". Older videos don't have one.
+  title?: string
 }
 
 // Everything the template path collected
@@ -51,8 +53,10 @@ export type JobRequest = {
   vibe: 'playful' | 'clean' | 'bold' | 'calm'
   brandName: string
   endingText: string
-  // Real paths on disk (from getPathForFile)
-  files: { path: string; role: 'photo' | 'recording' | 'logo' }[]
+  // What the app does, in one or two sentences (up to 300 letters). Empty when skipped.
+  about?: string
+  // Real paths on disk (from getPathForFile). Fonts are .woff2, .woff, .ttf or .otf.
+  files: { path: string; role: 'photo' | 'recording' | 'logo' | 'font' }[]
   music: MusicChoice
   // Only when music is "own": real path of the song (.mp3, .wav, .m4a, .aac, .ogg, .flac)
   musicFile?: string
@@ -72,6 +76,10 @@ export type JobEvent = {
   total?: number
   video?: VideoInfo
   message?: string
+  // Only while it's being made: how far along the whole video is (0 to 1),
+  // and about how many seconds are left (a guess from past videos, see main/eta.ts)
+  progress?: number
+  secondsLeft?: number
 }
 
 // ---------------------------------------------------------------------------

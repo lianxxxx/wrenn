@@ -12,24 +12,45 @@ const MIN_MS = 3000
 const MAX_MS = 600000
 
 // What each vibe sounds like. Always instrumental: no singing over the brand's video.
+// Even "calm" keeps a clear beat: the video's cuts land on it.
 const VIBE_PROMPTS: Record<string, string> = {
-  playful: 'Playful, bouncy, upbeat pop with bright plucks, claps and a fun bass line',
-  clean: 'Clean, modern, minimal electronic with soft synths and a tight steady beat',
-  bold: 'Bold, energetic, punchy electronic with big drums and a driving bass',
-  calm: 'Calm, warm, gentle lo-fi with soft keys and a relaxed beat'
+  playful: 'Playful, bouncy, upbeat pop with bright plucks, claps, snappy percussion and a fun bass line',
+  clean: 'Modern, confident tech product launch music, crisp electronic drums, punchy synth bass, bright stabs, clean and polished',
+  bold: 'Bold, high-energy, punchy electronic with big drums, hard-hitting kicks, risers and a driving bass',
+  calm: 'Warm, smooth, uplifting electronic with soft keys, a light groove and a steady beat'
 }
 
+// 120 BPM: one beat every 0.5 seconds, the same grid the template lands its cuts and hits on
 export function musicPrompt(vibe: string): string {
   const style = VIBE_PROMPTS[vibe] ?? VIBE_PROMPTS.clean
-  return `${style}. Instrumental only, no vocals. Background music for a short product showreel video, with a clear ending.`
+  return `${style}. Exactly 120 BPM, steady tempo. Starts right away on the first beat with drums, no slow intro and no fade-in. Instrumental only, no vocals. Energetic background music for a fast motion graphics product showreel with quick cuts, with a strong final hit at the very end.`
 }
 
 // Plain reason for the log (never includes the key)
 function reasonFor(status: number): string {
   if (status === 401 || status === 403) return 'the key was not accepted'
-  if (status === 402 || status === 429) return 'out of credits or too many requests'
+  if (status === 402) return 'ElevenLabs asked for payment (no credits, or the plan has no Music)'
+  if (status === 429) return 'too many requests'
   if (status === 422) return 'ElevenLabs did not accept the request'
   return `ElevenLabs answered with status ${status}`
+}
+
+// ElevenLabs' own error message, so we know the real cause. Short, and never the key.
+async function detailFrom(response: Response): Promise<string> {
+  try {
+    const text = await response.text()
+    try {
+      const body = JSON.parse(text)
+      const detail = body?.detail
+      const message = typeof detail === 'string' ? detail : detail?.message ?? detail?.status
+      if (message) return String(message).slice(0, 200)
+    } catch {
+      // Not JSON, use the plain text
+    }
+    return text.slice(0, 200)
+  } catch {
+    return ''
+  }
 }
 
 // Saves the song to outFile. Throws an Error with a plain reason if anything goes wrong.
@@ -61,7 +82,10 @@ export async function makeElevenLabsSong(opts: {
     throw new Error(name === 'TimeoutError' ? 'it took too long' : 'no connection to ElevenLabs')
   }
 
-  if (!response.ok) throw new Error(reasonFor(response.status))
+  if (!response.ok) {
+    const detail = await detailFrom(response)
+    throw new Error(detail ? `${reasonFor(response.status)}: ${detail}` : reasonFor(response.status))
+  }
   const song = Buffer.from(await response.arrayBuffer())
   if (song.length < 1000) throw new Error('ElevenLabs sent back an empty song')
   await writeFile(opts.outFile, song)

@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Button } from '../components/Button'
 import { ProgressBar } from '../components/ProgressBar'
 import { Spinner } from '../components/Spinner'
 import type { JobEvent } from '../data'
+import { steadyProgress, timeLeftText, type ShownProgress } from '../timeLeft'
 
 type Props = {
   // The latest event for this job. Done and cancelled never show here (App moves on).
@@ -12,8 +14,9 @@ type Props = {
 
 // The template path, driven by real events from the main process.
 // The user only waits here: Claude Code runs in the background, no typing.
+// One bar for the whole video, with about how long is left (main/eta.ts makes the guess).
 //   waiting-for-claude -> Claude Code is building the scenes (message says what it's doing)
-//   rendering          -> the MP4 is being made, with a real progress bar
+//   rendering          -> the MP4 is being made (frame / total)
 //   adding-sound       -> music and sound effects are mixed in (message may say e.g. "Making your song")
 //   failed             -> a plain message and Try again
 export function Generating({ event, onCancel, onTryAgain }: Props) {
@@ -32,22 +35,49 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
     )
   }
 
+  return <Progress event={event} onCancel={onCancel} />
+}
+
+function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }) {
+  // What the bar and the time left show. Only moves forward (see timeLeft.ts).
+  // Adjusted while rendering, the React way to follow a changing prop without an extra pass.
+  const [shown, setShown] = useState<ShownProgress>({ percent: 0 })
+  const next = steadyProgress(shown, event)
+  if (next.percent !== shown.percent || next.secondsLeft !== shown.secondsLeft) setShown(next)
+
   const building = event.stage === 'waiting-for-claude'
   const rendering = event.stage === 'rendering'
   const addingSound = event.stage === 'adding-sound'
-  const percent =
+  const renderPercent =
     rendering && event.total ? Math.min(100, Math.round(((event.frame ?? 0) / event.total) * 100)) : 0
+  const overall = Math.round(next.percent)
+  const timeLeft = timeLeftText(next.secondsLeft)
 
   return (
     <div className="mx-auto w-full max-w-[640px]">
       <div className="text-center">
         <h1 className="font-display text-[3rem] leading-[1.05] text-navy">Making your video</h1>
         <p className="mt-sm text-[1.1875rem] leading-[1.55] text-navy-body">
-          This takes a few minutes. You can leave Wrenn open and do something else.
+          You can leave Wrenn open and do something else. We'll let you know when it's ready.
         </p>
       </div>
 
-      <div className="mt-xl rounded-lg border-2 border-line bg-card p-lg">
+      <div className="mt-xl">
+        <ProgressBar
+          className=""
+          percent={overall}
+          label="Making your video"
+          valueText={`${overall}%, ${timeLeft.toLowerCase()}`}
+        />
+        <div className="mt-sm flex items-baseline justify-between gap-md text-base">
+          <span className="font-semibold text-navy">{timeLeft}</span>
+          <span className="text-navy-body tabular-nums" aria-hidden>
+            {overall}%
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-lg rounded-lg border-2 border-line bg-card p-lg">
         <Step
           active={building}
           done={!building}
@@ -60,13 +90,8 @@ export function Generating({ event, onCancel, onTryAgain }: Props) {
           active={rendering}
           done={addingSound}
           title="Putting your video together"
-          text={rendering ? `${percent}% done` : addingSound ? 'Done' : 'Up next'}
+          text={rendering ? `${renderPercent}% of the frames done` : addingSound ? 'Done' : 'Up next'}
         />
-        {rendering && (
-          <div className="mt-md ml-[56px]">
-            <ProgressBar percent={percent} />
-          </div>
-        )}
         <div className="my-md border-t-2 border-line" />
         <Step
           active={addingSound}

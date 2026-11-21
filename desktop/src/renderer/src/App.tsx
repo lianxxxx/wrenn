@@ -149,6 +149,7 @@ function App() {
         vibe: templateDraft.vibe,
         brandName: templateDraft.brandName.trim(),
         endingText: templateDraft.cta.trim(),
+        about: templateDraft.about.trim(),
         files: draftFiles(templateDraft),
         ...draftMusic(templateDraft)
       }

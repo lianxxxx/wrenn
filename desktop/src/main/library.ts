@@ -15,6 +15,8 @@ type Sidecar = {
   kind: 'template' | 'edit'
   size: SizeId
   createdAt: string
+  // The brand name, shown as the video's title. Older videos don't have one.
+  title?: string
 }
 
 // Where Wrenn saves videos. Makes the folder if it isn't there yet.
@@ -38,7 +40,8 @@ function toVideoInfo(filePath: string, data: Sidecar): VideoInfo {
     url: `wrenn-media://video/${encodeURIComponent(fileName)}`,
     kind: data.kind,
     size: data.size,
-    createdAt: data.createdAt
+    createdAt: data.createdAt,
+    title: data.title
   }
 }
 
@@ -47,9 +50,15 @@ export async function addVideo(info: {
   filePath: string
   kind: 'template' | 'edit'
   size: SizeId
+  title?: string
   createdAt: Date
 }): Promise<VideoInfo> {
-  const data: Sidecar = { kind: info.kind, size: info.size, createdAt: info.createdAt.toISOString() }
+  const data: Sidecar = {
+    kind: info.kind,
+    size: info.size,
+    createdAt: info.createdAt.toISOString(),
+    title: info.title?.trim() || undefined
+  }
   await fs.writeFile(sidecarPath(info.filePath), JSON.stringify(data, null, 2), 'utf8')
   return toVideoInfo(info.filePath, data)
 }
@@ -98,7 +107,9 @@ export async function listVideos(): Promise<VideoInfo[]> {
           ? sidecar.createdAt
           : stats.mtime.toISOString()
 
-      videos.push(toVideoInfo(filePath, { kind, size, createdAt }))
+      const title = typeof sidecar?.title === 'string' && sidecar.title.trim() ? sidecar.title.trim().slice(0, 80) : undefined
+
+      videos.push(toVideoInfo(filePath, { kind, size, createdAt, title }))
     } catch {
       // Can't read this file (locked, deleted mid-scan): skip it
     }

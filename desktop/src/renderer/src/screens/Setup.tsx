@@ -3,6 +3,7 @@ import { Button } from '../components/Button'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import { TextField } from '../components/TextField'
+import { keyWarning } from '../elevenlabsKey'
 
 type Props = {
   voiceoverKey: string
@@ -20,7 +21,7 @@ type Props = {
 type Status = 'checking' | 'missing' | 'signed-out' | 'waiting' | 'found'
 
 // Placeholder link: double check the exact Anthropic install page before launch
-const INSTALL_URL = 'https://docs.anthropic.com/en/docs/claude-code/setup'
+const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
 
 // How often to check again while waiting for the user to install or sign in
 const RECHECK_MS = 4000
@@ -161,6 +162,7 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
         autoComplete="off"
         spellCheck={false}
         placeholder="Paste your key here"
+        warning={keyWarning(voiceoverKey)}
         value={voiceoverKey}
         onChange={(e) => onKeyChange(e.target.value)}
       />

@@ -27,12 +27,13 @@ export type MixOptions = {
   signal?: AbortSignal
 }
 
-// How loud things are (1 = as the file is). Songs are usually mastered loud,
-// so the music sits well under the effects.
-const MUSIC_VOLUME = 0.35
-const SFX_VOLUME = 0.8
-const FADE_IN = 0.3
-const FADE_OUT = 1.5
+// How loud things are (1 = as the file is). Without a voiceover the music carries
+// the video, so it stays up front and the effects sit just on top of it.
+const MUSIC_VOLUME = 0.7
+const SFX_VOLUME = 0.6
+// Short fades: the song starts on its first beat and ends on its final hit
+const FADE_IN = 0.05
+const FADE_OUT = 0.6
 // Shortest piece of an effect worth playing when its start has to be cut off (seconds)
 const MIN_SFX_LEFT = 0.1
 const MIX_TIME_LIMIT_MS = 2 * 60 * 1000
@@ -167,11 +168,12 @@ export async function mixSound({ videoFile, duration, musicFile, hits, sfx, sign
   let mixLabel: string
   if (musicLabel && sfxLabel) {
     // One copy of the effects goes into the mix, the other tells the compressor when to dip the music.
-    // Gentle: about 4:1 above the threshold, quick to dip, slow to come back.
+    // Light: about 2:1 and only on the louder effects, quick to dip, quick to come back.
+    // Effects land every half second, so a heavy or slow dip would bury the music.
     // The key copy is padded with silence: if it ended, the compressor would stop the music too
     filters.push(`${sfxLabel}asplit=2[sfxmix][key0]`)
     filters.push(`[key0]apad[sfxkey]`)
-    filters.push(`${musicLabel}[sfxkey]sidechaincompress=threshold=0.05:ratio=4:attack=5:release=300[ducked]`)
+    filters.push(`${musicLabel}[sfxkey]sidechaincompress=threshold=0.1:ratio=2:attack=5:release=150[ducked]`)
     filters.push(`[ducked][sfxmix]amix=inputs=2:duration=longest:normalize=0[mixed]`)
     mixLabel = '[mixed]'
   } else {

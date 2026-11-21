@@ -107,6 +107,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  // Same as appId in electron-builder.yml. Windows needs it to show notifications (notify.ts).
   electronApp.setAppUserModelId('com.wrenn.app')
 
   // Serve finished videos to the screens at wrenn-media://video/<file name> (see media.ts)

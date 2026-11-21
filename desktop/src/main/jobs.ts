@@ -17,21 +17,27 @@ import { basename, dirname, extname, isAbsolute, join } from 'path'
 import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
+import { estimate, type EtaStage, type StageTimes } from './eta'
 import { addVideo, outputDir } from './library'
+import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
+import { expectedTimes, recordRun } from './timings'
 
 const isWindows = process.platform === 'win32'
 
 // Limits for what the page may send us
 const MAX_FILES = 25
 const MAX_TEXT = 200
+// "What does it do?" can be a bit longer: one or two sentences
+const MAX_ABOUT = 300
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
+const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
 const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 const LENGTHS = ['15', '30', '60']
 const VIBES = ['playful', 'clean', 'bold', 'calm']
-const ROLES = ['photo', 'recording', 'logo']
+const ROLES = ['photo', 'recording', 'logo', 'font']
 const MUSIC_CHOICES: MusicChoice[] = ['wrenn', 'own', 'elevenlabs', 'none']
 const SONG_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
 const MAX_SONG_BYTES = 200 * 1024 * 1024
@@ -43,6 +49,8 @@ const CLAUDE_TIME_LIMIT_MS = 20 * 60 * 1000
 const KEEP_JOBS_MS = 7 * 24 * 60 * 60 * 1000
 // Send at most about 10 progress updates per second to the screen
 const PROGRESS_EVERY_MS = 100
+// Between real updates, send the time left again every second so it keeps counting down
+const TICK_MS = 1000
 
 // A job id looks like "1762500000000-a1b2c3" (time + short random part)
 const JOB_ID = /^\d{13}-[0-9a-f]{6}$/
@@ -52,6 +60,8 @@ type RunningJob = {
   id: string
   dir: string
   size: SizeId
+  // The brand name the user typed: the video's title, the start of its file name and the notification
+  brandName: string
   // For the sound: where the music comes from, the vibe, and the length in seconds
   music: MusicChoice
   vibe: JobRequest['vibe']
@@ -67,6 +77,24 @@ type RunningJob = {
   busy: boolean
   // The background Claude Code process, while it's working
   claude?: ChildProcess
+  // For the progress bar (see eta.ts): the video length, the expected seconds per part,
+  // which part is running and since when, and how long the finished parts took
+  length: JobRequest['length']
+  times: StageTimes
+  startedAt: number
+  part: EtaStage
+  partStartedAt: number
+  partTimes: Partial<StageTimes>
+  // The last progress event, sent again by the ticker
+  lastEvent?: Omit<JobEvent, 'jobId'>
+  ticker?: NodeJS.Timeout
+}
+
+// Which part of the time estimate each screen stage is
+const PARTS: Partial<Record<JobEvent['stage'], EtaStage>> = {
+  'waiting-for-claude': 'claude',
+  rendering: 'render',
+  'adding-sound': 'sound'
 }
 
 const jobs = new Map<string, RunningJob>()
@@ -119,6 +147,10 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
   if (!VIBES.includes(r.vibe as string)) throw new Error('Pick a vibe for your video.')
   if (!isText(r.brandName) || r.brandName.trim() === '') throw new Error('Add your brand name.')
   if (!isText(r.endingText)) throw new Error('The ending line is too long.')
+  // Optional: older screens don't send it
+  if (r.about !== undefined && (typeof r.about !== 'string' || r.about.length > MAX_ABOUT)) {
+    throw new Error(`Keep "What does it do?" under ${MAX_ABOUT} letters.`)
+  }
 
   if (!Array.isArray(r.files)) throw new Error('Add at least one screenshot or recording.')
   if (r.files.length > MAX_FILES) throw new Error(`That's a lot of files. Use ${MAX_FILES} or fewer.`)
@@ -130,16 +162,19 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     }
     const name = basename(f.path)
     const ext = extname(f.path).toLowerCase()
-    const allowed = f.role === 'recording' ? VIDEO_EXTS : IMAGE_EXTS
+    const allowed = f.role === 'recording' ? VIDEO_EXTS : f.role === 'font' ? FONT_EXTS : IMAGE_EXTS
     if (!allowed.includes(ext)) {
-      throw new Error(`"${name}" isn't a ${f.role === 'recording' ? 'video' : 'picture'} Wrenn can use.`)
+      const kind = f.role === 'recording' ? 'video' : f.role === 'font' ? 'font' : 'picture'
+      throw new Error(`"${name}" isn't a ${kind} Wrenn can use.`)
     }
     const info = await stat(f.path).catch(() => null)
     if (!info || !info.isFile()) throw new Error(`Wrenn can't find "${name}" anymore. Try adding it again.`)
-    files.push({ path: f.path, role: f.role as 'photo' | 'recording' | 'logo' })
+    files.push({ path: f.path, role: f.role as JobRequest['files'][number]['role'] })
   }
   if (files.filter((f) => f.role === 'logo').length > 1) throw new Error('Add just one logo.')
-  if (!files.some((f) => f.role !== 'logo')) throw new Error('Add at least one screenshot or recording.')
+  if (!files.some((f) => f.role === 'photo' || f.role === 'recording')) {
+    throw new Error('Add at least one screenshot or recording.')
+  }
 
   // Music: Wrenn's own songs when the page doesn't say
   const music: MusicChoice = r.music === undefined ? 'wrenn' : (r.music as MusicChoice)
@@ -170,6 +205,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     vibe: r.vibe as JobRequest['vibe'],
     brandName: r.brandName.trim(),
     endingText: r.endingText.trim(),
+    about: typeof r.about === 'string' ? r.about.trim() : '',
     files,
     music,
     musicFile
@@ -180,7 +216,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
 // Making the job folder
 // ---------------------------------------------------------------------------
 
-// Copy the user's files into assets/. Photos and recordings keep their names
+// Copy the user's files into assets/. Photos, recordings and fonts keep their names
 // ("shot.png", then "shot (2).png" if the name is taken). The logo becomes logo.<ext>.
 async function copyAssets(files: JobRequest['files'], assetsDir: string): Promise<void> {
   // Windows file names ignore upper/lower case, so we compare in lower case
@@ -269,7 +305,8 @@ async function runClaude(job: RunningJob): Promise<void> {
         if (msg?.type !== 'assistant' || !Array.isArray(parts)) continue
         for (const part of parts) {
           const activity = part?.type === 'tool_use' ? activityFor(String(part.name)) : undefined
-          if (activity && activity !== lastActivity) {
+          // Once rendering started, Claude Code's last tool calls must not move the screen back
+          if (activity && activity !== lastActivity && !job.busy) {
             lastActivity = activity
             send(job, { stage: 'waiting-for-claude', message: activity })
           }
@@ -324,27 +361,80 @@ function stopClaude(job: RunningJob): void {
 // ---------------------------------------------------------------------------
 
 function send(job: RunningJob, event: Omit<JobEvent, 'jobId'>): void {
+  const full: JobEvent = { jobId: job.id, ...event }
+
+  // Progress events also carry how far along the whole video is and the time left
+  const part = PARTS[event.stage]
+  if (part) {
+    const now = Date.now()
+    // A new part started: remember how long the last one took
+    if (part !== job.part) {
+      job.partTimes[job.part] = (now - job.partStartedAt) / 1000
+      job.part = part
+      job.partStartedAt = now
+    }
+    job.lastEvent = event
+    const eta = estimate({
+      stage: part,
+      times: job.times,
+      elapsed: (now - job.startedAt) / 1000,
+      stageElapsed: (now - job.partStartedAt) / 1000,
+      frame: event.frame,
+      total: event.total
+    })
+    full.progress = eta.progress
+    full.secondsLeft = Math.round(eta.secondsLeft)
+  }
+
   // The window may have been closed while we worked
-  if (!job.sender.isDestroyed()) job.sender.send('job-event', { jobId: job.id, ...event })
+  if (!job.sender.isDestroyed()) job.sender.send('job-event', full)
+  // A Windows notification if the user is in another app (see notify.ts)
+  if (event.stage === 'done' || event.stage === 'failed') {
+    notifyJobEnd(job.sender, event.stage === 'done', job.brandName)
+  }
 }
 
-// Stop the timer and forget the job
+// Stop the timers and forget the job
 function finish(job: RunningJob): void {
   if (job.timer) clearInterval(job.timer)
+  if (job.ticker) clearInterval(job.ticker)
   jobs.delete(job.id)
+}
+
+// Saves how long each part of a finished video took, for the next time estimate
+function saveTimings(job: RunningJob): void {
+  const { claude, render } = job.partTimes
+  if (job.part !== 'sound' || claude === undefined || render === undefined) return
+  const sound = (Date.now() - job.partStartedAt) / 1000
+  void recordRun(job.length, { claude, render, sound })
 }
 
 // ---------------------------------------------------------------------------
 // Waiting for done.json, then rendering
 // ---------------------------------------------------------------------------
 
-// "wrenn 2026-11-07 14-03-22.mp4" (local time). Adds " (2)" if that name is taken.
-function videoFileName(): string {
+// Turns the brand name into something Windows allows in a file name.
+// Drops characters like \ / : * ? " < > |, and falls back to "wrenn" if nothing is left.
+function fileNamePart(brandName: string): string {
+  const clean = brandName
+    // eslint-disable-next-line no-control-regex
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60)
+    // Windows doesn't allow a name ending in a dot or a space
+    .replace(/[. ]+$/, '')
+  return clean || 'wrenn'
+}
+
+// "Trackr 2026-11-07 14-03-22.mp4" (local time). Adds " (2)" if that name is taken.
+function videoFileName(brandName: string): string {
   const d = new Date()
   const two = (n: number): string => String(n).padStart(2, '0')
   const stamp = `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())} ${two(d.getHours())}-${two(d.getMinutes())}-${two(d.getSeconds())}`
-  let name = `wrenn ${stamp}.mp4`
-  for (let n = 2; existsSync(join(outputDir(), name)); n++) name = `wrenn ${stamp} (${n}).mp4`
+  const start = fileNamePart(brandName)
+  let name = `${start} ${stamp}.mp4`
+  for (let n = 2; existsSync(join(outputDir(), name)); n++) name = `${start} ${stamp} (${n}).mp4`
   return name
 }
 
@@ -434,9 +524,16 @@ async function checkForDone(job: RunningJob): Promise<void> {
     }
     if (job.abort.signal.aborted) throw new Error('Cancelled')
 
-    const filePath = join(outputDir(), videoFileName())
+    const filePath = join(outputDir(), videoFileName(job.brandName))
     await moveFile(tempFile, filePath)
-    const video = await addVideo({ filePath, kind: 'template', size: job.size, createdAt: new Date() })
+    const video = await addVideo({
+      filePath,
+      kind: 'template',
+      size: job.size,
+      title: job.brandName,
+      createdAt: new Date()
+    })
+    saveTimings(job)
     send(job, { stage: 'done', video, message: soundNote })
   } catch (error) {
     // A cancel already told the screen, so only report real errors
@@ -482,6 +579,8 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     const brief = {
       brandName: request.brandName,
       endingText: request.endingText,
+      // Left out when empty, so Claude Code only sees it when there's something to read
+      ...(request.about ? { about: request.about } : {}),
       size: request.size,
       length: request.length,
       vibe: request.vibe
@@ -498,13 +597,20 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     id,
     dir,
     size: request.size,
+    brandName: request.brandName,
     music: request.music,
     vibe: request.vibe,
     duration: Number(request.length),
     ownSongFile,
     sender,
     abort: new AbortController(),
-    busy: false
+    busy: false,
+    length: request.length,
+    times: await expectedTimes(request.length),
+    startedAt: Date.now(),
+    part: 'claude',
+    partStartedAt: Date.now(),
+    partTimes: {}
   }
   jobs.set(id, job)
   try {
@@ -515,6 +621,9 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
   }
   job.timer = setInterval(() => void checkForDone(job), POLL_MS)
   send(job, { stage: 'waiting-for-claude', message: 'Getting started' })
+  job.ticker = setInterval(() => {
+    if (job.lastEvent) send(job, job.lastEvent)
+  }, TICK_MS)
 
   return { jobId: id }
 }
@@ -559,6 +668,7 @@ export function stopAllJobs(): void {
     job.abort.abort()
     stopClaude(job)
     if (job.timer) clearInterval(job.timer)
+    if (job.ticker) clearInterval(job.ticker)
   }
   jobs.clear()
 }
