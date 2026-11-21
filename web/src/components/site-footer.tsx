@@ -42,7 +42,7 @@ export function SiteFooter() {
       <Cloud className="left-[44%] top-[30%] hidden w-16 opacity-60 md:block" />
       <div className="mx-auto grid max-w-[1160px] gap-xl sm:grid-cols-[2fr_1fr_1fr]">
         <div>
-          <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} className="h-12 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
+          <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} sizes="144px" className="h-12 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
           <p className="mt-sm max-w-[22rem] text-[0.9375rem] leading-relaxed text-navy-body">
             No prompts. Just render. A free app that turns your photos and videos into videos you can post.
           </p>

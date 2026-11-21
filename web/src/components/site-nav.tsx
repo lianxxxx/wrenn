@@ -11,7 +11,7 @@ export function SiteNav() {
     <header className="relative z-20 flex w-full items-start justify-between gap-sm pl-md md:pl-2xl">
       <a href="#" className="shrink-0 pt-sm">
         {/* Draft PNG from brand/logo/, swap for the SVG once it's traced */}
-        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} priority className="h-9 w-auto sm:h-12 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
+        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} sizes="144px" loading="eager" className="h-9 w-auto sm:h-12 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
       </a>
 
       <nav className="relative isolate">

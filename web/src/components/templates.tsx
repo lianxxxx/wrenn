@@ -50,6 +50,7 @@ export function Templates() {
                   alt=""
                   width={1462}
                   height={1076}
+                  sizes="96px"
                   className="absolute -top-16 left-1 w-20 sm:-top-20 sm:w-24 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]"
                 />
               )}
