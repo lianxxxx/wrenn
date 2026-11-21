@@ -7,7 +7,7 @@ export function SimplePage({ title, updated, children }: { title: string; update
   return (
     <main className="mx-auto w-full max-w-[44rem] px-md py-2xl">
       <Link href="/" className="inline-block">
-        <Image src="/wrenn-logo.png" alt="Wrenn, back to home" width={2172} height={724} className="h-10 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
+        <Image src="/wrenn-logo.png" alt="Wrenn, back to home" width={2172} height={724} sizes="120px" loading="eager" className="h-10 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
       </Link>
       <h1 className="mt-2xl font-display text-[clamp(2.5rem,7vw,4rem)] leading-[1.05] text-navy">{title}</h1>
       <p className="mt-xs text-[0.8125rem] text-navy-body">Last updated {updated}</p>
