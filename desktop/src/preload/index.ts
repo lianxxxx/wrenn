@@ -53,8 +53,8 @@ export type JobRequest = {
   vibe: 'playful' | 'clean' | 'bold' | 'calm'
   brandName: string
   endingText: string
-  // Real paths on disk (from getPathForFile)
-  files: { path: string; role: 'photo' | 'recording' | 'logo' }[]
+  // Real paths on disk (from getPathForFile). Fonts are .woff2, .woff, .ttf or .otf.
+  files: { path: string; role: 'photo' | 'recording' | 'logo' | 'font' }[]
   music: MusicChoice
   // Only when music is "own": real path of the song (.mp3, .wav, .m4a, .aac, .ogg, .flac)
   musicFile?: string

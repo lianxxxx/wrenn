@@ -68,6 +68,10 @@ test('startJob turns down bad requests with plain messages', async () => {
   expect(await startJobError(request({ music: 'radio' }))).toContain('Pick where the music comes from.')
 
   expect(await startJobError(request({ files: [] }))).toContain('Add at least one screenshot or recording.')
+  // A picture can't pass as a font
+  expect(await startJobError(request({ files: [{ path: picture, role: 'font' }] }))).toContain(
+    `"screenshot.png" isn't a font Wrenn can use.`
+  )
   expect(await startJobError(request({ templateId: '../secret' }))).toContain("That template doesn't exist.")
 
   // No ElevenLabs key saved in the test settings

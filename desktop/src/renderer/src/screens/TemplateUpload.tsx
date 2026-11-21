@@ -58,6 +58,15 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           files={draft.logo}
           onFiles={(logo) => onChange({ logo })}
         />
+        <FileDrop
+          label="Fonts (optional)"
+          hint="Your brand's font files. Skip this and Wrenn picks a font for you."
+          accept=".woff2,.woff,.ttf,.otf"
+          multiple
+          files={draft.fonts}
+          onFiles={(fonts) => onChange({ fonts })}
+          typeHint="a WOFF2, WOFF, TTF or OTF font"
+        />
         <TextField
           label="Ending text (optional)"
           hint="The last words people see, like Download it free."

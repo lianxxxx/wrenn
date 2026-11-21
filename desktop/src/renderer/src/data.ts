@@ -111,6 +111,7 @@ export type TemplateDraft = {
   photos: File[]
   recordings: File[]
   logo: File[]
+  fonts: File[]
   brandName: string
   cta: string
   music: MusicChoice
@@ -126,6 +127,7 @@ export const emptyTemplateDraft: TemplateDraft = {
   photos: [],
   recordings: [],
   logo: [],
+  fonts: [],
   brandName: '',
   cta: '',
   music: 'wrenn',
@@ -167,9 +169,14 @@ export function fakeEditVideo(size: SizeId, now = new Date()): VideoInfo {
 
 // The picked files as real paths on disk, each with its role, for startJob
 export function draftFiles(draft: TemplateDraft): JobRequest['files'] {
-  const toPaths = (files: File[], role: 'photo' | 'recording' | 'logo') =>
+  const toPaths = (files: File[], role: JobRequest['files'][number]['role']) =>
     files.map((file) => ({ path: window.api.getPathForFile(file), role }))
-  return [...toPaths(draft.photos, 'photo'), ...toPaths(draft.recordings, 'recording'), ...toPaths(draft.logo, 'logo')]
+  return [
+    ...toPaths(draft.photos, 'photo'),
+    ...toPaths(draft.recordings, 'recording'),
+    ...toPaths(draft.logo, 'logo'),
+    ...toPaths(draft.fonts, 'font')
+  ]
 }
 
 // The music choice for startJob. The song's real path only goes along with "Your own song".

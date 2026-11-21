@@ -28,10 +28,11 @@ const MAX_FILES = 25
 const MAX_TEXT = 200
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
+const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
 const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 const LENGTHS = ['15', '30', '60']
 const VIBES = ['playful', 'clean', 'bold', 'calm']
-const ROLES = ['photo', 'recording', 'logo']
+const ROLES = ['photo', 'recording', 'logo', 'font']
 const MUSIC_CHOICES: MusicChoice[] = ['wrenn', 'own', 'elevenlabs', 'none']
 const SONG_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
 const MAX_SONG_BYTES = 200 * 1024 * 1024
@@ -132,16 +133,19 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     }
     const name = basename(f.path)
     const ext = extname(f.path).toLowerCase()
-    const allowed = f.role === 'recording' ? VIDEO_EXTS : IMAGE_EXTS
+    const allowed = f.role === 'recording' ? VIDEO_EXTS : f.role === 'font' ? FONT_EXTS : IMAGE_EXTS
     if (!allowed.includes(ext)) {
-      throw new Error(`"${name}" isn't a ${f.role === 'recording' ? 'video' : 'picture'} Wrenn can use.`)
+      const kind = f.role === 'recording' ? 'video' : f.role === 'font' ? 'font' : 'picture'
+      throw new Error(`"${name}" isn't a ${kind} Wrenn can use.`)
     }
     const info = await stat(f.path).catch(() => null)
     if (!info || !info.isFile()) throw new Error(`Wrenn can't find "${name}" anymore. Try adding it again.`)
-    files.push({ path: f.path, role: f.role as 'photo' | 'recording' | 'logo' })
+    files.push({ path: f.path, role: f.role as JobRequest['files'][number]['role'] })
   }
   if (files.filter((f) => f.role === 'logo').length > 1) throw new Error('Add just one logo.')
-  if (!files.some((f) => f.role !== 'logo')) throw new Error('Add at least one screenshot or recording.')
+  if (!files.some((f) => f.role === 'photo' || f.role === 'recording')) {
+    throw new Error('Add at least one screenshot or recording.')
+  }
 
   // Music: Wrenn's own songs when the page doesn't say
   const music: MusicChoice = r.music === undefined ? 'wrenn' : (r.music as MusicChoice)
@@ -182,7 +186,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
 // Making the job folder
 // ---------------------------------------------------------------------------
 
-// Copy the user's files into assets/. Photos and recordings keep their names
+// Copy the user's files into assets/. Photos, recordings and fonts keep their names
 // ("shot.png", then "shot (2).png" if the name is taken). The logo becomes logo.<ext>.
 async function copyAssets(files: JobRequest['files'], assetsDir: string): Promise<void> {
   // Windows file names ignore upper/lower case, so we compare in lower case

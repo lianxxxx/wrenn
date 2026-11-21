@@ -108,6 +108,7 @@ test('template path: options, music choices and the upload step', async () => {
   await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
   await expect(page.getByLabel('Brand name')).toBeVisible()
   await expect(page.getByText('Photos and screenshots')).toBeVisible()
+  await expect(page.getByText('Fonts (optional)')).toBeVisible()
   await expect(page.getByText('Add at least one file and your brand name.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Make my video' })).toBeDisabled()
 
