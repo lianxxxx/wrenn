@@ -66,7 +66,7 @@ export function Faq() {
       {/* Light list: one thin line between questions, no boxes. The whole question row is the tap area. */}
       <div data-reveal-group className="mx-auto mt-2xl flex max-w-[760px] flex-col divide-y divide-line">
         {faqs.map((item) => (
-          <details key={item.q} data-reveal="rise" className="group text-left">
+          <details key={item.q} data-reveal="rise" className="faq-item group text-left">
             <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-md py-md font-display text-xl text-navy sm:py-lg sm:text-2xl [&::-webkit-details-marker]:hidden">
               {item.q}
               <svg
