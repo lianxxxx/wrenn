@@ -18,6 +18,7 @@ import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
 import { addVideo, outputDir } from './library'
+import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
 
@@ -55,7 +56,7 @@ type RunningJob = {
   id: string
   dir: string
   size: SizeId
-  // The brand name the user typed: the video's title and the start of its file name
+  // The brand name the user typed: the video's title, the start of its file name and the notification
   brandName: string
   // For the sound: where the music comes from, the vibe, and the length in seconds
   music: MusicChoice
@@ -339,6 +340,10 @@ function stopClaude(job: RunningJob): void {
 function send(job: RunningJob, event: Omit<JobEvent, 'jobId'>): void {
   // The window may have been closed while we worked
   if (!job.sender.isDestroyed()) job.sender.send('job-event', { jobId: job.id, ...event })
+  // A Windows notification if the user is in another app (see notify.ts)
+  if (event.stage === 'done' || event.stage === 'failed') {
+    notifyJobEnd(job.sender, event.stage === 'done', job.brandName)
+  }
 }
 
 // Stop the timer and forget the job
