@@ -53,6 +53,8 @@ export type JobRequest = {
   vibe: 'playful' | 'clean' | 'bold' | 'calm'
   brandName: string
   endingText: string
+  // What the app does, in one or two sentences (up to 300 letters). Empty when skipped.
+  about?: string
   // Real paths on disk (from getPathForFile). Fonts are .woff2, .woff, .ttf or .otf.
   files: { path: string; role: 'photo' | 'recording' | 'logo' | 'font' }[]
   music: MusicChoice

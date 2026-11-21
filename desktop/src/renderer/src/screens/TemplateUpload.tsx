@@ -1,6 +1,7 @@
 import { Button } from '../components/Button'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
+import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
 import type { TemplateDraft } from '../data'
 
@@ -36,6 +37,14 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           placeholder="e.g. Wrenn"
           value={draft.brandName}
           onChange={(e) => onChange({ brandName: e.target.value })}
+        />
+        <TextArea
+          label="What does it do? (optional)"
+          hint="One or two sentences. Helps Wrenn show the right things."
+          placeholder="e.g. Turns your app screenshots into short videos for social media."
+          maxLength={300}
+          value={draft.about}
+          onChange={(e) => onChange({ about: e.target.value })}
         />
         <FileDrop
           label="Photos and screenshots"

@@ -114,6 +114,8 @@ export type TemplateDraft = {
   fonts: File[]
   brandName: string
   cta: string
+  // "What does it do?": one or two sentences
+  about: string
   music: MusicChoice
   // Only used when music is "own": one song file
   musicFile: File[]
@@ -130,6 +132,7 @@ export const emptyTemplateDraft: TemplateDraft = {
   fonts: [],
   brandName: '',
   cta: '',
+  about: '',
   music: 'wrenn',
   musicFile: []
 }

@@ -26,6 +26,8 @@ const isWindows = process.platform === 'win32'
 // Limits for what the page may send us
 const MAX_FILES = 25
 const MAX_TEXT = 200
+// "What does it do?" can be a bit longer: one or two sentences
+const MAX_ABOUT = 300
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
 const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
@@ -122,6 +124,10 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
   if (!VIBES.includes(r.vibe as string)) throw new Error('Pick a vibe for your video.')
   if (!isText(r.brandName) || r.brandName.trim() === '') throw new Error('Add your brand name.')
   if (!isText(r.endingText)) throw new Error('The ending line is too long.')
+  // Optional: older screens don't send it
+  if (r.about !== undefined && (typeof r.about !== 'string' || r.about.length > MAX_ABOUT)) {
+    throw new Error(`Keep "What does it do?" under ${MAX_ABOUT} letters.`)
+  }
 
   if (!Array.isArray(r.files)) throw new Error('Add at least one screenshot or recording.')
   if (r.files.length > MAX_FILES) throw new Error(`That's a lot of files. Use ${MAX_FILES} or fewer.`)
@@ -176,6 +182,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     vibe: r.vibe as JobRequest['vibe'],
     brandName: r.brandName.trim(),
     endingText: r.endingText.trim(),
+    about: typeof r.about === 'string' ? r.about.trim() : '',
     files,
     music,
     musicFile
@@ -509,6 +516,8 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     const brief = {
       brandName: request.brandName,
       endingText: request.endingText,
+      // Left out when empty, so Claude Code only sees it when there's something to read
+      ...(request.about ? { about: request.about } : {}),
       size: request.size,
       length: request.length,
       vibe: request.vibe

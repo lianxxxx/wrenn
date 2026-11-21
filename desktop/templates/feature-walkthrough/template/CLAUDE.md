@@ -18,6 +18,7 @@ The result must look like a premium motion-graphics showreel made by a studio, n
 1. Read `brief.json`. Fields:
    - `brandName`: the brand or product name
    - `endingText`: the last line of the video, for example "Download it free"
+   - `about` (optional, may be missing): one or two sentences from the user about what their app does. Use it to understand the product: pick which screenshots and features to highlight, in which order, and where to focus on each one. Use it to write the hook and labels too, in your own short words (2 to 5 words each). Never paste it on screen as a sentence or a paragraph. If it's missing, work it out from the screenshots.
    - `size`: `reels`, `feed`, `square` or `youtube`
    - `length`: `"15"`, `"30"` or `"60"` (seconds)
    - `vibe`: `playful`, `clean`, `bold` or `calm`

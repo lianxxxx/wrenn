@@ -18,6 +18,7 @@ The result must look like a premium motion-graphics showreel made by a studio, n
 1. Read `brief.json`. Fields:
    - `brandName`: the brand or product name
    - `endingText`: the last line of the video, for example "Download it free"
+   - `about` (optional, may be missing): one or two sentences from the user about what their app does. Use it to understand the product: pick which screenshots and features to highlight, in which order, and where to focus on each one. Use it to write the hook and labels too, in your own short words (2 to 5 words each). Never paste it on screen as a sentence or a paragraph. If it's missing, work it out from the screenshots.
    - `size`: `reels`, `feed`, `square` or `youtube`
    - `length`: `"15"`, `"30"` or `"60"` (seconds)
    - `vibe`: `playful`, `clean`, `bold` or `calm`
@@ -38,20 +39,68 @@ The result must look like a premium motion-graphics showreel made by a studio, n
   - bold: fast and punchy, big type, hard cuts on the beat, strong scale hits.
   - calm: slower, soft eases, gentle drift, small overshoot only.
 
-## Step 3: Structure
+## Step 3: Plan the edit (scenes, not slides)
 
-The video has 4 parts, in this order:
+This is the most important step. **A slideshow is a failed video.** One screenshot after another, the same layout every time, a label on one side and a device in the middle, slow and calm: that is exactly what we don't want. Make a real showreel edit: fast, varied, and alive, as if someone is using the app on screen.
 
-1. **Hook:** the brand name or one bold line (you may write a short line from what the screenshots show, 2 to 5 words). Huge, centered, readable on mute.
-2. **Features:** each screenshot in a device frame, one at a time. For each one:
-   - a label of 2 to 5 words that says what the screen does for the user ("Pick a template", "Your video, done"). Write it yourself from what you see. No full sentences, no ending period.
-   - a zoom or pan to the important part of the screenshot with `device.focus(...)`. On longer videos, give each screenshot 2 or 3 focus stops. Keep zoom at 2.2 or less so the screenshot stays sharp.
-   - Use screenshots in the order that tells the best story (start, middle, result). If there are too many for the length, use the best ones so each gets at least 1.8 seconds.
-   - Screen recordings play inside a device frame too (see "Screen recordings" below).
-3. **Logo moment:** the logo, big, with the brand colors around it. A short, satisfying hit (scale pop, a shape wiping behind it).
-4. **Ending:** the `endingText`, big and clear. Hold it long enough to read (at least 1.5 seconds fully on screen).
+Before writing any code, write a shot list as a comment at the top of the script: for every scene, its start and end time, its layout, its background, how it comes in, how it goes out, and its hits. Then build it.
 
-**Timing** from `length`: `Wrenn.timing(length, numberOfFeatures)` gives a fair split (start, end and dur of every part). You can adjust it, but the total must equal `length` exactly.
+### The order
+
+1. **Brand open (first 2 to 3 seconds):** build the logo up from pieces, not just a fade or a scale. Shapes in the brand colors pop in, the logo mark lands with overshoot, then the brand name wipes in beside it with a mask (`clip-path: inset(...)`). No logo file? Do the same with the brand name and a brand shape.
+2. **Hook line:** one bold line about what the app does for people (2 to 5 words, written from what the screenshots show). Huge, line by line.
+3. **Product scenes:** the middle of the video. Each scene uses a different layout from the list below. Never the same layout twice in a row, and each layout at most twice in the whole video.
+4. **Finale:** the logo and the `endingText`, made into a button. A cursor moves to it and clicks it (the button dips and springs back), then a last pulse on the final beat. Hold the ending text fully on screen for at least 1.5 seconds.
+
+### Layouts for product scenes
+
+- **Hero screen:** one screenshot BIG (at least 70% of the frame width on youtube, 80% of the height on reels), coming in tilted in 3D (`perspective` on the parent, `rotateX`/`rotateY` on the frame) and straightening, then zooming into the important part.
+- **Scroll:** a tall or full-page screenshot (name often ends in `-full`, or the image is much taller than wide) inside a browser or phone frame that scrolls down with `power2.inOut`, stopping briefly on 1 or 2 key parts.
+- **Devices:** a browser window and a phone together on a big brand-color shape, the phone overlapping the browser's corner, both drifting slowly in opposite directions. Use the phone screenshots (narrow images) in the phone.
+- **Fan or collage:** 3 to 5 screenshots fly in from below with a little rotation, staggered, and land in a fanned row. Then one gets "picked": the others dim to 40% and shrink a little, the picked one scales up with an accent-color ring.
+- **Detail zoom:** crop into one card, chart or number of a screenshot (put the image in its own box with `overflow: hidden` and move it inside), big, with a short label next to it.
+- **Big number:** a number you can read in the screenshots (a total, a count, a percent) counting up in huge type, the screen dimmed behind it.
+- **Split:** a color panel slides up over half the frame with the text, the screenshot on the other half moving at a different speed (parallax).
+
+You may build your own frames, panels and shapes in HTML and CSS. `Wrenn.device(...)` is one easy option for a frame, not the only one.
+
+### Make it feel used (interactions)
+
+Every product scene has at least one of these:
+
+- **Cursor click:** draw a simple arrow cursor (inline SVG). It moves with easing to a button or item, presses (scale 0.85 for 0.08 seconds and back), and the target reacts right then (a dip, a ring, a color change, a tap ripple).
+- **Highlight:** an accent-color ring or outline snaps around the key part while everything else dims.
+- **Chips:** small tags pop in with a stagger, then one lights up in the accent color.
+- **Count up:** numbers count up with easing: `const n = { v: 0 }; tl.to(n, { v: 51400, duration: 1.2, ease: "power2.out", onUpdate: () => (el.textContent = format(n.v)) }, t)`. Set the starting text first.
+- **Live UI:** a bar in a chart grows, a progress bar fills, a toggle flips, a list item slides in. Only on top of shapes you draw yourself, never painted over the real screenshot to fake data.
+
+### Transitions between scenes
+
+Use at least 3 different kinds in a 30 second video. Each one starts from where the eye already is.
+
+**Transitions are fast and snappy:** 0.25 to 0.4 seconds, never longer. Use sharp eases like `expo.inOut` or `power4.inOut` (slow at the very ends, very fast in the middle), never `sine` or a long `power1`. The cut lands exactly on a beat. Everything in the old scene leaves in the same quick move, nothing lingers or fades out slowly.
+
+- **Circle wipe:** a brand-color circle grows from a point (the last click, the center of the last thing that moved) until it covers the frame, then gives way to the next scene.
+- **Panel push:** the next scene slides up as a big rounded panel over the current one, the current one moves up faster behind it, the corners go square as it lands.
+- **Bar wipe:** a thick accent-color bar sweeps across and leaves the next scene behind it.
+- **Zoom through:** zoom into part of a screenshot until a color or a shape fills the frame and becomes the next scene's background.
+- **Mask reveal:** the next scene appears through a growing shape (a rounded box, a circle, the logo shape).
+
+### Backgrounds
+
+Change the background between scenes. Use the brand colors in at least 2 or 3 moods (a deep dark brand tone, the full brand color, a light tint). Keep 1 or 2 brand shapes that travel from scene to scene so the whole video feels like one piece.
+
+### Pace
+
+- **Scenes:** 15 seconds: 4 to 5 scenes. 30 seconds: 7 to 9 scenes. 60 seconds: 12 to 16 scenes. Each scene is 2 to 4 seconds.
+- **Every half second something happens:** a line of text, a card landing, a click, a zoom stop, a chip lighting up. A screenshot never just sits there.
+- **The camera never stops:** every scene has a slow push-in, drift or parallax running under it the whole time. Once a moment has landed (a number finished counting, a line fully shown), move on within about 1 second. No layout stays still for more than 1.5 seconds.
+- **The cursor never covers what it points at:** it stops just below and to the right of the target, and moves away after the click so the label is fully readable.
+- **Text:** 2 to 5 words per line. Reveal it line by line from below with a mask (each line inside a box with `overflow: hidden`, the text slides up from `yPercent: 115`). Take it out quickly before the next text comes.
+- Screen recordings work great in the Hero, Scroll or Devices layouts (see "Screen recordings" below).
+- Use the screenshots in the order that tells the best story (start, middle, result). You don't have to use every image, use the best ones.
+
+**Timing** from `length`: the total must equal `length` exactly. `Wrenn.timing(...)` gives a simple hook / features / logo / ending split. Use it only as a rough start, or plan the times yourself.
 
 **Canvas** from `size`: `Wrenn.canvas(brief.size)` sets the page size. reels 1080x1920, feed 1080x1350, square 1080x1080, youtube 1920x1080. Lay everything out from `C.safe`, `C.cx`, `C.cy` and `C.u` (1% of the shorter side), never hard-coded pixels, so the layout fits the size. On `youtube` (landscape) put the label beside the device frame instead of above it.
 
@@ -62,13 +111,17 @@ The video has 4 parts, in this order:
 - **Easing and overshoot on everything.** No linear motion. Entrances overshoot a little (the vibe eases do this). Exits are quicker than entrances.
 - **Secondary motion.** While something holds, something else moves gently (a slow drift, a soft scale, a shape breathing). No frozen frames longer than half a second.
 - **Continuity between scenes.** One or two shapes or colors live through the whole video and move from scene to scene (a shape that becomes the backdrop of the next device frame, a color that wipes into the next background). The viewer should never see a hard reset.
-- **No generic transitions.** No crossfades, no plain slide-in from the side, no spinning cube, no glitch, no zoom blur. Each cut is motivated: something exits and the next thing enters from where the eye already is.
-- **Hidden until its moment.** `tl.fromTo()` shows its start values right away, from the very first frame. So anything that appears later (the logo, labels, shapes) must start invisible: include `autoAlpha: 0` in the "from" values (or `gsap.set` it hidden and use `tl.to`). Check frame 0: only the hook may be visible.
-- **Nothing overlaps text or the logo.** Text, the logo and screenshots never sit on top of each other, not even for a moment during a transition. The logo appears only in the Logo moment, alone and centered, with clear space around it. Take one thing out before the next comes into the same spot.
-- **Screenshots stay clear.** Shapes and colors live BEHIND the device frame, never on top of it. While a screenshot is on screen nothing may cover it, and the zoom must keep the important part fully inside the frame (no key buttons or words cut off at the edge).
+- **No generic transitions.** No crossfades, no plain slide-in from the side, no spinning cube, no glitch, no zoom blur. Use the transitions from Step 3. Each cut is motivated: something exits and the next thing enters from where the eye already is.
+- **Hidden until its moment.** `tl.fromTo()` shows its start values right away, from the very first frame. So anything that appears later (the logo, labels, shapes) must start invisible: include `autoAlpha: 0` in the "from" values (or `gsap.set` it hidden and use `tl.to`). Check frame 0: only the start of the brand open may be visible.
+- **One scene at a time.** Keep each scene in its own container and hide it (`visibility: hidden`) once the next scene has fully covered it, so old scenes never peek through.
+- **Text stays readable.** Text never sits on top of a busy screenshot or the logo. Put it on a clean background, or on a solid panel. The logo shows in the brand open and the finale, with clear space around it.
+- **Never cut through words.** Whatever you zoom, crop or frame, every word and number the viewer can see must be whole. A screen edge may cut through empty space or a picture, never through text ("come back, Lian" or "51,400" with the start missing is a fail). Plan each zoom with real numbers: from the screenshot's size, the zoom and the focus point, work out which part of the image is visible, and check that no line of text runs past its left or right edge.
+- **Phone screens show their full width.** A screenshot inside a phone frame always fits the phone's width exactly (no zooming in sideways). To show more, scroll it up and down. For a closer look at a phone screen, zoom the whole phone, not the picture inside it.
+- **Screenshots stay clear.** Shapes, rings, cursors and highlights may sit on a screenshot, but never cover the key words or numbers. Don't zoom a full screenshot past 2.2 (it gets blurry); for a closer look use the Detail zoom crop. Keep the important part inside the frame (no key buttons or words cut off at the edge).
+- **No AI-slop look.** These make a video look auto-generated, so avoid them: soft blurry glows or radial gradients behind things, everything fading and scaling up from the center the same way, the same ease and the same duration on every move, slow floaty motion, things drifting in at half opacity, gradient text, glassy blurred cards. Instead: solid brand colors, crisp edges, sharp eases, moves with different speeds and directions, and hard, confident cuts.
 - **No stock emoji**, no clip art, no fake UI you invent, no lorem ipsum. Only the user's real screenshots, logo, words and colors.
 - **Text hierarchy:** one idea per moment. Reveal text word by word or line by line with `Wrenn.reveal(...)`, take it out with `Wrenn.hide(...)` before the next text comes in.
-- **Beat feel:** land hits (pops, scale punches, cuts) on a steady grid, for example every 0.5 seconds, so music can sync later.
+- **On the beat:** the music is 120 BPM, so one beat is 0.5 seconds and one bar is 2 seconds. Land hits (pops, clicks, scale punches, text lines) on the 0.5 second grid, and put scene changes on a full bar (2, 4, 6 ...) when you can. Transitions should peak right on the beat.
 
 ## Step 5: Technical contract (must follow exactly)
 
