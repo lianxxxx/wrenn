@@ -8,7 +8,7 @@
 //    add it to the library and tell the screen.
 
 import { app, type WebContents } from 'electron'
-import { spawn, type ChildProcess } from 'child_process'
+import { spawn, spawnSync, type ChildProcess } from 'child_process'
 import { randomBytes } from 'crypto'
 import { existsSync } from 'fs'
 import { copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
@@ -379,10 +379,12 @@ async function runClaude(job: RunningJob): Promise<void> {
 }
 
 // Stops the background Claude Code. On Windows it runs inside a shell, so stop the whole tree.
+// Waits for taskkill to finish (it takes a moment), so quitting right after a cancel
+// can't leave Claude Code running in the background.
 function stopClaude(job: RunningJob): void {
   const child = job.claude
   if (!child?.pid) return
-  if (isWindows) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true })
+  if (isWindows) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 5000 })
   else child.kill()
   job.claude = undefined
 }
