@@ -1,6 +1,7 @@
 // Shared types and the fixed lists the screens use (sizes, templates, vibes).
 // Types the main process also uses come from the preload (the contract), so both sides agree.
 import type { JobRequest, MusicChoice, SizeId, VideoInfo } from '../../preload'
+import { AUDIO_EXTS } from '../../shared/limits'
 // Placeholder video for the fake edit path
 import sampleVideo from './assets/sample.mp4'
 
@@ -91,8 +92,8 @@ export const musicChoices: { id: MusicChoice; name: string; hint: string }[] = [
   { id: 'none', name: 'No music', hint: 'Just sound effects' }
 ]
 
-// Song files Wrenn can mix in (used as a file input accept string)
-export const songTypes = '.mp3,.wav,.m4a,.aac,.ogg,.flac'
+// Song files Wrenn can mix in (used as a file input accept string: ".mp3,.wav,...")
+export const songTypes = AUDIO_EXTS.join(',')
 
 export type SubtitleId = 'bold-pop' | 'clean' | 'boxed'
 

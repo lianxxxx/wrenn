@@ -18,13 +18,13 @@ import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
 import { estimate, type EtaStage, type SoundKind, type StageTimes } from './eta'
-import { addVideo, outputDir } from './library'
+import { addVideo, outputDir, SIZES } from './library'
 import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
 // "What does it do?" can be a bit longer than the other text: one or two sentences
-import { MAX_ABOUT } from '../shared/limits'
+import { AUDIO_EXTS, MAX_ABOUT } from '../shared/limits'
 
 const isWindows = process.platform === 'win32'
 
@@ -34,12 +34,10 @@ const MAX_TEXT = 200
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
 const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
-const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 const LENGTHS = ['15', '30', '60']
 const VIBES = ['playful', 'clean', 'bold', 'calm']
 const ROLES = ['photo', 'recording', 'logo', 'font']
 const MUSIC_CHOICES: MusicChoice[] = ['wrenn', 'own', 'elevenlabs', 'none']
-const SONG_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
 const MAX_SONG_BYTES = 200 * 1024 * 1024
 
 const POLL_MS = 2000
@@ -185,7 +183,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     const f = r.musicFile
     if (typeof f !== 'string' || !isAbsolute(f)) throw new Error("Your song couldn't be read. Try adding it again.")
     const name = basename(f)
-    if (!SONG_EXTS.includes(extname(f).toLowerCase())) {
+    if (!AUDIO_EXTS.includes(extname(f).toLowerCase())) {
       throw new Error(`"${name}" isn't a song Wrenn can use. Use an MP3, WAV, M4A, AAC, OGG or FLAC file.`)
     }
     const info = await stat(f).catch(() => null)
