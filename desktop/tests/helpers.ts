@@ -91,6 +91,12 @@ export function makeVideo(file: string): string {
   return file
 }
 
+// A file with a font's name. Wrenn only checks the name and copies the file, so the bytes don't matter.
+export function makeFontFile(file: string): string {
+  writeFileSync(file, 'not a real font')
+  return file
+}
+
 // A tiny PNG picture, made on the spot
 export function makePicture(file: string): string {
   ffmpeg(['-y', '-f', 'lavfi', '-i', 'color=c=0xffb703:s=64x64', '-frames:v', '1', file])
