@@ -3,6 +3,7 @@
 
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
 import { join } from 'path'
+import { MAX_ABOUT } from '../src/shared/limits'
 import { launchApp, makeFontFile, makePicture, makeTempDirs, removeTempDirs, seedSettings, type TestDirs } from './helpers'
 
 let dirs: TestDirs
@@ -25,6 +26,21 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   await app.close()
   removeTempDirs(dirs)
+})
+
+test('"What does it do?" counts letters and stops at the limit', async () => {
+  const about = page.getByLabel('What does it do? (optional)')
+  await expect(about).toHaveValue('')
+  await expect(page.getByText(`0/${MAX_ABOUT}`, { exact: true })).toBeVisible()
+
+  await about.fill('Turns screenshots into videos.')
+  await expect(page.getByText(`30/${MAX_ABOUT}`, { exact: true })).toBeVisible()
+
+  // Typing past the limit stops at the limit
+  await about.fill('')
+  await about.pressSequentially('a'.repeat(MAX_ABOUT + 5), { delay: 0 })
+  await expect(about).toHaveValue('a'.repeat(MAX_ABOUT))
+  await expect(page.getByText(`${MAX_ABOUT}/${MAX_ABOUT}`, { exact: true })).toBeVisible()
 })
 
 test('the fonts box takes font files and turns down the rest', async () => {
