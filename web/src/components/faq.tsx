@@ -72,7 +72,7 @@ export function Faq() {
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden
-                className="size-6 shrink-0 text-navy transition-transform duration-200 group-open:rotate-180"
+                className="size-6 shrink-0 text-navy duration-200 group-open:rotate-180 motion-safe:transition-transform"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="3"
