@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import type { Settings } from '../preload'
 import { checkClaude, openClaudeSignIn } from './claude'
 import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from './jobs'
 import { outputDir, listVideos } from './library'
@@ -32,7 +31,7 @@ ipcMain.handle('open-output-folder', () => shell.openPath(outputDir()))
 
 // Settings saved on this computer (see settings.ts)
 ipcMain.handle('get-settings', () => getSettings())
-ipcMain.handle('save-settings', (_event, changes: unknown) => saveSettings(cleanSettings(changes)))
+ipcMain.handle('save-settings', (_event, changes: unknown) => saveSettings(changes))
 
 // Every video in Videos\Wrenn, newest first (see library.ts)
 ipcMain.handle('list-videos', () => listVideos())
@@ -41,17 +40,6 @@ ipcMain.handle('list-videos', () => listVideos())
 ipcMain.handle('start-job', (event, request: unknown) => startJob(event.sender, request))
 ipcMain.handle('open-claude-in-job', (_event, jobId: unknown) => openClaudeInJob(jobId))
 ipcMain.handle('cancel-job', (_event, jobId: unknown) => cancelJob(jobId))
-
-// Keep only the settings we know, with the right types. Anything else the page sends is dropped.
-function cleanSettings(input: unknown): Partial<Settings> {
-  const changes: Partial<Settings> = {}
-  if (!input || typeof input !== 'object') return changes
-  const i = input as Record<string, unknown>
-  if (typeof i.setupDone === 'boolean') changes.setupDone = i.setupDone
-  // API keys are short. A very long string is a mistake, so it's ignored.
-  if (typeof i.voiceoverKey === 'string' && i.voiceoverKey.length <= 500) changes.voiceoverKey = i.voiceoverKey.trim()
-  return changes
-}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({

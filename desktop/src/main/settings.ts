@@ -76,7 +76,10 @@ function cleanChanges(changes: unknown): Partial<Settings> {
   if (!changes || typeof changes !== 'object') return clean
   const input = changes as Record<string, unknown>
   if (typeof input.setupDone === 'boolean') clean.setupDone = input.setupDone
-  if (typeof input.voiceoverKey === 'string') clean.voiceoverKey = input.voiceoverKey.trim()
+  // API keys are short. A very long string is a mistake, so it's ignored.
+  if (typeof input.voiceoverKey === 'string' && input.voiceoverKey.length <= 500) {
+    clean.voiceoverKey = input.voiceoverKey.trim()
+  }
   return clean
 }
 
@@ -100,7 +103,8 @@ async function writeFile(settings: Settings): Promise<void> {
   await fs.rename(temp, target)
 }
 
-export async function saveSettings(changes: Partial<Settings>): Promise<Settings> {
+// The changes come straight from the page, so cleanChanges checks them first
+export async function saveSettings(changes: unknown): Promise<Settings> {
   const run = async (): Promise<Settings> => {
     const current = await getSettings()
     const next: Settings = { ...current, ...cleanChanges(changes) }
