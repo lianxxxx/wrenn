@@ -1,7 +1,7 @@
 // The time-left math for the progress screen. Plain functions, no app window.
 
 import { expect, test } from '@playwright/test'
-import { addRun, averageTimes, DEFAULT_TIMES, estimate, KEEP_RUNS, partLeft } from '../src/main/eta'
+import { addRun, averageTimes, DEFAULT_TIMES, estimate, KEEP_RUNS, partLeft, SONG_EXTRA_SECONDS } from '../src/main/eta'
 import { steadyProgress, timeLeftText } from '../src/renderer/src/timeLeft'
 
 const times = { claude: 300, render: 100, sound: 20 }
@@ -13,6 +13,21 @@ test('averages past runs, or uses the first-time guess', () => {
     { claude: 400, render: 120, sound: 30 }
   ]
   expect(averageTimes(runs, DEFAULT_TIMES['30'])).toEqual({ claude: 300, render: 100, sound: 20 })
+})
+
+test('ElevenLabs songs are timed apart from other sound', () => {
+  const runs = [
+    // An old run from before "kind" was saved counts as other music
+    { claude: 200, render: 80, sound: 10 },
+    { claude: 400, render: 120, sound: 30, kind: 'other' as const },
+    { claude: 300, render: 100, sound: 90, kind: 'elevenlabs' as const }
+  ]
+  // Claude Code and rendering use every run
+  expect(averageTimes(runs, DEFAULT_TIMES['30'])).toEqual({ claude: 300, render: 100, sound: 20 })
+  expect(averageTimes(runs, DEFAULT_TIMES['30'], 'elevenlabs')).toEqual({ claude: 300, render: 100, sound: 90 })
+  // No song yet: the first-time guess plus a bit for the song
+  const noSong = averageTimes(runs.slice(0, 2), DEFAULT_TIMES['30'], 'elevenlabs')
+  expect(noSong.sound).toBe(DEFAULT_TIMES['30'].sound + SONG_EXTRA_SECONDS)
 })
 
 test('keeps only the newest runs', () => {

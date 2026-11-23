@@ -8,19 +8,35 @@ import { randomBytes } from 'crypto'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 
-import { addRun, averageTimes, DEFAULT_TIMES, type StageTimes, type VideoLength } from './eta'
+import {
+  addRun,
+  averageTimes,
+  DEFAULT_TIMES,
+  type PastRun,
+  type SoundKind,
+  type StageTimes,
+  type VideoLength
+} from './eta'
 
-type TimingsFile = Partial<Record<VideoLength, StageTimes[]>>
+// Each run may say which kind of music it had ("kind"). Older files don't, and still load.
+type TimingsFile = Partial<Record<VideoLength, PastRun[]>>
 
 function timingsPath(): string {
   return join(app.getPath('userData'), 'timings.json')
 }
 
 // Keep only runs that look right (the file could be edited or broken)
-function cleanRuns(value: unknown): StageTimes[] {
+function cleanRuns(value: unknown): PastRun[] {
   if (!Array.isArray(value)) return []
   const ok = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n < 24 * 3600
-  return value.filter((r) => r && ok(r.claude) && ok(r.render) && ok(r.sound)) as StageTimes[]
+  return value
+    .filter((r) => r && ok(r.claude) && ok(r.render) && ok(r.sound))
+    .map((r) => ({
+      claude: r.claude,
+      render: r.render,
+      sound: r.sound,
+      kind: r.kind === 'elevenlabs' ? 'elevenlabs' : 'other'
+    }))
 }
 
 async function readTimings(): Promise<TimingsFile> {
@@ -36,14 +52,14 @@ async function readTimings(): Promise<TimingsFile> {
   }
 }
 
-// The expected seconds for each part of a video of this length
-export async function expectedTimes(length: VideoLength): Promise<StageTimes> {
+// The expected seconds for each part of a video of this length and kind of music
+export async function expectedTimes(length: VideoLength, kind: SoundKind): Promise<StageTimes> {
   const timings = await readTimings()
-  return averageTimes(timings[length], DEFAULT_TIMES[length])
+  return averageTimes(timings[length], DEFAULT_TIMES[length], kind)
 }
 
 // Saves one finished video's times. Errors are ignored: this is only for the estimate.
-export async function recordRun(length: VideoLength, run: StageTimes): Promise<void> {
+export async function recordRun(length: VideoLength, run: PastRun): Promise<void> {
   // Each save gets its own temp file, so two videos finishing at once don't write the same one
   const target = timingsPath()
   const temp = `${target}.${randomBytes(6).toString('hex')}.tmp`

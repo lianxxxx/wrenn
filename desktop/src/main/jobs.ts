@@ -17,7 +17,7 @@ import { basename, dirname, extname, isAbsolute, join } from 'path'
 import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
-import { estimate, type EtaStage, type StageTimes } from './eta'
+import { estimate, type EtaStage, type SoundKind, type StageTimes } from './eta'
 import { addVideo, outputDir } from './library'
 import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
@@ -401,12 +401,17 @@ function finish(job: RunningJob): void {
   jobs.delete(job.id)
 }
 
+// An ElevenLabs song makes the sound part much slower, so it's timed on its own
+function soundKind(music: MusicChoice): SoundKind {
+  return music === 'elevenlabs' ? 'elevenlabs' : 'other'
+}
+
 // Saves how long each part of a finished video took, for the next time estimate
 function saveTimings(job: RunningJob): void {
   const { claude, render } = job.partTimes
   if (job.part !== 'sound' || claude === undefined || render === undefined) return
   const sound = (Date.now() - job.partStartedAt) / 1000
-  void recordRun(job.length, { claude, render, sound })
+  void recordRun(job.length, { claude, render, sound, kind: soundKind(job.music) })
 }
 
 // ---------------------------------------------------------------------------
@@ -606,7 +611,7 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     abort: new AbortController(),
     busy: false,
     length: request.length,
-    times: await expectedTimes(request.length),
+    times: await expectedTimes(request.length, soundKind(request.music)),
     startedAt: Date.now(),
     part: 'claude',
     partStartedAt: Date.now(),
