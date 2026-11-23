@@ -102,8 +102,7 @@ const jobs = new Map<string, RunningJob>()
 // ---------------------------------------------------------------------------
 
 // Where the templates live. In dev that's desktop/templates.
-// Packaging note: the built app needs electron-builder "extraResources" to copy
-// templates/ next to the app, and this should then use process.resourcesPath.
+// Packaged app: next to the app in process.resourcesPath (electron-builder "extraResources").
 export function templatesDir(): string {
   if (app.isPackaged) return join(process.resourcesPath, 'templates')
   // In dev the app folder is desktop/ with "npm run dev", but desktop/out/main when Electron
@@ -670,7 +669,6 @@ export function cancelJob(jobId: unknown): void {
   send(job, { stage: 'cancelled' })
 }
 
-// When the app quits: stop every Claude Code, timer and render. The job folders stay on disk.
 // Deletes job folders older than a week, so they don't pile up on the user's computer.
 // Only folders named like a job id, and never one that's running. Errors are ignored.
 export async function cleanOldJobs(): Promise<void> {
@@ -687,6 +685,7 @@ export async function cleanOldJobs(): Promise<void> {
   }
 }
 
+// When the app quits: stop every Claude Code, timer and render. The job folders stay on disk.
 export function stopAllJobs(): void {
   for (const job of jobs.values()) {
     job.abort.abort()

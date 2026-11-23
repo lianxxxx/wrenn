@@ -12,8 +12,6 @@ import { makeElevenLabsSong } from './elevenlabs'
 import { mixSound, videoDuration } from './mix'
 import { hashText, listSfx, listSongs, readHits } from './sounds'
 
-export { soundsDir } from './sounds'
-
 export type AddSoundOptions = {
   jobId: string
   /** The job folder (has scene/ and maybe music/own.<ext>) */

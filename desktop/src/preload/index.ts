@@ -63,7 +63,7 @@ export type JobRequest = {
 }
 
 // Sent by the main process while a video is being made
-//   waiting-for-claude -> the job folder is ready, Claude Code is open, waiting for done.json
+//   waiting-for-claude -> the job folder is ready, Claude Code works in the background, waiting for done.json
 //   rendering          -> turning the scene into an MP4 (frame / total)
 //   adding-sound       -> mixing the music and sound effects into the MP4 (message may say e.g. "Making your song")
 //   done               -> finished, video is set
@@ -104,7 +104,7 @@ const api = {
   // Every video in Videos\Wrenn, newest first
   listVideos: (): Promise<VideoInfo[]> => ipcRenderer.invoke('list-videos'),
 
-  // Makes the job folder, opens Claude Code in it, and starts waiting for it
+  // Makes the job folder, runs Claude Code in it in the background, and starts waiting for it
   startJob: (request: JobRequest): Promise<{ jobId: string }> => ipcRenderer.invoke('start-job', request),
   // Opens Claude Code in the job folder again (if the user closed the window)
   openClaudeInJob: (jobId: string): Promise<void> => ipcRenderer.invoke('open-claude-in-job', jobId),

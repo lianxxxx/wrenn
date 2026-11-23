@@ -2,7 +2,7 @@
 //
 // What the ffmpeg command does:
 // 1. Music: looped if it's too short, cut to the video length, made quieter,
-//    faded in (0.3 s) and out (1.5 s).
+//    with a short fade in and out (FADE_IN and FADE_OUT below).
 // 2. Each hit gets its effect, delayed so the effect's loud moment lands on the hit's time.
 // 3. The music dips a little under the effects (ducking, "sidechaincompress").
 // 4. A limiter stops anything from being too loud, then AAC audio goes into the MP4.
