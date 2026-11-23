@@ -4,6 +4,7 @@
 // and it never leaves this computer.
 
 import { app } from 'electron'
+import { randomBytes } from 'crypto'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 
@@ -43,15 +44,18 @@ export async function expectedTimes(length: VideoLength): Promise<StageTimes> {
 
 // Saves one finished video's times. Errors are ignored: this is only for the estimate.
 export async function recordRun(length: VideoLength, run: StageTimes): Promise<void> {
+  // Each save gets its own temp file, so two videos finishing at once don't write the same one
+  const target = timingsPath()
+  const temp = `${target}.${randomBytes(6).toString('hex')}.tmp`
   try {
     const timings = await readTimings()
     timings[length] = addRun(timings[length], run)
-    const target = timingsPath()
-    const temp = `${target}.tmp`
     await fs.mkdir(app.getPath('userData'), { recursive: true })
     await fs.writeFile(temp, JSON.stringify(timings, null, 2), 'utf8')
     await fs.rename(temp, target)
   } catch (error) {
     console.error('Could not save video timings:', error)
+    // Don't leave a half-written temp file behind
+    await fs.rm(temp, { force: true }).catch(() => {})
   }
 }
