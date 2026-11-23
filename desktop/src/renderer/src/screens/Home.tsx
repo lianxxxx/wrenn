@@ -57,7 +57,7 @@ export function Home({ videos, onOpenVideo, onTemplate, onEdit }: Props) {
             type="button"
             onClick={p.onClick}
             disabled={p.soon}
-            className={`group flex min-h-64 flex-col items-start justify-end rounded-lg px-[22px] py-[28px] text-left text-ink shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-transform duration-200 ease-[var(--ease-out-strong)] ${p.soon ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:rotate-0 hover:-translate-y-1 active:translate-y-0'} ${p.color} ${p.tilt}`}
+            className={`group flex min-h-64 flex-col items-start justify-end rounded-lg px-[22px] py-[28px] text-left text-ink shadow-[0_10px_30px_rgba(0,0,0,0.08)] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[var(--ease-out-strong)] ${p.soon ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:rotate-0 hover:-translate-y-1 active:translate-y-0'} ${p.color} ${p.tilt}`}
           >
             <span className="font-display text-[1.875rem] leading-[1.1]">{p.title}</span>
             <span className="mt-sm text-base leading-[1.55]">{p.text}</span>
@@ -68,7 +68,7 @@ export function Home({ videos, onOpenVideo, onTemplate, onEdit }: Props) {
             ) : (
               <span className="mt-lg inline-flex items-center gap-xs rounded-pill bg-ink px-[18px] py-[8px] font-display text-lg leading-none text-[#fff8ec]">
                 Start
-                <svg viewBox="0 0 24 24" className="size-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <svg viewBox="0 0 24 24" className="size-5 motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </span>
