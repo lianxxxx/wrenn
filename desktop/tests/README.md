@@ -40,7 +40,7 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 
 `eta.spec.ts` (the time left, no window)
 
-- **Progress math.** The guess per part comes from past videos (or a first-time guess), a part that runs long never says zero, rendering uses the real frame speed, the screen never steps back, and the time left reads as "About 3 min left" or "Almost done".
+- **Progress math.** The guess per part comes from past videos (or a first-time guess), ElevenLabs songs are timed apart from other music, a part that runs long never says zero, rendering uses the real frame speed, the screen never steps back, and the time left reads as "About 3 min left" or "Almost done".
 
 `sound.spec.ts` (the sound engine, no window)
 
