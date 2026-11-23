@@ -55,3 +55,28 @@ The guides give advice, not orders. When a guide disagrees with `DESIGN.md`, `DE
 - **One-at-a-time FAQ (`name` on `details`).** The guide itself says to avoid it: people sometimes want two answers open.
 - **Moving the FAQ arrow next to the question.** The guide prefers that, but it changes the look. That's a design choice for Lian.
 - **Custom focus rings.** The site uses the browser's default focus ring, which already only shows for keyboard users. A branded ring is a design choice for later.
+
+## Desktop app
+
+The same pass on the Wrenn app (`desktop/src/renderer/`). The app only runs inside Electron's own Chromium, so we can use new CSS without worrying about other browsers. We still respect reduced motion.
+
+The scan only flagged the dark mode toggle. The rest we found by reading the code.
+
+| What | Old way | New way | Why | Guide id |
+|---|---|---|---|---|
+| Dark mode and the browser | Our colors changed, but scrollbars and form parts stayed light in dark mode. | `color-scheme: light` on `:root`, `color-scheme: dark` on `:root.dark` (in `main.css`). | Same fix as the landing page. Chromium's own parts now match the theme. | `dark-mode-toggle` |
+| Heading and paragraph line breaks | A heading or paragraph could end with one lonely word. | `text-wrap: balance` on `h1` to `h3`, `text-wrap: pretty` on `p` and `li`. | Even lines, no lonely last word. No JS. | `improve-text-layout-and-legibility` |
+| "Making your video" updates for screen readers | The active step line was a live region. Its text changes every second (frame count), so a screen reader kept reading numbers. | One hidden `role="status"` line that only says the step name ("Building your scenes", and so on). | Screen readers hear it only when the step changes. The bar still has its full value for anyone who asks. | `accessibility`, `progress` |
+| The "What does it do?" box | Fixed at 3 rows. Longer text meant scrolling or dragging the corner. | `field-sizing: content`, with `min-height: 3lh` and `max-height: 10lh`. | The box grows as you type, then scrolls after 10 lines. No JS. | `form-fields-automatically-fit-contents` |
+| Reduced motion | The toggle knob, home cards, card arrow and the edit options arrow still slid with reduced motion on. | Their transitions now use Tailwind's `motion-safe:`. | With motion off they snap into place, like the rest of the app. | `accessibility` |
+
+### Where we didn't follow the guide
+
+- **Dark mode default.** Same as the landing page: the guide says follow the device setting and use `<meta name="color-scheme">`. `DESIGN.md` says light by default with a manual switch, so we only added `color-scheme` to the CSS.
+
+### What we skipped, and why
+
+- **`:user-invalid` styling.** No field uses the browser's own checks (`required`, `pattern`). The API key warning is our own message, so there's nothing for `:user-invalid` to catch yet.
+- **Native `<dialog>` or `popover`.** The app has no custom modals or popups to swap out.
+- **Focus rings.** Already done: one `:focus-visible` ring in the brand teal.
+- **The fake edit progress screen.** It's a placeholder (the edit path isn't built), so we left its live region alone.
