@@ -238,6 +238,35 @@ async function copyAssets(files: JobRequest['files'], assetsDir: string): Promis
   }
 }
 
+// Fills a new job folder: the template, the user's files in assets/, their song (if any)
+// and brief.json. Returns where the user's own song went, if they picked one.
+async function makeJobFolder(request: JobRequest, dir: string): Promise<string | undefined> {
+  await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
+  const assetsDir = join(dir, 'assets')
+  await mkdir(assetsDir, { recursive: true })
+  await copyAssets(request.files, assetsDir)
+
+  // The user's own song goes in music/, not assets/, so Claude Code doesn't treat it as a picture
+  let ownSongFile: string | undefined
+  if (request.music === 'own' && request.musicFile) {
+    await mkdir(join(dir, 'music'), { recursive: true })
+    ownSongFile = join(dir, 'music', `own${extname(request.musicFile).toLowerCase()}`)
+    await copyFile(request.musicFile, ownSongFile)
+  }
+
+  const brief = {
+    brandName: request.brandName,
+    endingText: request.endingText,
+    // Left out when empty, so Claude Code only sees it when there's something to read
+    ...(request.about ? { about: request.about } : {}),
+    size: request.size,
+    length: request.length,
+    vibe: request.vibe
+  }
+  await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+  return ownSongFile
+}
+
 // ---------------------------------------------------------------------------
 // Opening Claude Code
 // ---------------------------------------------------------------------------
@@ -456,6 +485,51 @@ async function moveFile(from: string, to: string): Promise<void> {
   }
 }
 
+// Renders the job's scene/index.html to outFile. Sends about 10 progress updates a second.
+async function renderJob(job: RunningJob, outFile: string): Promise<void> {
+  let lastSent = 0
+  send(job, { stage: 'rendering', frame: 0 })
+  await renderScene({
+    sceneDir: join(job.dir, 'scene'),
+    outFile,
+    signal: job.abort.signal,
+    onProgress: (frame, total) => {
+      const now = Date.now()
+      if (now - lastSent >= PROGRESS_EVERY_MS || frame === total) {
+        lastSent = now
+        send(job, { stage: 'rendering', frame, total })
+      }
+    }
+  })
+}
+
+// Music and sound effects. Sound is a bonus: if the mix fails we keep the silent video.
+// Returns a short note for the Done screen if the sound didn't go as picked.
+// Never throws: after a cancel it just returns, and the caller checks the cancel.
+async function addJobSound(job: RunningJob, videoFile: string): Promise<string | undefined> {
+  const message =
+    job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
+  send(job, { stage: 'adding-sound', message })
+  try {
+    const sound = await addSound({
+      jobId: job.id,
+      jobDir: job.dir,
+      videoFile,
+      music: job.music,
+      vibe: job.vibe,
+      duration: job.duration,
+      ownSongFile: job.ownSongFile,
+      signal: job.abort.signal
+    })
+    return sound.note
+  } catch (error) {
+    if (job.abort.signal.aborted) return undefined
+    console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
+    return "Wrenn couldn't add the sound this time, so your video is silent."
+  }
+}
+
+// Called every 2 seconds. Once done.json is there: render, add sound, save to the library.
 async function checkForDone(job: RunningJob): Promise<void> {
   const doneFile = join(job.dir, 'done.json')
   if (job.busy || !existsSync(doneFile)) return
@@ -489,47 +563,10 @@ async function checkForDone(job: RunningJob): Promise<void> {
   // Render inside the job folder first, then move the finished file to Videos\Wrenn.
   // That way the library never sees a half-written video.
   const tempFile = join(job.dir, 'video.mp4')
-  let lastSent = 0
   try {
-    send(job, { stage: 'rendering', frame: 0 })
-    await renderScene({
-      sceneDir: join(job.dir, 'scene'),
-      outFile: tempFile,
-      signal: job.abort.signal,
-      onProgress: (frame, total) => {
-        const now = Date.now()
-        if (now - lastSent >= PROGRESS_EVERY_MS || frame === total) {
-          lastSent = now
-          send(job, { stage: 'rendering', frame, total })
-        }
-      }
-    })
-
-    // Music and sound effects. Sound is a bonus: if the mix fails we keep the silent video.
-    // A cancel still stops everything (addSound throws, and the check below catches it too).
-    const message =
-      job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
-    send(job, { stage: 'adding-sound', message })
-    // A short note for the Done screen if the sound didn't go as picked
-    let soundNote: string | undefined
-    try {
-      const sound = await addSound({
-        jobId: job.id,
-        jobDir: job.dir,
-        videoFile: tempFile,
-        music: job.music,
-        vibe: job.vibe,
-        duration: job.duration,
-        ownSongFile: job.ownSongFile,
-        signal: job.abort.signal
-      })
-      soundNote = sound.note
-    } catch (error) {
-      if (!job.abort.signal.aborted) {
-        console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
-        soundNote = "Wrenn couldn't add the sound this time, so your video is silent."
-      }
-    }
+    await renderJob(job, tempFile)
+    const soundNote = await addJobSound(job, tempFile)
+    // A cancel during the sound stops everything (addJobSound doesn't throw for it)
     if (job.abort.signal.aborted) throw new Error('Cancelled')
 
     const filePath = join(outputDir(), videoFileName(job.brandName))
@@ -572,28 +609,7 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
   const dir = join(jobsDir(), id)
   let ownSongFile: string | undefined
   try {
-    await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
-    const assetsDir = join(dir, 'assets')
-    await mkdir(assetsDir, { recursive: true })
-    await copyAssets(request.files, assetsDir)
-
-    // The user's own song goes in music/, not assets/, so Claude Code doesn't treat it as a picture
-    if (request.music === 'own' && request.musicFile) {
-      await mkdir(join(dir, 'music'), { recursive: true })
-      ownSongFile = join(dir, 'music', `own${extname(request.musicFile).toLowerCase()}`)
-      await copyFile(request.musicFile, ownSongFile)
-    }
-
-    const brief = {
-      brandName: request.brandName,
-      endingText: request.endingText,
-      // Left out when empty, so Claude Code only sees it when there's something to read
-      ...(request.about ? { about: request.about } : {}),
-      size: request.size,
-      length: request.length,
-      vibe: request.vibe
-    }
-    await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+    ownSongFile = await makeJobFolder(request, dir)
   } catch (error) {
     // Don't leave a half-made folder behind
     console.error('Could not make the job folder:', error)
