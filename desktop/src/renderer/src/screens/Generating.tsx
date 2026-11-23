@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
 import { ProgressBar } from '../components/ProgressBar'
-import { Spinner } from '../components/Spinner'
+import { CheckIcon, Spinner } from '../components/Spinner'
 import type { JobEvent } from '../data'
 import { steadyProgress, timeLeftText, type ShownProgress } from '../timeLeft'
 
@@ -124,9 +124,7 @@ function Step({ active, done, title, text }: { active: boolean; done: boolean; t
           <Spinner className="size-8" />
         ) : done ? (
           <span className="flex size-8 items-center justify-center rounded-full bg-lime text-ink" aria-hidden>
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12.5l4.5 4.5L19 7.5" />
-            </svg>
+            <CheckIcon className="size-5" />
           </span>
         ) : (
           <span className="size-3 rounded-full bg-line" aria-hidden />
