@@ -4,6 +4,7 @@ import { ScreenTitle } from '../components/ScreenTitle'
 import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
 import type { TemplateDraft } from '../data'
+import { MAX_ABOUT } from '../../../shared/limits'
 
 type Props = {
   draft: TemplateDraft
@@ -42,7 +43,7 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           label="What does it do? (optional)"
           hint="One or two sentences. Helps Wrenn show the right things."
           placeholder="e.g. Turns your app screenshots into short videos for social media."
-          maxLength={300}
+          maxLength={MAX_ABOUT}
           value={draft.about}
           onChange={(e) => onChange({ about: e.target.value })}
         />

@@ -23,14 +23,14 @@ import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
+// "What does it do?" can be a bit longer than the other text: one or two sentences
+import { MAX_ABOUT } from '../shared/limits'
 
 const isWindows = process.platform === 'win32'
 
 // Limits for what the page may send us
 const MAX_FILES = 25
 const MAX_TEXT = 200
-// "What does it do?" can be a bit longer: one or two sentences
-const MAX_ABOUT = 300
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
 const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
