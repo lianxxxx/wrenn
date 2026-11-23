@@ -3,7 +3,7 @@
 // Each test cancels its job, which stops the fake.
 
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { existsSync, readdirSync, readFileSync } from 'fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { launchApp, makeFontFile, makePicture, makeTempDirs, removeTempDirs, seedSettings, stopFakeClaude, type TestDirs } from './helpers'
 
@@ -91,6 +91,78 @@ test('brief.json gets "What does it do?" trimmed, and leaves it out when empty',
   expect(readBrief(blank.jobId)).not.toHaveProperty('about')
   const missing = await startAndCancel({})
   expect(readBrief(missing.jobId)).not.toHaveProperty('about')
+})
+
+// The first time left for a 15 second video, from timings.json (see main/timings.ts).
+// It's sent right as the job starts, so it can be a second or so under the full guess.
+async function firstSecondsLeft(): Promise<number> {
+  const { event } = await startAndCancel({ length: '15' })
+  return event.secondsLeft!
+}
+
+function writeTimings(text: string): void {
+  writeFileSync(join(dirs.userData, 'timings.json'), text, 'utf8')
+}
+
+// The first-time guess for 15 seconds: 240 + 60 + 20, plus 2 to save the file
+const FIRST_TIME_15 = 322
+
+test('timings.json: none yet, or broken, uses the first-time guess', async () => {
+  expect(await firstSecondsLeft()).toBeGreaterThanOrEqual(FIRST_TIME_15 - 2)
+  expect(await firstSecondsLeft()).toBeLessThanOrEqual(FIRST_TIME_15)
+
+  writeTimings('{ this is not json')
+  const broken = await firstSecondsLeft()
+  expect(broken).toBeGreaterThanOrEqual(FIRST_TIME_15 - 2)
+  expect(broken).toBeLessThanOrEqual(FIRST_TIME_15)
+
+  // Valid JSON, but the wrong shape
+  writeTimings(JSON.stringify({ '15': 'nonsense', '30': [{ claude: 'slow' }] }))
+  const wrongShape = await firstSecondsLeft()
+  expect(wrongShape).toBeGreaterThanOrEqual(FIRST_TIME_15 - 2)
+  expect(wrongShape).toBeLessThanOrEqual(FIRST_TIME_15)
+})
+
+test('timings.json: an older file without the music kind still loads', async () => {
+  writeTimings(
+    JSON.stringify({
+      '15': [
+        // From before "kind" was saved: counts as Wrenn's music
+        { claude: 60, render: 30, sound: 10 },
+        // An ElevenLabs song: its slow sound part doesn't count for other music
+        { claude: 60, render: 30, sound: 500, kind: 'elevenlabs' },
+        // A broken run is skipped
+        { claude: -1, render: 30, sound: 10 }
+      ]
+    })
+  )
+  // 60 + 30 + 10, plus 2 to save the file
+  const left = await firstSecondsLeft()
+  expect(left).toBeGreaterThanOrEqual(100)
+  expect(left).toBeLessThanOrEqual(102)
+})
+
+test('"Making your video" shows a progress bar screen readers can follow', async () => {
+  await page.getByRole('button', { name: /Make from a template/ }).click()
+  await page.getByRole('button', { name: /Feature walkthrough/ }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByLabel('Brand name').fill('Test Brand')
+  await page.locator('input[type="file"][accept="image/*"]').first().setInputFiles(picture)
+  await page.getByRole('button', { name: 'Make my video' }).click()
+
+  const bar = page.getByRole('progressbar', { name: 'Making your video' })
+  await expect(bar).toBeVisible()
+  await expect(bar).toHaveAttribute('aria-valuemin', '0')
+  await expect(bar).toHaveAttribute('aria-valuemax', '100')
+  await expect(bar).toHaveAttribute('aria-valuenow', /^\d{1,2}$/)
+  // The default 30 second video, first time: 360 + 120 + 25 + 2 seconds is about 8 min
+  await expect(page.getByText('About 8 min left')).toBeVisible()
+  await expect(bar).toHaveAttribute('aria-valuetext', /^\d{1,2}%, about 8 min left$/)
+  // Screen readers hear the step, not the numbers that change every second
+  await expect(page.getByRole('status')).toHaveText('Building your scenes')
+
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
 })
 
 test('from the upload screen: the about text and fonts reach the job folder', async () => {
