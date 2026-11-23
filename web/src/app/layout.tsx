@@ -30,6 +30,20 @@ const loaderDots = ["bg-teal", "bg-lime", "bg-lemon", "bg-orange", "bg-red"];
 export const metadata: Metadata = {
   title: "Wrenn",
   description: "No prompts. Just render.",
+  // Link previews (Facebook, X, Slack, Discord...). No preview image yet: add
+  // openGraph.images and metadataBase once there's a share image and a domain.
+  openGraph: {
+    title: "Wrenn",
+    description: "No prompts. Just render.",
+    siteName: "Wrenn",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: "Wrenn",
+    description: "No prompts. Just render.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
