@@ -244,10 +244,16 @@ async function copyAssets(files: JobRequest['files'], assetsDir: string): Promis
 // Opening Claude Code
 // ---------------------------------------------------------------------------
 
-// Opens a new, visible console window in the job folder with Claude Code running.
-async function openClaudeConsole(jobDir: string): Promise<void> {
+// The command that starts Claude Code, or a plain error the screen can show
+async function requireClaude(): Promise<string> {
   const claude = await findClaude()
   if (!claude) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  return claude
+}
+
+// Opens a new, visible console window in the job folder with Claude Code running.
+async function openClaudeConsole(jobDir: string): Promise<void> {
+  const claude = await requireClaude()
 
   if (isWindows) {
     // "start" opens a new console window. We build the command line ourselves
@@ -283,8 +289,7 @@ function activityFor(tool: string): string | undefined {
 // Runs the user's own Claude Code in the background in the job folder.
 // It streams JSON lines, which we only use to show what it's doing.
 async function runClaude(job: RunningJob): Promise<void> {
-  const claude = await findClaude()
-  if (!claude) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  const claude = await requireClaude()
 
   // Windows needs a shell because npm installs Claude Code as "claude.cmd".
   // Every part is fixed text (no user input), so building the line ourselves is safe.
@@ -563,7 +568,7 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
   const request = await checkRequest(input)
 
   // Check for Claude Code before making any folders
-  if (!(await findClaude())) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  await requireClaude()
 
   const id = newJobId()
   const dir = join(jobsDir(), id)
