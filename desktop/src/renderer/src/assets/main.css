@@ -39,6 +39,26 @@
   --color-ink: #023047;
 }
 
+/* Tell Chromium which theme we're in, so scrollbars and form parts match.
+   Light by default, dark only with the "dark" class (DESIGN.md). */
+:root {
+  color-scheme: light;
+}
+:root.dark {
+  color-scheme: dark;
+}
+
+/* Headings break into even lines, paragraphs avoid one lonely last word */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p,
+li {
+  text-wrap: pretty;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-navy);
