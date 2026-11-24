@@ -106,7 +106,9 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [x] Download button points to latest GitHub Release (`web/src/lib/links.ts`, installer is always `Wrenn-Setup.exe`)
 - [x] README: setup guide, screenshots, credits to prompt sources, license (MIT), ElevenLabs terms note
 
-## Phase 7: Launch
+## Phase 7: Launch (optional, when ready)
+
+Lian (2026-11-24): no big launch for now. Let people find it through SEO (Google Search Console + the sitemap). If people find it, great; either way it goes on her CV and portfolio as a side project. The steps below are for later, if she wants to.
 
 - [ ] Make the launch video WITH Wrenn (dogfooding)
 - [x] Make repo public
