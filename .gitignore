@@ -32,6 +32,8 @@ inspo/
 
 # Render output
 *.mp4
+# ...except the landing page demo videos (Safari plays the MP4s)
+!web/public/demo/*.mp4
 
 # Testing
 coverage/
