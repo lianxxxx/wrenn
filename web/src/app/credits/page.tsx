@@ -116,6 +116,11 @@ export default function CreditsPage() {
         <li>React and Tailwind CSS, in the app and on this website (MIT License).</li>
         <li>Next.js, for this website (MIT License).</li>
         <li>Playwright, for testing (Apache License 2.0).</li>
+        <li>
+          The iPhone and MacBook mockups on this website are by{" "}
+          <a href="https://www.webmobilefirst.com/">Mobile FIRST</a>. Apple, iPhone and MacBook are trademarks of
+          Apple Inc. Wrenn isn&apos;t made or endorsed by Apple.
+        </li>
       </ul>
 
       <h2>Inspiration</h2>
