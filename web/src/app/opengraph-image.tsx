@@ -16,6 +16,43 @@ const TEAL = "#219EBC";
 const PAGE = "#FCFCFA";
 const SKY_SOFT = "#DCEFF8";
 
+// The hero's cloud shape (hero.tsx), as an inline SVG
+function Cloud({ width, style }: { width: number; style: React.CSSProperties }) {
+  return (
+    <svg width={width} height={width / 2} viewBox="0 0 140 70" style={{ position: "absolute", ...style }}>
+      <path d="M20 60 a20 20 0 0 1 4-38 a28 28 0 0 1 52-8 a22 22 0 0 1 40 14 a18 18 0 0 1 4 32 z" fill={SKY_SOFT} />
+    </svg>
+  );
+}
+
+// The site roughens its highlight blobs with an SVG noise filter, which the image tool
+// can't run. So the edge is drawn instead: an oval with small bumps along it, from fixed
+// numbers (no randomness), so the picture is the same on every build.
+function roughBlobPath(w: number, h: number): string {
+  const points = 96;
+  const cx = w / 2;
+  const cy = h / 2;
+  const pts: [number, number][] = [];
+  for (let i = 0; i < points; i++) {
+    const a = (i / points) * Math.PI * 2;
+    // Two waves of different sizes make the edge look painted, not wavy
+    const wobble = 1 + 0.03 * Math.sin(a * 3 + 1.3) + 0.012 * Math.sin(a * 11 + 0.4) + 0.008 * Math.sin(a * 29);
+    // A slightly squarer oval than an ellipse, like a marker stroke
+    const x = cx + Math.sign(Math.cos(a)) * Math.pow(Math.abs(Math.cos(a)), 0.92) * (w / 2) * wobble;
+    const y = cy + Math.sign(Math.sin(a)) * Math.pow(Math.abs(Math.sin(a)), 0.92) * (h / 2) * wobble;
+    pts.push([x, y]);
+  }
+  // Smooth curve through the points (each point is a control point, midpoints are on the curve)
+  const mid = (p: [number, number], q: [number, number]) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+  let d = `M ${mid(pts[points - 1], pts[0]).join(" ")}`;
+  for (let i = 0; i < points; i++) {
+    const p = pts[i];
+    const m = mid(p, pts[(i + 1) % points]);
+    d += ` Q ${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
+  }
+  return `${d} Z`;
+}
+
 // Reads the fonts and images in a cached step, so the picture is made once at build time
 // instead of on every share. Fixed paths (not a variable), so only these files get bundled.
 // Returns plain base64 text, since the cache can't hold file buffers.
@@ -40,8 +77,8 @@ export default async function Image() {
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: PAGE, padding: "56px 72px", position: "relative", fontFamily: "Figtree" }}>
         {/* Soft clouds, like the hero */}
-        <div style={{ position: "absolute", top: 70, right: 120, width: 220, height: 90, borderRadius: 60, background: SKY_SOFT }} />
-        <div style={{ position: "absolute", bottom: 48, right: 300, width: 160, height: 64, borderRadius: 50, background: SKY_SOFT }} />
+        <Cloud width={210} style={{ top: 48, right: 110 }} />
+        <Cloud width={150} style={{ bottom: 30, right: 300 }} />
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logo} width={216} height={72} alt="" style={{ objectFit: "contain" }} />
@@ -51,8 +88,11 @@ export default async function Image() {
             <div style={{ display: "flex" }}>No prompts.</div>
             <div style={{ display: "flex", alignItems: "center" }}>
               Just
-              <div style={{ display: "flex", marginLeft: 28, padding: "0 36px 10px", borderRadius: "48% 42% 46% 40% / 55% 50% 52% 48%", background: TEAL, color: "#FFFFFF", transform: "rotate(-1.5deg)" }}>
-                render.
+              <div style={{ display: "flex", position: "relative", marginLeft: 22, width: 380, height: 150, alignItems: "center", justifyContent: "center", color: "#FFFFFF", transform: "rotate(-1.5deg)" }}>
+                <svg width={380} height={150} viewBox="0 0 380 150" style={{ position: "absolute", top: 0, left: 0 }}>
+                  <path d={roughBlobPath(380, 150)} fill={TEAL} />
+                </svg>
+                <div style={{ display: "flex", marginTop: -12 }}>render.</div>
               </div>
             </div>
             <div style={{ display: "flex", marginTop: 34, fontFamily: "Figtree", fontSize: 32, color: "#2A4A5A" }}>
