@@ -8,10 +8,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteNav() {
   return (
-    <header className="relative z-20 flex w-full items-start justify-between gap-sm pl-md md:pl-2xl">
+    <header className="relative z-20 flex w-full items-start justify-between gap-sm pl-sm min-[375px]:pl-md md:pl-2xl">
       <a href="#" className="shrink-0 pt-sm">
         {/* Draft PNG from brand/logo/, swap for the SVG once it's traced */}
-        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} sizes="144px" loading="eager" className="h-9 w-auto sm:h-12 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
+        <Image src="/wrenn-logo.png" alt="Wrenn" width={2172} height={724} sizes="144px" loading="eager" className="h-8 w-auto min-[375px]:h-9 sm:h-12 dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
       </a>
 
       <nav className="relative isolate">
@@ -20,7 +20,7 @@ export function SiteNav() {
           viewBox="0 0 220 115"
           preserveAspectRatio="none"
           aria-hidden
-          className="absolute inset-0 -z-10 h-full w-full text-bg sm:hidden"
+          className="absolute inset-0 -z-10 h-full w-full text-sky-soft sm:hidden"
         >
           <path
             d="M0 0 H220 V40 A28 28 0 0 1 185 70 A32 32 0 0 1 135 88 A30 30 0 0 1 88 90 A28 28 0 0 1 45 72 A25 25 0 0 1 14 42 A20 20 0 0 1 0 10 Z"
@@ -32,14 +32,14 @@ export function SiteNav() {
           viewBox="0 0 600 175"
           preserveAspectRatio="none"
           aria-hidden
-          className="absolute inset-0 -z-10 hidden h-full w-full text-bg sm:block"
+          className="absolute inset-0 -z-10 hidden h-full w-full text-sky-soft sm:block"
         >
           <path
             d="M0 0 H600 V70 A75 75 0 0 1 470 110 A85 85 0 0 1 320 125 A80 80 0 0 1 180 110 A72 72 0 0 1 60 70 A55 55 0 0 1 0 0 Z"
             fill="currentColor"
           />
         </svg>
-        <div className="relative flex items-center gap-lg pb-[2.75rem] pl-[2.75rem] pr-md pt-md text-navy sm:pb-[4.5rem] sm:pl-[5.5rem] sm:pr-xl sm:pt-lg">
+        <div className="relative flex items-center gap-sm pb-[2.75rem] pl-[1.75rem] pr-sm pt-md text-navy min-[375px]:gap-lg min-[375px]:pl-[2.75rem] min-[375px]:pr-md sm:gap-md sm:pb-[4.5rem] sm:pl-[3.5rem] sm:pr-lg sm:pt-lg md:gap-lg md:pl-[5.5rem] md:pr-xl">
           <NavLinks />
           <ThemeToggle />
           <a

@@ -105,7 +105,7 @@ export function NavLinks() {
   const [intro, setIntro] = useState(true);
 
   return (
-    <ul className="hidden items-center gap-lg sm:flex">
+    <ul className="hidden items-center gap-md sm:flex md:gap-lg">
       {links.map((link) => (
         <li key={link.label}>
           <a
@@ -116,7 +116,7 @@ export function NavLinks() {
               setIntro(false);
             }}
             aria-current={active === link.href ? "page" : undefined}
-            className="relative text-[0.9375rem] font-semibold"
+            className="relative whitespace-nowrap text-[0.9375rem] font-semibold"
           >
             {link.label}
             {active === link.href && <HandDrawnCircle intro={intro} />}
