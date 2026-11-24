@@ -214,3 +214,77 @@ html.js:not(.loaded) .page-loader {
     animation-delay: var(--reveal-delay, 0ms);
   }
 }
+
+/* Theme switch: "night falls" (Wrenn's own, not the usual circle reveal).
+   The new theme comes in like a curtain with a row of cloud bumps on its edge:
+   down from the top when it gets dark, up from the bottom when it gets light.
+   ThemeToggle sets data-theme-to on <html> and wraps the switch in a view transition.
+   --curtain is a registered property so the mask can animate smoothly. */
+@property --curtain {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes curtain {
+  from {
+    --curtain: -120px;
+  }
+  to {
+    --curtain: calc(100vh + 120px);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Big bumps plus a row of smaller ones in between, so the edge looks like clouds, not a zigzag */
+html[data-theme-to="dark"]::view-transition-new(root) {
+  mask-image:
+    linear-gradient(#000 0 0),
+    radial-gradient(circle 60px at 50% 0, #000 98%, transparent 100%),
+    radial-gradient(circle 38px at 50% 0, #000 98%, transparent 100%);
+  mask-size:
+    100% max(0px, var(--curtain)),
+    150px 60px,
+    150px 38px;
+  mask-position:
+    0 0,
+    0 var(--curtain),
+    75px var(--curtain);
+  mask-repeat: no-repeat, repeat-x, repeat-x;
+  animation: curtain 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+html[data-theme-to="light"]::view-transition-new(root) {
+  mask-image:
+    linear-gradient(#000 0 0),
+    radial-gradient(circle 60px at 50% 100%, #000 98%, transparent 100%),
+    radial-gradient(circle 38px at 50% 100%, #000 98%, transparent 100%);
+  mask-size:
+    100% max(0px, var(--curtain)),
+    150px 60px,
+    150px 38px;
+  mask-position:
+    0 100%,
+    left 0 bottom var(--curtain),
+    left 75px bottom var(--curtain);
+  mask-repeat: no-repeat, repeat-x, repeat-x;
+  animation: curtain 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+/* The toggle icon spins in when it changes */
+@keyframes theme-icon-in {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .theme-icon {
+    animation: theme-icon-in 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}

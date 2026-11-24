@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
 import { ProgressBar } from '../components/ProgressBar'
-import { Spinner } from '../components/Spinner'
+import { CheckIcon, Spinner } from '../components/Spinner'
 import type { JobEvent } from '../data'
 import { steadyProgress, timeLeftText, type ShownProgress } from '../timeLeft'
 
@@ -52,6 +52,8 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
     rendering && event.total ? Math.min(100, Math.round(((event.frame ?? 0) / event.total) * 100)) : 0
   const overall = Math.round(next.percent)
   const timeLeft = timeLeftText(next.secondsLeft)
+  // Screen readers hear only when the step changes, not the numbers that tick every second
+  const stepNow = building ? 'Building your scenes' : rendering ? 'Putting your video together' : 'Adding music and sound'
 
   return (
     <div className="mx-auto w-full max-w-[640px]">
@@ -77,12 +79,15 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
         </div>
       </div>
 
+      <p className="sr-only" role="status">
+        {stepNow}
+      </p>
+
       <div className="mt-lg rounded-lg border-2 border-line bg-card p-lg">
         <Step
           active={building}
           done={!building}
           title="Building your scenes"
-          // Screen readers hear what Claude Code is doing as it changes
           text={building ? `${event.message || 'Getting started'}...` : 'Done'}
         />
         <div className="my-md border-t-2 border-line" />
@@ -113,15 +118,13 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
 // One line of progress: a spinner while it runs, a check when it's done, a dot while it waits
 function Step({ active, done, title, text }: { active: boolean; done: boolean; title: string; text: string }) {
   return (
-    <div className="flex items-center gap-md" aria-live={active ? 'polite' : undefined}>
+    <div className="flex items-center gap-md">
       <span className="flex size-10 shrink-0 items-center justify-center">
         {active ? (
           <Spinner className="size-8" />
         ) : done ? (
           <span className="flex size-8 items-center justify-center rounded-full bg-lime text-ink" aria-hidden>
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12.5l4.5 4.5L19 7.5" />
-            </svg>
+            <CheckIcon className="size-5" />
           </span>
         ) : (
           <span className="size-3 rounded-full bg-line" aria-hidden />

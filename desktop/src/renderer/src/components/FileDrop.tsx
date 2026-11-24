@@ -23,8 +23,8 @@ function matches(file: File, accept: string): boolean {
   })
 }
 
-// Drop files on the box, or click Browse. Files only stay in memory for now:
-// nothing is copied or saved yet.
+// Drop files on the box, or click Browse. The screen only keeps the picked files:
+// the main process copies them into the job folder when the video starts.
 export function FileDrop({ label, hint, accept, multiple = false, files, onFiles, big = false, typeHint }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)

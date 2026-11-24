@@ -11,6 +11,8 @@ import { existsSync } from 'fs'
 import { readdir, readFile } from 'fs/promises'
 import { dirname, extname, join } from 'path'
 
+import { AUDIO_EXTS } from '../../shared/limits'
+
 // The kinds of sound effects a scene may ask for
 export const SFX_TYPES = ['pop', 'whoosh', 'click', 'impact', 'riser'] as const
 export type SfxType = (typeof SFX_TYPES)[number]
@@ -22,7 +24,6 @@ export type Hit = { t: number; type: SfxType }
 export type SfxFile = { path: string; type: SfxType; hit: number; length?: number }
 
 const MAX_HITS = 60
-export const AUDIO_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
 
 // The folder that holds music/ and sfx/.
 // Packaged app: next to the app in process.resourcesPath (electron-builder "extraResources").

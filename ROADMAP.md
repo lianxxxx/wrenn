@@ -90,8 +90,8 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 ## Phase 5: Test
 
-- [ ] Make 3 real videos with it (Trackr, Beavr, one more)
-- [ ] Replace the landing page placeholders with real Wrenn output: hero visual (gallery idea, inspo 11), the sample video, the "your photos" frame, the 4 size frames, and the demo video
+- [ ] Make 3 real videos with it (Trackr done 2026-11-20, G-Track done 2026-11-24, one more)
+- [ ] Replace the landing page placeholders with real Wrenn output: hero visual (gallery idea, inspo 11), the demo video. Done 2026-11-24: "From photos to video" plays the G-Track and Trackr videos in iPhone and MacBook mockups; the 4 size frames are labeled outlines
 - [ ] Test on a fresh Windows laptop (no Node, no dev tools)
 - [ ] Ask 2 to 3 non-techy friends to try it, watch where they get stuck
 - [ ] Fix the top issues

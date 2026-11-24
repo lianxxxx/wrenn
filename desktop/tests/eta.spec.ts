@@ -1,8 +1,8 @@
 // The time-left math for the progress screen. Plain functions, no app window.
 
 import { expect, test } from '@playwright/test'
-import { addRun, averageTimes, DEFAULT_TIMES, estimate, KEEP_RUNS, partLeft } from '../src/main/eta'
-import { steadyProgress, timeLeftText } from '../src/renderer/src/timeLeft'
+import { addRun, averageTimes, DEFAULT_TIMES, estimate, KEEP_RUNS, partLeft, SONG_EXTRA_SECONDS } from '../src/main/eta'
+import { steadyProgress, timeLeftText, type ShownProgress } from '../src/renderer/src/timeLeft'
 
 const times = { claude: 300, render: 100, sound: 20 }
 
@@ -13,6 +13,21 @@ test('averages past runs, or uses the first-time guess', () => {
     { claude: 400, render: 120, sound: 30 }
   ]
   expect(averageTimes(runs, DEFAULT_TIMES['30'])).toEqual({ claude: 300, render: 100, sound: 20 })
+})
+
+test('ElevenLabs songs are timed apart from other sound', () => {
+  const runs = [
+    // An old run from before "kind" was saved counts as other music
+    { claude: 200, render: 80, sound: 10 },
+    { claude: 400, render: 120, sound: 30, kind: 'other' as const },
+    { claude: 300, render: 100, sound: 90, kind: 'elevenlabs' as const }
+  ]
+  // Claude Code and rendering use every run
+  expect(averageTimes(runs, DEFAULT_TIMES['30'])).toEqual({ claude: 300, render: 100, sound: 20 })
+  expect(averageTimes(runs, DEFAULT_TIMES['30'], 'elevenlabs')).toEqual({ claude: 300, render: 100, sound: 90 })
+  // No song yet: the first-time guess plus a bit for the song
+  const noSong = averageTimes(runs.slice(0, 2), DEFAULT_TIMES['30'], 'elevenlabs')
+  expect(noSong.sound).toBe(DEFAULT_TIMES['30'].sound + SONG_EXTRA_SECONDS)
 })
 
 test('keeps only the newest runs', () => {
@@ -66,4 +81,46 @@ test('time left reads in plain words', () => {
   expect(timeLeftText(60)).toBe('About 1 min left')
   expect(timeLeftText(150)).toBe('About 3 min left')
   expect(timeLeftText(600)).toBe('About 10 min left')
+})
+
+test('"Almost done" starts at 45 seconds left', () => {
+  expect(timeLeftText(45)).toBe('Almost done')
+  expect(timeLeftText(46)).toBe('About 1 min left')
+  expect(timeLeftText(89)).toBe('About 1 min left')
+  expect(timeLeftText(91)).toBe('About 2 min left')
+  // A broken number never shows as a time
+  expect(timeLeftText(Number.NaN)).toBe('Working out the time left')
+  expect(timeLeftText(Number.POSITIVE_INFINITY)).toBe('Working out the time left')
+})
+
+test('the screen ignores missing or broken numbers', () => {
+  const shown = { percent: 40, secondsLeft: 200 }
+  // An event with no estimate changes nothing
+  expect(steadyProgress(shown, {})).toEqual(shown)
+  expect(steadyProgress(shown, { secondsLeft: Number.NaN })).toEqual(shown)
+  expect(steadyProgress(shown, { secondsLeft: Number.POSITIVE_INFINITY })).toEqual(shown)
+  // Out of range values stay between 0 and 100, and never below 0 seconds
+  expect(steadyProgress({ percent: 0 }, { progress: 1.7, secondsLeft: -30 })).toEqual({ percent: 100, secondsLeft: 0 })
+  expect(steadyProgress({ percent: 0 }, { progress: -0.5 })).toEqual({ percent: 0, secondsLeft: undefined })
+})
+
+test('over a whole video, the bar never goes back and the time never goes up', () => {
+  // Claude Code runs twice as long as guessed, then rendering speeds up and slows down
+  const updates = [
+    ...Array.from({ length: 60 }, (_, i) => estimate({ stage: 'claude', times, elapsed: i * 10, stageElapsed: i * 10 })),
+    ...[10, 30, 35, 60, 90, 95, 100].map((frame, i) =>
+      estimate({ stage: 'render', times, elapsed: 600 + i * 15, stageElapsed: 1 + i * 15, frame, total: 100 })
+    ),
+    ...Array.from({ length: 10 }, (_, i) => estimate({ stage: 'sound', times, elapsed: 710 + i * 5, stageElapsed: i * 5 }))
+  ]
+  let shown: ShownProgress = { percent: 0 }
+  for (const update of updates) {
+    const next = steadyProgress(shown, update)
+    expect(next.percent).toBeGreaterThanOrEqual(shown.percent)
+    // The estimate stops at 99%: only "done" means finished
+    expect(next.percent).toBeLessThan(100)
+    expect(next.secondsLeft).toBeGreaterThanOrEqual(0)
+    if (shown.secondsLeft !== undefined) expect(next.secondsLeft).toBeLessThanOrEqual(shown.secondsLeft)
+    shown = next
+  }
 })

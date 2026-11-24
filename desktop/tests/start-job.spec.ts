@@ -5,7 +5,7 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
 import { existsSync, readdirSync } from 'fs'
 import { join } from 'path'
-import { launchApp, makePicture, makeTempDirs, removeTempDirs, seedSettings, type TestDirs } from './helpers'
+import { launchApp, makeFontFile, makePicture, makeTempDirs, removeTempDirs, seedSettings, type TestDirs } from './helpers'
 
 let dirs: TestDirs
 let app: ElectronApplication
@@ -80,5 +80,16 @@ test('startJob turns down bad requests with plain messages', async () => {
   expect(await startJobError(request({ music: 'elevenlabs' }))).toContain('Add your ElevenLabs key in Settings first')
 
   // None of these made a job folder
+  expect(jobFolders()).toEqual([])
+})
+
+test('startJob takes WOFF2, WOFF, TTF and OTF fonts', async () => {
+  const fonts = ['Brand.woff2', 'Brand.woff', 'Brand.ttf', 'BRAND-BOLD.OTF'].map((name) => ({
+    path: makeFontFile(join(dirs.root, name)),
+    role: 'font'
+  }))
+  // The fonts pass the check, so the next thing missing is Claude Code (hidden in these tests)
+  const error = await startJobError(request({ files: [{ path: picture, role: 'photo' }, ...fonts] }))
+  expect(error).toContain("Wrenn can't find Claude Code on this computer.")
   expect(jobFolders()).toEqual([])
 })

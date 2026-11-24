@@ -52,7 +52,7 @@ export function EditUpload({ draft, onChange, onBack, onMake }: Props) {
           </span>
           <svg
             viewBox="0 0 24 24"
-            className={`size-6 shrink-0 text-navy transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            className={`size-6 shrink-0 text-navy motion-safe:transition-transform motion-safe:duration-200 ${open ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"

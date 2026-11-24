@@ -19,21 +19,43 @@ export const DEFAULT_TIMES: Record<VideoLength, StageTimes> = {
   '60': { claude: 540, render: 240, sound: 35 }
 }
 
+// The sound part is much slower when ElevenLabs makes a song, so we time it separately.
+// "other" is Wrenn's music, the user's own song, or sound effects only.
+export type SoundKind = 'elevenlabs' | 'other'
+
+// First-time guess for the extra seconds an ElevenLabs song adds to the sound part
+export const SONG_EXTRA_SECONDS = 45
+
+// A past run. `kind` is missing in older timings.json files: those count as "other".
+export type PastRun = StageTimes & { kind?: SoundKind }
+
 // Moving the file to Videos\Wrenn at the very end
 const SAVE_SECONDS = 2
 
 // How many past videos per length we keep for the average
 export const KEEP_RUNS = 5
 
-// The average of the past runs, or the first-time guess when there are none
-export function averageTimes(runs: StageTimes[] | undefined, fallback: StageTimes): StageTimes {
-  if (!runs || runs.length === 0) return { ...fallback }
-  const avg = (key: keyof StageTimes): number => runs.reduce((sum, r) => sum + r[key], 0) / runs.length
-  return { claude: avg('claude'), render: avg('render'), sound: avg('sound') }
+// The average of the past runs, or the first-time guess when there are none.
+// Claude Code and rendering use every run. The sound part only uses runs with the same kind of music.
+export function averageTimes(
+  runs: PastRun[] | undefined,
+  fallback: StageTimes,
+  kind: SoundKind = 'other'
+): StageTimes {
+  const all = runs ?? []
+  const avg = (list: PastRun[], key: keyof StageTimes): number =>
+    list.reduce((sum, r) => sum + r[key], 0) / list.length
+  const sameSound = all.filter((r) => (r.kind ?? 'other') === kind)
+  const soundGuess = kind === 'elevenlabs' ? fallback.sound + SONG_EXTRA_SECONDS : fallback.sound
+  return {
+    claude: all.length > 0 ? avg(all, 'claude') : fallback.claude,
+    render: all.length > 0 ? avg(all, 'render') : fallback.render,
+    sound: sameSound.length > 0 ? avg(sameSound, 'sound') : soundGuess
+  }
 }
 
 // Adds a finished run and keeps only the newest few
-export function addRun(runs: StageTimes[] | undefined, run: StageTimes): StageTimes[] {
+export function addRun(runs: PastRun[] | undefined, run: PastRun): PastRun[] {
   return [...(runs ?? []), run].slice(-KEEP_RUNS)
 }
 

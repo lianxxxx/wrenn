@@ -62,7 +62,8 @@ export function StepCarousel({ children }: { children: React.ReactNode }) {
         })}
       </div>
 
-      <div className="mt-md flex justify-center gap-sm">
+      {/* Each button is a 24px tap area (WCAG minimum) around the small 12px dot */}
+      <div className="mt-md flex justify-center">
         {cards.map((_, i) => (
           <button
             key={i}
@@ -70,8 +71,13 @@ export function StepCarousel({ children }: { children: React.ReactNode }) {
             aria-label={`Show step ${i + 1}`}
             aria-current={i === active}
             onClick={() => setActive(i)}
-            className={`size-3 rounded-full border-2 border-navy transition-colors ${i === active ? "bg-navy" : "bg-transparent"}`}
-          />
+            className="grid size-6 place-items-center rounded-full"
+          >
+            <span
+              aria-hidden
+              className={`size-3 rounded-full border-2 border-navy transition-colors ${i === active ? "bg-navy" : "bg-transparent"}`}
+            />
+          </button>
         ))}
       </div>
     </div>

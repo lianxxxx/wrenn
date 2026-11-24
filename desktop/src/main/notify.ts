@@ -7,6 +7,8 @@
 import { BrowserWindow, Notification, type WebContents } from 'electron'
 import { join } from 'path'
 
+import { jobEndMessage, shouldNotify } from './notifyRules'
+
 // Keep each notification until it's clicked or closed. Without this, JavaScript may
 // throw it away early and the click would do nothing.
 const showing = new Set<Notification>()
@@ -14,14 +16,11 @@ const showing = new Set<Notification>()
 export function notifyJobEnd(sender: WebContents, ok: boolean, brandName: string): void {
   if (!Notification.isSupported() || sender.isDestroyed()) return
   const window = BrowserWindow.fromWebContents(sender)
-  // The user is looking at Wrenn already: the screen tells them
-  if (!window || (window.isFocused() && !window.isMinimized())) return
+  // The user is looking at Wrenn already: the screen tells them (see notifyRules.ts)
+  if (!window || !shouldNotify({ focused: window.isFocused(), minimized: window.isMinimized() })) return
 
   const notification = new Notification({
-    title: ok ? 'Your video is ready' : "Your video didn't finish",
-    body: ok
-      ? `Your ${brandName} video is saved in Videos\\Wrenn.`
-      : 'Open Wrenn to see what happened and try again.',
+    ...jobEndMessage(ok, brandName),
     icon: join(__dirname, '../../resources/icon.png')
   })
 

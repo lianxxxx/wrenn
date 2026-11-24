@@ -8,10 +8,10 @@ import { DOWNLOAD_URL } from "@/lib/links";
 
 export function Cloud({ className }: { className: string }) {
   return (
-    <svg viewBox="0 0 140 70" aria-hidden className={`absolute -z-10 dark:hidden ${className}`}>
+    <svg viewBox="0 0 140 70" aria-hidden className={`absolute -z-10 text-sky-soft dark:hidden ${className}`}>
       <path
         d="M20 60 a20 20 0 0 1 4-38 a28 28 0 0 1 52-8 a22 22 0 0 1 40 14 a18 18 0 0 1 4 32 z"
-        fill="#FFFFFF"
+        fill="currentColor"
       />
     </svg>
   );

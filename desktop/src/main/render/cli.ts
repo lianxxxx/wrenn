@@ -14,7 +14,7 @@ const [sceneDir, outFile, flag, vibe] = process.argv.slice(2)
 const soundVibe = flag === '--sound' ? vibe || 'playful' : undefined
 
 if (!sceneDir || !outFile) {
-  console.error('Usage: npm run render -- <sceneDir> <outFile>')
+  console.error('Usage: npm run render -- <sceneDir> <outFile> [--sound <vibe>]')
   process.exit(1)
 }
 

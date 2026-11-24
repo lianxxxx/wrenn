@@ -41,7 +41,7 @@ const faqs: { q: string; a: string; steps?: string[] }[] = [
   },
   {
     q: "Why a bird?",
-    a: "Our mascot is a wren, a small bird with a loud song. It's mixed with the Ibong Adarna, the bird from Filipino folklore whose song changes its colors. That's why its tail is full of colors. And say \"Wrenn\" out loud: it sounds like \"render\", which is what it does.",
+    a: "Wrenn's mascot is a wren, a small songbird found mostly in North and South America. The name stuck because \"Wrenn\" sounds like \"render\", which is what it does. The wren isn't from the Philippines, so it got a Filipino touch. Its rainbow tail comes from the Ibong Adarna, the magical bird from Filipino folklore whose song changes its colors.",
   },
   {
     q: "Is there a Mac version?",
@@ -63,16 +63,16 @@ export function Faq() {
         }
         sub="The quick answers before you hit download."
       />
-      {/* Light list: one thin line between questions, no boxes. The whole question row is the tap area. */}
-      <div data-reveal-group className="mx-auto mt-2xl flex max-w-[760px] flex-col divide-y divide-line">
+      {/* One box per question, same corners and border as the cards above. The whole question row is the tap area. */}
+      <div data-reveal-group className="mx-auto mt-2xl flex max-w-[760px] flex-col gap-sm">
         {faqs.map((item) => (
-          <details key={item.q} data-reveal="rise" className="faq-item group text-left">
-            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-md py-md font-display text-xl text-navy sm:py-lg sm:text-2xl [&::-webkit-details-marker]:hidden">
+          <details key={item.q} data-reveal="rise" className="faq-item group rounded-lg border border-navy/15 px-md text-left sm:px-lg">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-md py-sm font-display text-lg text-navy sm:py-md sm:text-xl [&::-webkit-details-marker]:hidden">
               {item.q}
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden
-                className="size-6 shrink-0 text-navy transition-transform duration-200 group-open:rotate-180"
+                className="size-5 shrink-0 text-navy duration-200 group-open:rotate-180 motion-safe:transition-transform"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="3"
@@ -82,9 +82,9 @@ export function Faq() {
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </summary>
-            {item.a && <p className="pb-md text-[0.9375rem] sm:pb-lg leading-relaxed text-navy-body">{item.a}</p>}
+            {item.a && <p className="pb-md text-[0.9375rem] leading-relaxed text-navy-body">{item.a}</p>}
             {item.steps && (
-              <ol className="list-decimal pb-md sm:pb-lg space-y-xs pl-lg text-[0.9375rem] leading-relaxed text-navy-body">
+              <ol className="list-decimal pb-md space-y-xs pl-lg text-[0.9375rem] leading-relaxed text-navy-body">
                 {item.steps.map((step) => (
                   <li key={step}>{step}</li>
                 ))}

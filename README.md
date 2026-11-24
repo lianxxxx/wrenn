@@ -12,9 +12,9 @@ Tap. Render. Post.
 
 1. Open Wrenn. The first time, it checks that Claude Code is on your computer and signed in.
 2. Pick a template, then a size (Reels, Feed, Square or YouTube), a length (15, 30 or 60 seconds) and a vibe.
-3. Add your logo and screenshots (or a screen recording), your brand name and the line you want at the end.
-4. Click **Make my video**. Wrenn works in the background while you wait.
-5. Your MP4 lands in your `Videos\Wrenn` folder, ready to post.
+3. Add your logo and screenshots (or a screen recording), your brand name and the line you want at the end. If you like, also add your brand's font files and a sentence or two about what your product does. Both are optional, but they help the video look and sound like you.
+4. Click **Make my video**. Wrenn works in the background while you wait. A progress bar shows how far along it is and about how much time is left.
+5. Your MP4 lands in your `Videos\Wrenn` folder, ready to post. If you switched to another window while you waited, Windows pops up a notification when it's done.
 
 ![Picking the size, length and vibe](desktop/templates/feature-walkthrough/sample-job/assets/light-04-template-options.png)
 

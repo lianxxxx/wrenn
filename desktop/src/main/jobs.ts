@@ -8,7 +8,7 @@
 //    add it to the library and tell the screen.
 
 import { app, type WebContents } from 'electron'
-import { spawn, type ChildProcess } from 'child_process'
+import { spawn, spawnSync, type ChildProcess } from 'child_process'
 import { randomBytes } from 'crypto'
 import { existsSync } from 'fs'
 import { copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
@@ -17,29 +17,27 @@ import { basename, dirname, extname, isAbsolute, join } from 'path'
 import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
-import { estimate, type EtaStage, type StageTimes } from './eta'
-import { addVideo, outputDir } from './library'
+import { estimate, type EtaStage, type SoundKind, type StageTimes } from './eta'
+import { addVideo, outputDir, SIZES } from './library'
 import { notifyJobEnd } from './notify'
 import { renderScene } from './render/render'
 import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
+// "What does it do?" can be a bit longer than the other text: one or two sentences
+import { AUDIO_EXTS, MAX_ABOUT } from '../shared/limits'
 
 const isWindows = process.platform === 'win32'
 
 // Limits for what the page may send us
 const MAX_FILES = 25
 const MAX_TEXT = 200
-// "What does it do?" can be a bit longer: one or two sentences
-const MAX_ABOUT = 300
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
 const VIDEO_EXTS = ['.mp4', '.webm', '.mov']
 const FONT_EXTS = ['.woff2', '.woff', '.ttf', '.otf']
-const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 const LENGTHS = ['15', '30', '60']
 const VIBES = ['playful', 'clean', 'bold', 'calm']
 const ROLES = ['photo', 'recording', 'logo', 'font']
 const MUSIC_CHOICES: MusicChoice[] = ['wrenn', 'own', 'elevenlabs', 'none']
-const SONG_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
 const MAX_SONG_BYTES = 200 * 1024 * 1024
 
 const POLL_MS = 2000
@@ -104,8 +102,7 @@ const jobs = new Map<string, RunningJob>()
 // ---------------------------------------------------------------------------
 
 // Where the templates live. In dev that's desktop/templates.
-// Packaging note: the built app needs electron-builder "extraResources" to copy
-// templates/ next to the app, and this should then use process.resourcesPath.
+// Packaged app: next to the app in process.resourcesPath (electron-builder "extraResources").
 export function templatesDir(): string {
   if (app.isPackaged) return join(process.resourcesPath, 'templates')
   // In dev the app folder is desktop/ with "npm run dev", but desktop/out/main when Electron
@@ -185,7 +182,7 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     const f = r.musicFile
     if (typeof f !== 'string' || !isAbsolute(f)) throw new Error("Your song couldn't be read. Try adding it again.")
     const name = basename(f)
-    if (!SONG_EXTS.includes(extname(f).toLowerCase())) {
+    if (!AUDIO_EXTS.includes(extname(f).toLowerCase())) {
       throw new Error(`"${name}" isn't a song Wrenn can use. Use an MP3, WAV, M4A, AAC, OGG or FLAC file.`)
     }
     const info = await stat(f).catch(() => null)
@@ -240,14 +237,49 @@ async function copyAssets(files: JobRequest['files'], assetsDir: string): Promis
   }
 }
 
+// Fills a new job folder: the template, the user's files in assets/, their song (if any)
+// and brief.json. Returns where the user's own song went, if they picked one.
+async function makeJobFolder(request: JobRequest, dir: string): Promise<string | undefined> {
+  await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
+  const assetsDir = join(dir, 'assets')
+  await mkdir(assetsDir, { recursive: true })
+  await copyAssets(request.files, assetsDir)
+
+  // The user's own song goes in music/, not assets/, so Claude Code doesn't treat it as a picture
+  let ownSongFile: string | undefined
+  if (request.music === 'own' && request.musicFile) {
+    await mkdir(join(dir, 'music'), { recursive: true })
+    ownSongFile = join(dir, 'music', `own${extname(request.musicFile).toLowerCase()}`)
+    await copyFile(request.musicFile, ownSongFile)
+  }
+
+  const brief = {
+    brandName: request.brandName,
+    endingText: request.endingText,
+    // Left out when empty, so Claude Code only sees it when there's something to read
+    ...(request.about ? { about: request.about } : {}),
+    size: request.size,
+    length: request.length,
+    vibe: request.vibe
+  }
+  await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+  return ownSongFile
+}
+
 // ---------------------------------------------------------------------------
 // Opening Claude Code
 // ---------------------------------------------------------------------------
 
-// Opens a new, visible console window in the job folder with Claude Code running.
-async function openClaudeConsole(jobDir: string): Promise<void> {
+// The command that starts Claude Code, or a plain error the screen can show
+async function requireClaude(): Promise<string> {
   const claude = await findClaude()
   if (!claude) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  return claude
+}
+
+// Opens a new, visible console window in the job folder with Claude Code running.
+async function openClaudeConsole(jobDir: string): Promise<void> {
+  const claude = await requireClaude()
 
   if (isWindows) {
     // "start" opens a new console window. We build the command line ourselves
@@ -283,8 +315,7 @@ function activityFor(tool: string): string | undefined {
 // Runs the user's own Claude Code in the background in the job folder.
 // It streams JSON lines, which we only use to show what it's doing.
 async function runClaude(job: RunningJob): Promise<void> {
-  const claude = await findClaude()
-  if (!claude) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  const claude = await requireClaude()
 
   // Windows needs a shell because npm installs Claude Code as "claude.cmd".
   // Every part is fixed text (no user input), so building the line ourselves is safe.
@@ -348,10 +379,12 @@ async function runClaude(job: RunningJob): Promise<void> {
 }
 
 // Stops the background Claude Code. On Windows it runs inside a shell, so stop the whole tree.
+// Waits for taskkill to finish (it takes a moment), so quitting right after a cancel
+// can't leave Claude Code running in the background.
 function stopClaude(job: RunningJob): void {
   const child = job.claude
   if (!child?.pid) return
-  if (isWindows) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true })
+  if (isWindows) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 5000 })
   else child.kill()
   job.claude = undefined
 }
@@ -401,12 +434,17 @@ function finish(job: RunningJob): void {
   jobs.delete(job.id)
 }
 
+// An ElevenLabs song makes the sound part much slower, so it's timed on its own
+function soundKind(music: MusicChoice): SoundKind {
+  return music === 'elevenlabs' ? 'elevenlabs' : 'other'
+}
+
 // Saves how long each part of a finished video took, for the next time estimate
 function saveTimings(job: RunningJob): void {
   const { claude, render } = job.partTimes
   if (job.part !== 'sound' || claude === undefined || render === undefined) return
   const sound = (Date.now() - job.partStartedAt) / 1000
-  void recordRun(job.length, { claude, render, sound })
+  void recordRun(job.length, { claude, render, sound, kind: soundKind(job.music) })
 }
 
 // ---------------------------------------------------------------------------
@@ -448,6 +486,51 @@ async function moveFile(from: string, to: string): Promise<void> {
   }
 }
 
+// Renders the job's scene/index.html to outFile. Sends about 10 progress updates a second.
+async function renderJob(job: RunningJob, outFile: string): Promise<void> {
+  let lastSent = 0
+  send(job, { stage: 'rendering', frame: 0 })
+  await renderScene({
+    sceneDir: join(job.dir, 'scene'),
+    outFile,
+    signal: job.abort.signal,
+    onProgress: (frame, total) => {
+      const now = Date.now()
+      if (now - lastSent >= PROGRESS_EVERY_MS || frame === total) {
+        lastSent = now
+        send(job, { stage: 'rendering', frame, total })
+      }
+    }
+  })
+}
+
+// Music and sound effects. Sound is a bonus: if the mix fails we keep the silent video.
+// Returns a short note for the Done screen if the sound didn't go as picked.
+// Never throws: after a cancel it just returns, and the caller checks the cancel.
+async function addJobSound(job: RunningJob, videoFile: string): Promise<string | undefined> {
+  const message =
+    job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
+  send(job, { stage: 'adding-sound', message })
+  try {
+    const sound = await addSound({
+      jobId: job.id,
+      jobDir: job.dir,
+      videoFile,
+      music: job.music,
+      vibe: job.vibe,
+      duration: job.duration,
+      ownSongFile: job.ownSongFile,
+      signal: job.abort.signal
+    })
+    return sound.note
+  } catch (error) {
+    if (job.abort.signal.aborted) return undefined
+    console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
+    return "Wrenn couldn't add the sound this time, so your video is silent."
+  }
+}
+
+// Called every 2 seconds. Once done.json is there: render, add sound, save to the library.
 async function checkForDone(job: RunningJob): Promise<void> {
   const doneFile = join(job.dir, 'done.json')
   if (job.busy || !existsSync(doneFile)) return
@@ -481,47 +564,10 @@ async function checkForDone(job: RunningJob): Promise<void> {
   // Render inside the job folder first, then move the finished file to Videos\Wrenn.
   // That way the library never sees a half-written video.
   const tempFile = join(job.dir, 'video.mp4')
-  let lastSent = 0
   try {
-    send(job, { stage: 'rendering', frame: 0 })
-    await renderScene({
-      sceneDir: join(job.dir, 'scene'),
-      outFile: tempFile,
-      signal: job.abort.signal,
-      onProgress: (frame, total) => {
-        const now = Date.now()
-        if (now - lastSent >= PROGRESS_EVERY_MS || frame === total) {
-          lastSent = now
-          send(job, { stage: 'rendering', frame, total })
-        }
-      }
-    })
-
-    // Music and sound effects. Sound is a bonus: if the mix fails we keep the silent video.
-    // A cancel still stops everything (addSound throws, and the check below catches it too).
-    const message =
-      job.music === 'elevenlabs' ? 'Making your song' : job.music === 'none' ? 'Adding sound effects' : 'Adding music'
-    send(job, { stage: 'adding-sound', message })
-    // A short note for the Done screen if the sound didn't go as picked
-    let soundNote: string | undefined
-    try {
-      const sound = await addSound({
-        jobId: job.id,
-        jobDir: job.dir,
-        videoFile: tempFile,
-        music: job.music,
-        vibe: job.vibe,
-        duration: job.duration,
-        ownSongFile: job.ownSongFile,
-        signal: job.abort.signal
-      })
-      soundNote = sound.note
-    } catch (error) {
-      if (!job.abort.signal.aborted) {
-        console.error(`Adding sound failed for job ${job.id}, keeping the silent video:`, error)
-        soundNote = "Wrenn couldn't add the sound this time, so your video is silent."
-      }
-    }
+    await renderJob(job, tempFile)
+    const soundNote = await addJobSound(job, tempFile)
+    // A cancel during the sound stops everything (addJobSound doesn't throw for it)
     if (job.abort.signal.aborted) throw new Error('Cancelled')
 
     const filePath = join(outputDir(), videoFileName(job.brandName))
@@ -558,34 +604,13 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
   const request = await checkRequest(input)
 
   // Check for Claude Code before making any folders
-  if (!(await findClaude())) throw new Error("Wrenn can't find Claude Code on this computer. Run setup again.")
+  await requireClaude()
 
   const id = newJobId()
   const dir = join(jobsDir(), id)
   let ownSongFile: string | undefined
   try {
-    await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
-    const assetsDir = join(dir, 'assets')
-    await mkdir(assetsDir, { recursive: true })
-    await copyAssets(request.files, assetsDir)
-
-    // The user's own song goes in music/, not assets/, so Claude Code doesn't treat it as a picture
-    if (request.music === 'own' && request.musicFile) {
-      await mkdir(join(dir, 'music'), { recursive: true })
-      ownSongFile = join(dir, 'music', `own${extname(request.musicFile).toLowerCase()}`)
-      await copyFile(request.musicFile, ownSongFile)
-    }
-
-    const brief = {
-      brandName: request.brandName,
-      endingText: request.endingText,
-      // Left out when empty, so Claude Code only sees it when there's something to read
-      ...(request.about ? { about: request.about } : {}),
-      size: request.size,
-      length: request.length,
-      vibe: request.vibe
-    }
-    await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+    ownSongFile = await makeJobFolder(request, dir)
   } catch (error) {
     // Don't leave a half-made folder behind
     console.error('Could not make the job folder:', error)
@@ -606,7 +631,7 @@ export async function startJob(sender: WebContents, input: unknown): Promise<{ j
     abort: new AbortController(),
     busy: false,
     length: request.length,
-    times: await expectedTimes(request.length),
+    times: await expectedTimes(request.length, soundKind(request.music)),
     startedAt: Date.now(),
     part: 'claude',
     partStartedAt: Date.now(),
@@ -646,7 +671,6 @@ export function cancelJob(jobId: unknown): void {
   send(job, { stage: 'cancelled' })
 }
 
-// When the app quits: stop every Claude Code, timer and render. The job folders stay on disk.
 // Deletes job folders older than a week, so they don't pile up on the user's computer.
 // Only folders named like a job id, and never one that's running. Errors are ignored.
 export async function cleanOldJobs(): Promise<void> {
@@ -663,6 +687,7 @@ export async function cleanOldJobs(): Promise<void> {
   }
 }
 
+// When the app quits: stop every Claude Code, timer and render. The job folders stay on disk.
 export function stopAllJobs(): void {
   for (const job of jobs.values()) {
     job.abort.abort()

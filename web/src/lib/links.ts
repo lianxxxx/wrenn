@@ -7,3 +7,6 @@ export const ISSUES_URL = `${REPO_URL}/issues`;
 
 // Always the newest installer. The desktop build names it Wrenn-Setup.exe (desktop/electron-builder.yml).
 export const DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/Wrenn-Setup.exe`;
+
+// The live site (Vercel, on Lian's subdomain). Used for canonical URLs, the sitemap and link previews.
+export const SITE_URL = "https://wrenn.leyanne.com";

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { SimplePage } from "@/components/simple-page";
 
 export const metadata: Metadata = {
-  title: "Privacy · Wrenn",
+  title: "Privacy",
+  alternates: { canonical: "/privacy" },
+  openGraph: { title: "Privacy · Wrenn", url: "/privacy", siteName: "Wrenn", type: "website" },
   description: "What Wrenn keeps on your computer, and what goes to Claude Code and ElevenLabs when you use them.",
 };
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { CheckIcon } from './Spinner'
 
 export type Choice<T extends string> = {
   id: T
@@ -49,9 +50,7 @@ export function ChoiceGroup<T extends string>({
                   className="absolute top-sm right-sm flex size-6 items-center justify-center rounded-full bg-lime text-ink"
                   aria-hidden
                 >
-                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12.5l4.5 4.5L19 7.5" />
-                  </svg>
+                  <CheckIcon className="size-4" />
                 </span>
               )}
               {option.visual}

@@ -43,9 +43,9 @@ function StepCard({
   return (
     <article
       data-reveal={reveal ? "rise" : undefined}
-      className={`relative shrink-0 rounded-lg border border-navy/15 bg-bg text-center text-navy ${className}`}
+      className={`relative shrink-0 rounded-lg bg-bg text-center text-navy ${className}`}
     >
-      <Image {...step.image} alt="" sizes="224px" className="mx-auto h-28 w-auto object-contain mix-blend-multiply sm:h-36 dark:rounded-md dark:bg-white dark:mix-blend-normal dark:p-1" />
+      <Image {...step.image} alt="" sizes="224px" className="mx-auto h-20 w-auto object-contain mix-blend-multiply sm:h-24 dark:rounded-md dark:bg-white dark:mix-blend-normal dark:p-1" />
       <h3 className="mt-md font-display text-3xl">
         {step.num}. {step.title}
       </h3>

@@ -33,7 +33,7 @@ export function Toggle({ label, hint, checked, onChange }: Props) {
       >
         <span
           aria-hidden
-          className={`absolute top-1/2 left-[3px] size-5 -translate-y-1/2 rounded-full transition-transform duration-200 ease-[var(--ease-out-strong)] ${checked ? 'translate-x-6 bg-white' : 'bg-navy'}`}
+          className={`absolute top-1/2 left-[3px] size-5 -translate-y-1/2 rounded-full motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[var(--ease-out-strong)] ${checked ? 'translate-x-6 bg-white' : 'bg-navy'}`}
         />
       </button>
     </div>

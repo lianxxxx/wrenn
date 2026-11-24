@@ -1,8 +1,8 @@
 // Thick crayon-like zig-zag (inspo: brush-stroke bg, shape only).
-// Used behind the Download button only. Size it with className.
+// Used behind the size frames in "Made for every feed" only. Size it with className.
 // The viewBox has room on every side so the rounded ends never get clipped.
 // At night, light sky on the dark page turns into a flat grey shape, so it switches
-// to teal at a lower opacity and reads as a soft crayon mark behind the button.
+// to teal at a lower opacity and reads as a soft crayon mark behind the frames.
 
 export function Scribble({ className = "" }: { className?: string }) {
   return (

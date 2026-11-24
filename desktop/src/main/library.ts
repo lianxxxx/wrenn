@@ -8,7 +8,8 @@ import { basename, join } from 'path'
 
 import type { SizeId, VideoInfo } from '../preload'
 
-const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
+// Every video size. jobs.ts uses it too, to check the size a new job asks for.
+export const SIZES: SizeId[] = ['reels', 'feed', 'square', 'youtube']
 
 // What the sidecar file holds
 type Sidecar = {

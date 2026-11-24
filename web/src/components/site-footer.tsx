@@ -51,10 +51,11 @@ export function SiteFooter() {
         {columns.map((col) => (
           <div key={col.title}>
             <p className="text-xs font-semibold uppercase tracking-wider text-navy-body">{col.title}</p>
-            <ul className="mt-sm flex flex-col gap-xs">
+            {/* Each link is at least 24px tall (WCAG tap size); the padding replaces the old gap */}
+            <ul className="mt-sm flex flex-col">
               {col.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-[0.9375rem] text-navy hover:underline">
+                  <Link href={link.href} className="inline-block py-[3px] text-[0.9375rem] text-navy hover:underline">
                     {link.label}
                   </Link>
                 </li>
