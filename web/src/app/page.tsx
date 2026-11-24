@@ -16,7 +16,7 @@ export default function Home() {
       <main className="p-sm md:p-md">
         {/* Hero card (inspo: Little Bloom): nav cloud and hero inside one rounded box.
             Only the hero gets a card; other sections sit on the page background. */}
-        <div className="relative overflow-hidden rounded-[28px] bg-sky-soft">
+        <div className="relative overflow-hidden rounded-[28px]">
           <SiteNav />
           <Hero />
         </div>
