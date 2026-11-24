@@ -40,8 +40,7 @@ export const metadata: Metadata = {
   title: { default: TITLE, template: "%s · Wrenn" },
   description: DESCRIPTION,
   alternates: { canonical: "/" },
-  // Link previews (Facebook, X, Slack, Discord...). No preview image yet: add
-  // openGraph.images once there's a 1200x630 share image.
+  // Link previews (Facebook, X, Slack, Discord...). The picture comes from opengraph-image.tsx.
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
@@ -51,7 +50,7 @@ export const metadata: Metadata = {
     locale: "en_US",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
   },
