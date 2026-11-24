@@ -1,3 +1,8 @@
+import type { Metadata } from "next";
+
+// A test page only: keep it out of Google
+export const metadata: Metadata = { title: "Brand test", robots: { index: false, follow: false } };
+
 // Brand test page: checks that the tokens and fonts from brand/ work in code.
 // Throwaway until the real landing page replaces it.
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SITE_URL } from "@/lib/links";
 import "./globals.css";
 
 // Self-hosted copies of brand/fonts/ (no Google Fonts CDN)
@@ -27,22 +28,32 @@ const themeScript =
 // The 5 dots from the videos, in the blob colors
 const loaderDots = ["bg-teal", "bg-lime", "bg-lemon", "bg-orange", "bg-red"];
 
+// Title and description use what people search for ("motion graphics app", "video maker
+// for windows", "promo video maker"; DataForSEO, US, Nov 2026). Pages add their own title
+// through the template, e.g. "Privacy · Wrenn".
+const TITLE = "Wrenn: Motion graphics video maker for Windows";
+const DESCRIPTION =
+  "Make motion graphics promo videos for your app or brand on Windows. Wrenn uses your own Claude Code, so there's nothing to type. No prompts. Just render.";
+
 export const metadata: Metadata = {
-  title: "Wrenn",
-  description: "No prompts. Just render.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: TITLE, template: "%s · Wrenn" },
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
   // Link previews (Facebook, X, Slack, Discord...). No preview image yet: add
-  // openGraph.images and metadataBase once there's a share image and a domain.
+  // openGraph.images once there's a 1200x630 share image.
   openGraph: {
-    title: "Wrenn",
-    description: "No prompts. Just render.",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
     siteName: "Wrenn",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "Wrenn",
-    description: "No prompts. Just render.",
+    title: TITLE,
+    description: DESCRIPTION,
   },
 };
 

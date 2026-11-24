@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { SimplePage } from "@/components/simple-page";
 
 export const metadata: Metadata = {
-  title: "Credits · Wrenn",
+  title: "Credits",
+  alternates: { canonical: "/credits" },
+  openGraph: { title: "Credits · Wrenn", url: "/credits", siteName: "Wrenn", type: "website" },
   description: "The songs, sounds, fonts and tools Wrenn is built with, and the people who made them.",
 };
 
