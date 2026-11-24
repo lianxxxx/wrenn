@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import localFont from "next/font/local";
 import { SITE_URL } from "@/lib/links";
 import "./globals.css";
@@ -19,11 +20,12 @@ const figtree = localFont({
 // Runs before the page paints, so a saved dark choice doesn't flash light first.
 // Default is light: dark only when the visitor picked it with the toggle.
 // It also adds a "js" class, so entrance animations only hide things when JS is on.
-// It also adds "loaded" as soon as the page has finished loading, which removes the
-// loading dots right away (or after 6 seconds at most, so they can never get stuck).
+// It also adds "loaded" once the page and its fonts are ready (it doesn't wait for the
+// videos and big images), which removes the loading screen and starts the hero animation.
+// After 2.5 seconds it adds it anyway, so the loading screen can never get stuck.
 const themeScript =
   'var d=document.documentElement;d.classList.add("js");try{if(localStorage.getItem("theme")==="dark")d.classList.add("dark")}catch(e){}' +
-  'function l(){d.classList.add("loaded")}addEventListener("load",l);setTimeout(l,6000);';
+  'function l(){d.classList.add("loaded")}addEventListener("DOMContentLoaded",function(){(document.fonts?document.fonts.ready:Promise.resolve()).then(l)});setTimeout(l,2500);';
 
 // The 5 dots from the videos, in the blob colors
 const loaderDots = ["bg-teal", "bg-lime", "bg-lemon", "bg-orange", "bg-red"];
@@ -67,11 +69,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col">
-        {/* Loading dots: only appear if loading takes longer than 0.3s, gone the moment it's done */}
+        {/* Loading screen: the logo and 5 small dots. Only appears if loading takes longer than 0.3s, gone the moment it's done */}
         <div className="page-loader" aria-hidden>
-          {loaderDots.map((color) => (
-            <span key={color} className={color} />
-          ))}
+          <Image src="/wrenn-logo.png" alt="" width={2172} height={724} sizes="120px" loading="eager" className="h-9 w-auto dark:[filter:drop-shadow(0_0_1px_#f3ebdd)_drop-shadow(0_0_1px_#f3ebdd)]" />
+          <div className="page-loader-dots">
+            {loaderDots.map((color) => (
+              <span key={color} className={color} />
+            ))}
+          </div>
         </div>
         {children}
       </body>

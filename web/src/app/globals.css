@@ -68,18 +68,24 @@ html.js:not(.loaded) .page-loader {
   inset: 0;
   z-index: 100;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 18px;
   background: var(--color-bg);
   pointer-events: none;
   opacity: 0;
   animation: loader-show 150ms ease-out 300ms forwards;
 }
 
+.page-loader-dots {
+  display: flex;
+  gap: 7px;
+}
+
 .page-loader span {
-  width: 14px;
-  height: 14px;
+  width: 8px;
+  height: 8px;
   border-radius: 9999px;
 }
 
@@ -96,7 +102,7 @@ html.js:not(.loaded) .page-loader {
     transform: translateY(0);
   }
   30% {
-    transform: translateY(-12px);
+    transform: translateY(-7px);
   }
 }
 
@@ -187,11 +193,15 @@ html.js:not(.loaded) .page-loader {
 
   /* Hero entrance on load. The "js" class is set by the script in layout.tsx
      before the first paint, so there's no flash of hidden content. */
-  .js .hero-rise {
+  /* Waits for the loading screen to go ("loaded"), so the animation is never hidden behind it */
+  .js:not(.loaded) .hero-rise {
+    opacity: 0;
+  }
+  .js.loaded .hero-rise {
     animation: rise-in 500ms var(--ease-out-strong) both;
     animation-delay: calc(var(--hero-step, 0) * 90ms + 80ms);
   }
-  .js .hero-rise [data-reveal="pop"] {
+  .js.loaded .hero-rise [data-reveal="pop"] {
     animation:
       blob-pop 450ms var(--ease-pop) both,
       fade-in 200ms ease-out both;
