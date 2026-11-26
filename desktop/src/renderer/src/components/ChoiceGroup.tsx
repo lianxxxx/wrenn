@@ -43,7 +43,9 @@ export function ChoiceGroup<T extends string>({
               onChange={() => onChange(option.id)}
               className="peer sr-only"
             />
-            <span className="relative flex h-full flex-col items-center justify-center gap-sm rounded-md border-2 border-line bg-card px-md py-md text-center transition-colors duration-150 hover:border-navy/25 peer-checked:border-navy peer-checked:bg-sky-soft dark:peer-checked:bg-teal/25 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-teal">
+            <span
+              className={`relative flex h-full flex-col items-center justify-center gap-sm rounded-md border-2 border-line bg-card px-md py-md text-center transition-colors duration-150 peer-checked:border-navy peer-checked:bg-sky-soft dark:peer-checked:bg-teal/25 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-teal ${value === option.id ? '' : 'hover:border-navy/25'}`}
+            >
               {/* Check badge on the picked card, so "picked" doesn't rely on color alone */}
               {value === option.id && (
                 <span
