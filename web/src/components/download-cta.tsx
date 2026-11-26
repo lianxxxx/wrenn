@@ -18,7 +18,7 @@ export function DownloadCta() {
         }
         sub="Your first video is a few clicks away."
       />
-      <div className="mx-auto mt-xl flex w-fit flex-col items-center gap-sm px-0 py-lg min-[375px]:px-xl">
+      <div className="mx-auto mt-lg flex w-fit flex-col items-center gap-sm px-0 min-[375px]:px-xl">
         <a
           href={DOWNLOAD_URL}
           className="whitespace-nowrap rounded-pill bg-navy px-[22px] py-2.5 font-display text-xl text-cream transition-transform active:translate-y-0.5"
