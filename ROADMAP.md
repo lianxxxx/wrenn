@@ -101,7 +101,7 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 - [x] Package app with electron-builder (Windows `.exe` first, Mac later). `npm run dist`, see desktop/PACKAGING.md
 - [x] Unsigned for v1: "More info, Run anyway" note on the landing page and in the README. Code signing maybe later
 - [x] Auto updates via GitHub Releases (electron-updater). Repo must be public for it to work
-- [ ] Upload installer to GitHub Releases
+- [x] Upload installer to GitHub Releases (v0.1.0, 2026-11-26)
 - [x] Deploy landing page to Vercel, connect domain (live 2026-11-24 at https://wrenn.leyanne.com, Cloudflare CNAME, DNS only)
 - [x] Download button points to latest GitHub Release (`web/src/lib/links.ts`, installer is always `Wrenn-Setup.exe`)
 - [x] README: setup guide, screenshots, credits to prompt sources, license (MIT), ElevenLabs terms note
