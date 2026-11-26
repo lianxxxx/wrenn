@@ -68,7 +68,13 @@ export function HowItWorks() {
         }
         sub="No editing and no timeline. Three steps and your video is ready to post."
       />
-      <StepCarousel>
+      <StepCarousel
+        labels={[
+          { word: "Pick", bg: "bg-teal", text: "text-white" },
+          { word: "Drop", bg: "bg-lime", text: "text-[#023047]" },
+          { word: "Render", bg: "bg-lemon", text: "text-[#023047]" },
+        ]}
+      >
         {steps.map((step) => (
           <StepCard key={step.num} step={step} className="h-full w-[240px] px-md py-xl" />
         ))}

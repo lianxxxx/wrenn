@@ -1,6 +1,7 @@
 "use client";
 
 import { Children, useRef, useState } from "react";
+import { BlobWords, type BlobWord } from "@/components/blob-words";
 
 // Phone-only swipeable fan of cards. The active card sits straight in the middle;
 // its neighbours tilt out on each side, cut off by the screen edge. It doesn't loop,
@@ -13,7 +14,8 @@ const SWIPE_VELOCITY = 0.11;
 // Below this it's a tap, however fast
 const MIN_FLICK_DISTANCE = 10;
 
-export function StepCarousel({ children }: { children: React.ReactNode }) {
+// labels: one marker-blob word per card (Pick, Drop, Render). They are the step picker under the cards.
+export function StepCarousel({ children, labels }: { children: React.ReactNode; labels: BlobWord[] }) {
   const cards = Children.toArray(children);
   const [active, setActive] = useState(0);
   const dragStart = useRef<{ x: number; time: number } | null>(null);
@@ -62,21 +64,19 @@ export function StepCarousel({ children }: { children: React.ReactNode }) {
         })}
       </div>
 
-      {/* Each button is a 24px tap area (WCAG minimum) around the small 12px dot */}
-      <div className="mt-md flex justify-center">
+      {/* Step picker: the step names on marker blobs, like the headline highlights.
+          The current one pops and tilts, the others fade. Each is well over the 24px tap minimum. */}
+      <div className="mt-md flex justify-center gap-xs">
         {cards.map((_, i) => (
           <button
             key={i}
             type="button"
-            aria-label={`Show step ${i + 1}`}
+            aria-label={`Show step ${i + 1}: ${labels[i]?.word ?? ""}`}
             aria-current={i === active}
             onClick={() => setActive(i)}
-            className="grid size-6 place-items-center rounded-full"
+            className={`rounded-pill p-1 transition-[opacity,transform] duration-200 motion-reduce:transition-none ${i === active ? "-rotate-3 scale-110 opacity-100" : "opacity-45"}`}
           >
-            <span
-              aria-hidden
-              className={`size-3 rounded-full border-2 border-navy transition-colors ${i === active ? "bg-navy" : "bg-transparent"}`}
-            />
+            {labels[i] && <BlobWords className="text-base" offset={i} words={[labels[i]]} />}
           </button>
         ))}
       </div>
