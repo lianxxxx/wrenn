@@ -103,6 +103,7 @@ More on templates and the scene rules in [desktop/templates/README.md](desktop/t
 - **Sound effects**: CC0 sounds by [Kenney](https://www.kenney.nl/), plus a few made for Wrenn.
 - Full list of every song and sound, with links: [desktop/resources/CREDITS.md](desktop/resources/CREDITS.md).
 - **[GSAP](https://gsap.com/)** 3.15.1 by GreenSock, for the animation in each video. Used under GreenSock's standard "no charge" license ([gsap.com/standard-license](https://gsap.com/standard-license)). The copyright notice stays at the top of the file.
+- **[Devices.css](https://github.com/picturepan2/devices.css)** 0.2.0 by Yan Zhu, for the phone, laptop and tablet frames in the videos. MIT License (copy in `desktop/templates/feature-walkthrough/template/scene/vendor/devices.LICENSE.txt`).
 - **Fonts**: [Figtree](https://github.com/erikdkennedy/figtree) by Erik Kennedy and Bubblegum Sans by Angel Koziupa and Alejandro Paul, both under the SIL Open Font License 1.1.
 - **[FFmpeg](https://ffmpeg.org/)**, through [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static). The Windows build Wrenn ships is a GPL build (GPL v3). See [ffmpeg.org/legal.html](https://ffmpeg.org/legal.html).
 - **[Electron](https://www.electronjs.org/)**, **[React](https://react.dev/)** and **[Tailwind CSS](https://tailwindcss.com/)** for the app.
@@ -111,4 +112,4 @@ More on templates and the scene rules in [desktop/templates/README.md](desktop/t
 
 Wrenn's code is under the [MIT License](LICENSE).
 
-The parts that come from others keep their own licenses: the songs and sound effects are CC0, the fonts are under the SIL Open Font License, GSAP is under GreenSock's standard license, and FFmpeg is under its own license (GPL for the build Wrenn ships).
+The parts that come from others keep their own licenses: the songs and sound effects are CC0, the fonts are under the SIL Open Font License, GSAP is under GreenSock's standard license, Devices.css is MIT, and FFmpeg is under its own license (GPL for the build Wrenn ships).

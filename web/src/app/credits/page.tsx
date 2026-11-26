@@ -107,6 +107,10 @@ export default function CreditsPage() {
           under the <a href="https://gsap.com/standard-license">GSAP Standard License</a>.
         </li>
         <li>
+          <a href="https://github.com/picturepan2/devices.css">Devices.css</a> by Yan Zhu draws the phone, laptop and tablet
+          frames in the videos (MIT License).
+        </li>
+        <li>
           <a href="https://www.anthropic.com/claude-code">Claude Code</a> by Anthropic builds each video. Wrenn runs
           your own copy, signed in to your own account.
         </li>

@@ -271,6 +271,8 @@
       )
     );
     await fontsReady();
+    // The device mockup styles, if Wrenn.mockup() was used
+    if (mockupCssLoaded) await mockupCssLoaded;
   }
 
   function install(opts) {
@@ -439,6 +441,124 @@
       },
     };
     return d;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Real device mockups (Devices.css by Yan Zhu, MIT, scene/vendor/devices.min.css)
+  //   const m = Wrenn.mockup(img, { model: "iphone-14-pro", width: 360 })
+  //   parent.appendChild(m.el); m.place(cx, cy)
+  //   m.scroll(tl, { to: 0.6, at: 2, duration: 2 })   // scroll a tall screenshot inside the screen
+  //   m.focus(tl, { x: 0.5, y: 0.3, zoom: 1.6, at: 4 }) // zoom into a spot, like Wrenn.device
+  // Models: phones "iphone-14-pro", "iphone-14", "google-pixel-6-pro", "galaxy-s8";
+  // laptops "macbook-pro", "macbook-pro-2018"; tablet "ipad-pro"; desktop "imac".
+  // Give either width or height (px); the frame keeps its real proportions.
+  // Optional color: "silver", "gold", "black" etc. where the model has it (Devices.css color classes).
+  // ---------------------------------------------------------------------------
+  // Measured from Devices.css: frame size and where the screen sits inside it (px at 1x)
+  const MOCKUPS = {
+    "iphone-14-pro": { w: 428, h: 868, sx: 20, sy: 20, sw: 390, sh: 830 },
+    "iphone-14": { w: 428, h: 868, sx: 20, sy: 20, sw: 390, sh: 830 },
+    "google-pixel-6-pro": { w: 404, h: 862, sx: 14, sy: 20, sw: 376, sh: 816 },
+    "galaxy-s8": { w: 380, h: 828, sx: 10, sy: 53, sw: 360, sh: 740 },
+    "macbook-pro": { w: 740, h: 434, sx: 70, sy: 9, sw: 600, sh: 375 },
+    "macbook-pro-2018": { w: 740, h: 444, sx: 82, sy: 29, sw: 576, sh: 360 },
+    "ipad-pro": { w: 560, h: 778, sx: 27, sy: 27, sw: 506, sh: 724 },
+    imac: { w: 640, h: 540, sx: 16, sy: 16, sw: 608, sh: 342 },
+  };
+  const mockupCss = `
+    .wrenn-mockup { position: absolute; will-change: transform; }
+    .wrenn-mockup > .device { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+    .wrenn-mockup .device-screen { position: relative; overflow: hidden; background: #fff; }
+    .wrenn-mockup .wrenn-pan { position: absolute; left: 0; top: 0; width: 100%; transform-origin: 0 0; will-change: transform; }
+    .wrenn-mockup .wrenn-pan > img, .wrenn-mockup .wrenn-pan > video { display: block; width: 100%; height: auto; }
+    .wrenn-mockup .wrenn-pan.cover, .wrenn-mockup .wrenn-pan.cover > img, .wrenn-mockup .wrenn-pan.cover > video { height: 100%; object-fit: cover; object-position: 50% 0; }
+  `;
+  let mockupCssLoaded = null;
+
+  // Adds the Devices.css file once. waitForPageAssets() waits for it, so frame 0 is already styled.
+  function loadMockupCss() {
+    if (mockupCssLoaded) return;
+    const s = document.createElement("style");
+    s.textContent = mockupCss;
+    document.head.appendChild(s);
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "vendor/devices.min.css";
+    mockupCssLoaded = new Promise((resolve, reject) => {
+      link.onload = resolve;
+      link.onerror = () => reject(new Error("Could not load vendor/devices.min.css"));
+    });
+    document.head.appendChild(link);
+  }
+
+  function mockup(media, opts) {
+    const o = Object.assign({ model: "iphone-14-pro" }, opts);
+    const spec = MOCKUPS[o.model];
+    if (!spec) throw new Error("Wrenn.mockup: unknown model " + o.model + ". Use one of: " + Object.keys(MOCKUPS).join(", "));
+    loadMockupCss();
+    const scale = o.width ? o.width / spec.w : o.height ? o.height / spec.h : 1;
+    const width = spec.w * scale;
+    const height = spec.h * scale;
+
+    const el = document.createElement("div");
+    el.className = "wrenn-mockup";
+    el.style.width = width + "px";
+    el.style.height = height + "px";
+    const dev = document.createElement("div");
+    dev.className = "device device-" + o.model + (o.color ? " device-" + o.color : "");
+    dev.style.transform = "scale(" + scale + ")";
+    dev.innerHTML =
+      '<div class="device-frame"><div class="device-screen"></div></div>' +
+      '<div class="device-stripe"></div><div class="device-header"></div><div class="device-sensors"></div>' +
+      '<div class="device-btns"></div><div class="device-power"></div><div class="device-home"></div>';
+    el.appendChild(dev);
+    const screen = dev.querySelector(".device-screen");
+    const pan = document.createElement("div");
+    pan.className = "wrenn-pan";
+    pan.appendChild(media);
+    screen.appendChild(pan);
+
+    // A screenshot taller than the screen keeps its full width and can scroll; otherwise it covers the screen
+    const aspect = media.naturalWidth ? media.naturalHeight / media.naturalWidth : media.videoWidth ? media.videoHeight / media.videoWidth : 0;
+    const contentH = aspect ? spec.sw * aspect : spec.sh;
+    const tall = contentH > spec.sh * 1.02;
+    if (!tall) pan.classList.add("cover");
+    pan.style.height = (tall ? contentH : spec.sh) + "px";
+
+    const m = {
+      el,
+      device: dev,
+      screen,
+      pan,
+      media,
+      model: o.model,
+      width,
+      height,
+      // The screen's box inside the frame, in page px (for lining up highlights or a cursor)
+      screenBox: { x: spec.sx * scale, y: spec.sy * scale, width: spec.sw * scale, height: spec.sh * scale },
+      place(cx, cy) {
+        el.style.left = cx - width / 2 + "px";
+        el.style.top = cy - height / 2 + "px";
+        return m;
+      },
+      // Scroll a tall screenshot: to = 0 (top) .. 1 (bottom of the screenshot)
+      scroll(tl, f) {
+        const maxY = Math.max(0, contentH - spec.sh);
+        tl.to(pan, { y: -maxY * clamp(f.to == null ? 1 : f.to, 0, 1), duration: f.duration || 1.5, ease: f.ease || "power2.inOut" }, f.at);
+        return m;
+      },
+      // Zoom and pan to a spot of what's on screen. x and y are 0..1 of the screen.
+      focus(tl, f) {
+        const z = Math.max(1, f.zoom || 1);
+        const x = clamp(f.x == null ? 0.5 : f.x, 0, 1);
+        const y = clamp(f.y == null ? 0.5 : f.y, 0, 1);
+        const tx = clamp(spec.sw / 2 - x * spec.sw * z, spec.sw - spec.sw * z, 0);
+        const ty = clamp(spec.sh / 2 - y * spec.sh * z, spec.sh - spec.sh * z, 0);
+        tl.to(pan, { x: tx, y: ty, scale: z, duration: f.duration || 1, ease: f.ease || "power3.inOut" }, f.at);
+        return m;
+      },
+    };
+    return m;
   }
 
   // ---------------------------------------------------------------------------
@@ -659,9 +779,9 @@
     // Text: split words, or text blocks that were not split. Things inside a device frame are skipped.
     const isText = (el) => el.classList.contains("wrenn-w") || /^(H1|H2|H3|P)$/.test(el.tagName) || el.hasAttribute("data-safe");
     const targets = () =>
-      Array.from(document.querySelectorAll(".wrenn-w, h1, h2, h3, p, img, video, .wrenn-device, [data-safe]")).filter(
+      Array.from(document.querySelectorAll(".wrenn-w, h1, h2, h3, p, img, video, .wrenn-device, .wrenn-mockup, [data-safe]")).filter(
         (el) =>
-          (!el.closest(".wrenn-device") || el.classList.contains("wrenn-device")) &&
+          (!el.closest(".wrenn-device, .wrenn-mockup") || el.classList.contains("wrenn-device") || el.classList.contains("wrenn-mockup")) &&
           !(/^(H1|H2|H3|P)$/.test(el.tagName) && el.querySelector(".wrenn-w"))
       );
     for (let t = 0; t <= total + 1e-6; t += step) {
@@ -717,6 +837,7 @@
     install,
     fail,
     device,
+    mockup,
     split,
     reveal,
     hide,
