@@ -20,7 +20,14 @@ type Props = {
 // Step 3 of the template path: your files and a few words.
 export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error }: Props) {
   const hasFiles = draft.photos.length > 0 || draft.recordings.length > 0
-  const ready = hasFiles && draft.brandName.trim() !== ''
+  const hasName = draft.brandName.trim() !== ''
+  const ready = hasFiles && hasName
+  // Says exactly what's missing. A logo or font alone doesn't count as a file here.
+  const missing = !hasName && !hasFiles
+    ? 'Add your brand name and at least one screenshot or recording.'
+    : !hasName
+      ? 'Add your brand name.'
+      : 'Add at least one screenshot or recording.'
 
   return (
     // One column, top to bottom: forms are easier to follow with one field at a time
@@ -63,7 +70,7 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
         />
         <FileDrop
           label="Logo (optional)"
-          hint="A PNG with no background looks best."
+          hint="A PNG with a see-through background looks best."
           accept="image/*"
           files={draft.logo}
           onFiles={(logo) => onChange({ logo })}
@@ -94,7 +101,7 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
 
       <div className="mt-xl flex items-center justify-end gap-md">
         {!ready && (
-          <p className="text-[0.9375rem] text-navy-body">Add at least one file and your brand name.</p>
+          <p className="text-[0.9375rem] text-navy-body">{missing}</p>
         )}
         <Button onClick={onGenerate} disabled={!ready || starting}>
           {starting ? 'Starting...' : 'Make my video'}

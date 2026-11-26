@@ -78,7 +78,7 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
     <div className="mx-auto w-full max-w-[672px]">
       <ScreenTitle
         title="Let's get you set up"
-        sub="Wrenn uses Claude Code to build your videos. We'll get it ready in a couple of clicks."
+        sub="Wrenn uses Claude Code, an AI helper from Anthropic, to build your videos. We'll get it ready in a couple of clicks."
       />
 
       <div className="rounded-lg border-2 border-line bg-card p-lg">
@@ -168,6 +168,12 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
       />
 
       <div className="mt-xl flex items-center justify-end gap-md">
+        {/* Says why Continue is greyed out */}
+        {!saveError && (status === 'missing' || status === 'signed-out' || status === 'waiting') && (
+          <p className="text-[0.9375rem] text-navy-body">
+            {status === 'missing' ? 'Install Claude Code first.' : 'Sign in to Claude first.'}
+          </p>
+        )}
         {saveError && (
           <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
             Couldn't save your settings. Try again.
