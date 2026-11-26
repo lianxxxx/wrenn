@@ -205,8 +205,11 @@ function App() {
 
   // Move keyboard focus to the new screen, so keyboard and screen reader users know it changed
   const mainRef = useRef<HTMLElement>(null)
+  // Each new screen also starts at the top, with the logo in view. preventScroll stops
+  // the focus from scrolling the logo out of sight.
   useEffect(() => {
-    mainRef.current?.focus()
+    window.scrollTo(0, 0)
+    mainRef.current?.focus({ preventScroll: true })
   }, [screen])
 
   // Tiny blank moment while the settings file loads
