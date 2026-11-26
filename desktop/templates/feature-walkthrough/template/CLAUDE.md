@@ -33,6 +33,10 @@ The result must look like a premium motion-graphics showreel made by a studio, n
 
 - **Colors:** pick 2 or 3 colors from the logo: one main brand color, one accent, plus a background (a very dark or very light tone of the brand color often works best). Write them as CSS variables at the top of `scene/index.html`. If there is no logo, pick a tasteful palette that fits the vibe: playful (warm, saturated, 2 bright colors on a deep background), clean (one strong color on near-white), bold (high contrast, one loud color on near-black), calm (soft muted tones, low contrast background, one gentle accent). Check text contrast with `Wrenn.contrast(a, b)` (aim for 4.5 or more) or pick text color with `Wrenn.readableOn(bg)`.
 - **Fonts:** if `assets/` has brand fonts, add them with `@font-face` (path `../assets/<file>`) and use them. Otherwise use Figtree, already in `scene/fonts/`: weight 800 to 900 for big lines, 600 to 700 for labels.
+- **Shapes: copy the brand's own shape language from the screenshots, never default to perfect pills.** Before you draw any chip, tag, label, highlight or badge, look at how the brand draws them: highlighted words, tags, cards, buttons and icons' backgrounds. Write down in a comment what you see (for example "hand-painted blobs with rough edges behind words, pill only for the main button", or "sharp 4px corners, thin outlines", or "soft fully round pills").
+  - Use that same shape for every chip, label, highlight and badge you add. Use the brand's button shape only for buttons (like the ending button).
+  - Hand-drawn or organic shapes (rough blobs, brush or marker marks): build them so they still look hand-made, for example an uneven `border-radius` (like `45% 38% 42% 40% / 50% 46% 54% 50%`) plus a small tilt, and roughen the edge with an SVG filter (`feTurbulence` + `feDisplacementMap`, fixed `seed` so every frame is the same). Give neighbouring chips different radii and tilts so they don't look stamped out.
+  - If the brand has no clear shape style, pick one that fits the vibe and keep it the same everywhere in the video.
 - **Vibe** changes the motion. Use `const v = Wrenn.vibe(brief.vibe)`, which gives eases (`v.enter`, `v.exit`, `v.move`, `v.pop`), a stagger (`v.stagger`) and `v.d(seconds)` to scale durations by speed.
   - playful: bouncy overshoot, faster, little rotations, things pop and squash.
   - clean: smooth expo eases, precise, minimal rotation, generous space.
@@ -56,13 +60,13 @@ Before writing any code, write a shot list as a comment at the top of the script
 
 - **Hero screen:** one screenshot BIG (at least 70% of the frame width on youtube, 80% of the height on reels), coming in tilted in 3D (`perspective` on the parent, `rotateX`/`rotateY` on the frame) and straightening, then zooming into the important part.
 - **Scroll:** a tall or full-page screenshot (name often ends in `-full`, or the image is much taller than wide) inside a browser or phone frame that scrolls down with `power2.inOut`, stopping briefly on 1 or 2 key parts.
-- **Devices:** a browser window and a phone together on a big brand-color shape, the phone overlapping the browser's corner, both drifting slowly in opposite directions. Use the phone screenshots (narrow images) in the phone.
+- **Devices:** a real laptop and a real phone (`Wrenn.mockup`, see below) together on a big brand-color shape, the phone overlapping the laptop's corner, both drifting slowly in opposite directions. Phone screenshots (narrow images) go in the phone, desktop screenshots in the laptop.
 - **Fan or collage:** 3 to 5 screenshots fly in from below with a little rotation, staggered, and land in a fanned row. Then one gets "picked": the others dim to 40% and shrink a little, the picked one scales up with an accent-color ring.
 - **Detail zoom:** crop into one card, chart or number of a screenshot (put the image in its own box with `overflow: hidden` and move it inside), big, with a short label next to it.
 - **Big number:** a number you can read in the screenshots (a total, a count, a percent) counting up in huge type, the screen dimmed behind it.
 - **Split:** a color panel slides up over half the frame with the text, the screenshot on the other half moving at a different speed (parallax).
 
-You may build your own frames, panels and shapes in HTML and CSS. `Wrenn.device(...)` is one easy option for a frame, not the only one.
+**Device frames: use real ones, not drawn boxes.** Whenever a screenshot appears inside a phone, laptop or tablet, use `Wrenn.mockup(img, { model, width })` (realistic frames from Devices.css, already in `scene/vendor/`): `"iphone-14-pro"`, `"iphone-14"`, `"google-pixel-6-pro"` or `"galaxy-s8"` for phones, `"macbook-pro"` or `"macbook-pro-2018"` for laptops, `"ipad-pro"` for a tablet, `"imac"` for a desktop. Phone screenshots go in a phone, wide desktop screenshots in a laptop or iMac. A home-made rounded box with a fake notch looks cheap. `Wrenn.device(...)` is only for a plain browser window. You may still build your own panels, cards and shapes in HTML and CSS.
 
 ### Make it feel used (interactions)
 
@@ -70,7 +74,7 @@ Every product scene has at least one of these:
 
 - **Cursor click:** draw a simple arrow cursor (inline SVG). It moves with easing to a button or item, presses (scale 0.85 for 0.08 seconds and back), and the target reacts right then (a dip, a ring, a color change, a tap ripple).
 - **Highlight:** an accent-color ring or outline snaps around the key part while everything else dims.
-- **Chips:** small tags pop in with a stagger, then one lights up in the accent color.
+- **Chips:** small tags pop in with a stagger, then one lights up in the accent color. Draw them in the brand's own shape (see Shapes in Step 2), not a default pill.
 - **Count up:** numbers count up with easing: `const n = { v: 0 }; tl.to(n, { v: 51400, duration: 1.2, ease: "power2.out", onUpdate: () => (el.textContent = format(n.v)) }, t)`. Set the starting text first.
 - **Live UI:** a bar in a chart grows, a progress bar fills, a toggle flips, a list item slides in. Only on top of shapes you draw yourself, never painted over the real screenshot to fake data.
 
@@ -152,14 +156,14 @@ Rules that keep every render identical:
 - No `Date.now`, `performance.now`, `setTimeout`/`setInterval` for motion, `requestAnimationFrame` loops, CSS animations, CSS transitions, or video autoplay. (wrenn.js switches CSS animations and transitions off anyway.)
 - No `Math.random()`. Use `Wrenn.random(seed)` if you need variety.
 - Copy the values from `brief.json` into the `VIDEO` object. Don't fetch `brief.json` from the page (browsers block that for local files).
-- Load images with `Wrenn.loadImages` and pass them to `Wrenn.device(img, { maxWidth, maxHeight })`. It picks a phone frame for tall screenshots and a browser window for wide ones. Place it with `device.place(x, y)` and zoom with `device.focus(tl, { x, y, zoom, at, duration, ease })` where x and y are 0 to 1 across the screenshot.
+- Load images with `Wrenn.loadImages`. For a real device, pass one to `Wrenn.mockup(img, { model, width })` (or `height` instead of width; the frame keeps its real proportions). Add `m.el` to the page, place it with `m.place(x, y)` (its center), scroll a tall screenshot inside the screen with `m.scroll(tl, { to, at, duration, ease })` where `to` is 0 (top) to 1 (bottom), and zoom into a spot with `m.focus(tl, { x, y, zoom, at, duration, ease })` (x and y are 0 to 1 across the screen). Move, tilt or scale the whole device by animating `m.el`. For a plain browser window use `Wrenn.device(img, { maxWidth, maxHeight })`, which has the same `place` and `focus`.
 - Paths to assets start with `../assets/`. Keep file names exactly as they are (spaces and capitals included; use `encodeURI` if a name has spaces).
 
 **Screen recordings:**
 
 ```js
 const rec = await Wrenn.loadVideo("../assets/demo.mp4");
-const d = Wrenn.device(rec, { maxWidth: C.safe.width, maxHeight: C.safe.height * 0.8 });
+const d = Wrenn.mockup(rec, { model: "macbook-pro", width: C.safe.width * 0.8 }); // or Wrenn.device(rec, { maxWidth, maxHeight }) for a browser window
 Wrenn.syncVideo(rec, { start: 4.0, from: 0 }); // plays from timeline second 4.0
 ```
 
