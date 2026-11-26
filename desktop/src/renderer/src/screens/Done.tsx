@@ -49,7 +49,7 @@ export function Done({ video, isNew, note, onAnother, onHome }: Props) {
         )}
         {note && <p className="mt-md rounded-sm bg-lemon/40 px-md py-sm text-base text-navy">{note}</p>}
         <p className="mt-md text-[1.1875rem] leading-[1.55] text-navy-body">Saved to</p>
-        <p className="mt-xs break-all rounded-sm bg-sky-soft px-md py-sm font-semibold text-navy">
+        <p className="mt-xs rounded-sm [overflow-wrap:anywhere] bg-sky-soft px-md py-sm font-semibold text-navy">
           {video.filePath}
         </p>
         <div className="mt-xl flex flex-wrap gap-md">
