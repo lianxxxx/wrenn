@@ -48,22 +48,32 @@
   color-scheme: dark;
 }
 
-/* Headings break into even lines, paragraphs avoid one lonely last word */
-h1,
-h2,
-h3 {
-  text-wrap: balance;
-}
-p,
-li {
-  text-wrap: pretty;
+/* In the base layer, so Tailwind classes like "truncate" still win over these */
+@layer base {
+  /* Headings break into even lines, paragraphs avoid one lonely last word */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-navy);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-navy);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
+/* A thin, quiet scrollbar in the brand colors instead of the grey Windows one.
+   It only shows when the page is taller than the window. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-navy) 28%, transparent) transparent;
 }
 
 /* Faint paper grain, like the landing page */
