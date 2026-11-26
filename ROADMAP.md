@@ -90,10 +90,10 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 ## Phase 5: Test
 
-- [ ] Make 3 real videos with it (Trackr done 2026-11-20, G-Track done 2026-11-24, one more)
+- [ ] Make 3 real videos with it (Trackr done 2026-11-20, G-Track done 2026-11-24, the third is Wrenn's own landing page, wrenn.leyanne.com)
 - [ ] Replace the landing page placeholders with real Wrenn output: hero visual (gallery idea, inspo 11), the demo video. Done 2026-11-24: "From photos to video" plays the G-Track and Trackr videos in iPhone and MacBook mockups; the 4 size frames are labeled outlines
-- [ ] Test on a fresh Windows laptop (no Node, no dev tools)
-- [ ] Ask 2 to 3 non-techy friends to try it, watch where they get stuck
+- [ ] Test on a fresh Windows laptop (no Node, no dev tools). Lian (2026-11-26): Claude does this check and fixes what it finds
+- [ ] Ask 2 to 3 non-techy friends to try it, watch where they get stuck. Lian (2026-11-26): Claude does a first-time-user walkthrough instead and fixes what it finds
 - [ ] Fix the top issues
 
 ## Phase 6: Package + Deploy
@@ -118,6 +118,8 @@ Lian (2026-11-24): no big launch for now. Let people find it through SEO (Google
 - [ ] Collect feedback, plan v2
 
 ## Plan after launch
+
+Lian (2026-11-26): after the installer is on GitHub Releases, add one new feature a week (new templates and the ideas in "Later").
 
 Release v1 first, then improve with the features below (Lian, 2026-11-08).
 
