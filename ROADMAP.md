@@ -90,11 +90,11 @@ Playwright, img2threejs, React Bits and awesome-design-md can't be set up yet (t
 
 ## Phase 5: Test
 
-- [ ] Make 3 real videos with it (Trackr done 2026-11-20, G-Track done 2026-11-24, the third is Wrenn's own landing page, wrenn.leyanne.com)
+- [x] Make 3 real videos with it (Trackr 2026-11-20, G-Track 2026-11-24, Wrenn's own landing page 2026-11-26)
 - [ ] Replace the landing page placeholders with real Wrenn output: hero visual (gallery idea, inspo 11), the demo video. Done 2026-11-24: "From photos to video" plays the G-Track and Trackr videos in iPhone and MacBook mockups; the 4 size frames are labeled outlines
-- [ ] Test on a fresh Windows laptop (no Node, no dev tools). Lian (2026-11-26): Claude does this check and fixes what it finds
-- [ ] Ask 2 to 3 non-techy friends to try it, watch where they get stuck. Lian (2026-11-26): Claude does a first-time-user walkthrough instead and fixes what it finds
-- [ ] Fix the top issues
+- [x] Test on a fresh Windows laptop (no Node, no dev tools). Done 2026-11-26 by Claude on the installed app: no Node or Git on the PATH, a brand new user, with and without Claude Code, made a video, uninstalled cleanly
+- [x] Ask 2 to 3 non-techy friends to try it, watch where they get stuck. Done 2026-11-26 as a first-time-user walkthrough by Claude instead
+- [x] Fix the top issues (5 fixes 2026-11-26; the bigger ones are in "From the first-time user walkthrough" under Later)
 
 ## Phase 6: Package + Deploy
 
@@ -134,6 +134,14 @@ Release v1 first, then improve with the features below (Lian, 2026-11-08).
   - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
   - Your own templates (Lian, 2026-11-26): a 'My own prompt' card on the Pick a template screen, next to Feature walkthrough. Users paste a prompt they like (for example one they found on TikTok), name it, and it's saved as their own template to reuse with the same size, length, vibe and upload steps. Credit the source when it came from someone else
   - Make a video from a link (Lian, 2026-11-26): no files needed, the user just pastes their website's URL. Wrenn opens it in a hidden window (Electron can do this, no new package), takes phone and desktop screenshots of each section in light mode, and grabs the logo, the fonts and the colors from the page, the same way the Wrenn, Trackr and G-Track samples were made by hand. Then it carries on like a normal upload. Only public pages; for pages behind a login the user still uploads screenshots
+- From the first-time user walkthrough (2026-11-26), bigger than a quick fix:
+  - Installing Claude Code still means a terminal (the guide is a page of commands). A guided step in Wrenn, or a one-click install
+  - Sign in opens a black console window. Warn first ("A black window opens, that's normal") or hide it
+  - Cancel has no "are you sure?" and no message after. Add a confirm, then "Stopped. Your files are still here."
+  - Upload screen: remove one file (an x on each) and show thumbnails, not only "Remove all"
+  - Settings: show Claude Code's status (ready / sign in again)
+  - Progress can say "Almost done" too early; make the wording follow the bar
+  - Dark mode: the "Edit my video" coming-soon card looks muddy at 60% opacity
   - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first
 - Music made for the video (Lian, 2026-11-20, after comparing with the Moondance showreel): A (default) Claude Code composes the music in code for each video, 120 BPM, every hit and section change on the video's own cuts (how Moondance was made). B (with an ElevenLabs key) send ElevenLabs Music a composition plan with sections timed to the scene changes. Plan together with the voiceover
 - Done 2026-11-21: Waiting screen (Lian, 2026-11-20): a real progress bar with an estimated time left, instead of only a spinner (base it on how long past videos took per length). Plus a Windows notification when the video is done, so people can leave Wrenn while waiting
