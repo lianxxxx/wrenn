@@ -1,19 +1,12 @@
 import Image from "next/image";
 import { BlobWords } from "@/components/blob-words";
 import { DeviceVideo } from "@/components/device-frames";
+import { IconBlob } from "@/components/icon-blob";
 import { SectionHeading } from "@/components/section-heading";
 
 // "From photos to video". Plain page background. Centered headline and sub. Below it (inspo: Little Bloom):
 // a phone playing a Reels video Wrenn made (G-Track sample; the mascot sits on it)
 // and a laptop playing a YouTube-size one (Trackr sample), and a column of feature rows on the right.
-
-// Blob corners like the marker highlights in blob-words.tsx, a different one per card
-const BLOB_RADII = [
-  "45% 38% 42% 40% / 50% 46% 54% 50%",
-  "38% 45% 40% 42% / 46% 54% 48% 52%",
-  "42% 40% 46% 38% / 54% 48% 50% 46%",
-  "40% 42% 38% 45% / 48% 52% 46% 54%",
-];
 
 // Simple line icons drawn here (no icon package). 24x24, stroke uses the text color.
 const icons = {
@@ -23,11 +16,12 @@ const icons = {
   saved: <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />,
 };
 
-const features: { title: string; body: string; icon: keyof typeof icons; bg: string; ink: string }[] = [
-  { title: "Music that fits", body: "Beats and sound effects land on every cut.", icon: "music", bg: "bg-red", ink: "text-white" },
-  { title: "Your brand, not a template", body: "Your logo, colors and fonts, everywhere.", icon: "brand", bg: "bg-orange", ink: "text-[#023047]" },
-  { title: "Readable on mute", body: "Big, clear text for people scrolling with no sound.", icon: "mute", bg: "bg-lime", ink: "text-[#023047]" },
-  { title: "Saved on your computer", body: "An MP4 file, ready to post anywhere.", icon: "saved", bg: "bg-teal", ink: "text-white" },
+// Each row gets the next blob color (red, orange, lime, teal) from IconBlob
+const features: { title: string; body: string; icon: keyof typeof icons }[] = [
+  { title: "Music that fits", body: "Beats and sound effects land on every cut.", icon: "music" },
+  { title: "Your brand, not a template", body: "Your logo, colors and fonts, everywhere.", icon: "brand" },
+  { title: "Readable on mute", body: "Big, clear text for people scrolling with no sound.", icon: "mute" },
+  { title: "Saved on your computer", body: "An MP4 file, ready to post anywhere.", icon: "saved" },
 ];
 
 export function Demo() {
@@ -74,19 +68,9 @@ export function Demo() {
             <li
               key={f.title}
               data-reveal="rise"
-              className="flex items-center gap-md rounded-lg border border-navy/15 p-md"
+              className="flex items-center gap-md py-sm"
             >
-              {/* Icon on a marker blob, the same hand-painted shape as the headline highlights */}
-              <span className={`relative isolate grid size-11 shrink-0 place-items-center ${f.ink}`}>
-                <span
-                  aria-hidden
-                  className={`absolute inset-0 -z-10 ${f.bg}`}
-                  style={{ borderRadius: BLOB_RADII[i % BLOB_RADII.length], filter: `url(#marker-${i % 4})` }}
-                />
-                <svg viewBox="0 0 24 24" aria-hidden className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  {icons[f.icon]}
-                </svg>
-              </span>
+              <IconBlob icon={icons[f.icon]} index={i} />
               <div>
                 <h3 className="font-display text-xl leading-tight text-navy">{f.title}</h3>
                 <p className="text-[0.875rem] leading-snug text-navy-body">{f.body}</p>
