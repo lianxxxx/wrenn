@@ -132,6 +132,7 @@ Release v1 first, then improve with the features below (Lian, 2026-11-08).
   - Sidebar in the app: Home, templates, your videos, settings
   - Choose the AI: Claude Code or GPT (Codex CLI), plus a model picker (for example Opus). Same Option B flow: the user runs it themselves
   - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
+  - Your own templates (Lian, 2026-11-26): a 'My own prompt' card on the Pick a template screen, next to Feature walkthrough. Users paste a prompt they like (for example one they found on TikTok), name it, and it's saved as their own template to reuse with the same size, length, vibe and upload steps. Credit the source when it came from someone else
   - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first
 - Music made for the video (Lian, 2026-11-20, after comparing with the Moondance showreel): A (default) Claude Code composes the music in code for each video, 120 BPM, every hit and section change on the video's own cuts (how Moondance was made). B (with an ElevenLabs key) send ElevenLabs Music a composition plan with sections timed to the scene changes. Plan together with the voiceover
 - Done 2026-11-21: Waiting screen (Lian, 2026-11-20): a real progress bar with an estimated time left, instead of only a spinner (base it on how long past videos took per length). Plus a Windows notification when the video is done, so people can leave Wrenn while waiting
