@@ -116,28 +116,6 @@ html.js:not(.loaded) .page-loader {
   .page-loader span:nth-child(5) { animation-delay: 360ms; }
 }
 
-/* ---------- FAQ answers slide open ----------
-   The answer inside <details> lives in ::details-content. interpolate-size lets its
-   height animate to "auto". Browsers that don't support this just open instantly,
-   like before. */
-.faq-item::details-content {
-  interpolate-size: allow-keywords;
-  overflow: clip;
-  /* Keeps the slide smooth: without it the height jumps a little at the edges */
-  contain: layout;
-}
-.faq-item:not([open])::details-content {
-  block-size: 0;
-}
-
-@media screen and (prefers-reduced-motion: no-preference) {
-  .faq-item::details-content {
-    transition:
-      block-size 250ms var(--ease-out-strong),
-      content-visibility 250ms var(--ease-out-strong) allow-discrete;
-  }
-}
-
 /* ---------- Motion ----------
    Everything below only runs for visitors who allow motion, and only on screen
    (printing shows the finished page). Hidden start states need a class or
