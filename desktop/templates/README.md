@@ -12,6 +12,13 @@ How a video gets made:
 ## Templates
 
 - `feature-walkthrough/`: Hook, one feature per screenshot in a device frame, logo moment, ending line. 15, 30 or 60 seconds.
+- `logo-reveal/`: the logo builds itself from its own pieces, then holds with the tagline. Needs a logo, no screenshots. 15 seconds. Inspired by @tdinh_me.
+- `kinetic-typography/` ("Moving words"): the user's own words, big and on the beat. Needs only the words (the `about` field). 15 or 30 seconds. Inspired by @finnardley.
+- `product-launch/`: a keynote-style launch trailer where every scene morphs into the next. 15 or 30 seconds. Inspired by @twoclipping.
+- `product-explainer/` ("Explainer"): problem, product, 3 or 4 steps, result, CTA, told with captions. 30 or 60 seconds. Inspired by @finnardley.
+- `showreel/`: fast cuts of every screen on the beat, almost no words. 15 or 30 seconds. Inspired by @stephanlivera.
+
+What each template needs and which lengths it offers lives in `desktop/src/shared/templates.ts`. Wrenn's prompts are written from scratch; the creators above are credited, not copied.
 
 Each template folder has:
 
