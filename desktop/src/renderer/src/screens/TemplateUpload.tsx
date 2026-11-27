@@ -5,6 +5,7 @@ import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
 import type { TemplateDraft } from '../data'
 import { MAX_ABOUT } from '../../../shared/limits'
+import { rulesFor } from '../../../shared/templates'
 
 type Props = {
   draft: TemplateDraft
@@ -19,22 +20,37 @@ type Props = {
 
 // Step 3 of the template path: your files and a few words.
 export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error }: Props) {
-  const hasFiles = draft.photos.length > 0 || draft.recordings.length > 0
+  // What this template needs: screenshots, a logo, or the user's own words
+  const { needs } = rulesFor(draft.templateId)
   const hasName = draft.brandName.trim() !== ''
-  const ready = hasFiles && hasName
-  // Says exactly what's missing. A logo or font alone doesn't count as a file here.
-  const missing = !hasName && !hasFiles
-    ? 'Add your brand name and at least one screenshot or recording.'
+  const hasMain =
+    needs === 'screens'
+      ? draft.photos.length > 0 || draft.recordings.length > 0
+      : needs === 'logo'
+        ? draft.logo.length > 0
+        : draft.about.trim() !== ''
+  const ready = hasMain && hasName
+  // Says exactly what's missing. For "screens", a logo or font alone doesn't count.
+  const mainMissing =
+    needs === 'screens' ? 'at least one screenshot or recording' : needs === 'logo' ? 'your logo' : 'your words'
+  const missing = !hasName && !hasMain
+    ? `Add your brand name and ${mainMissing}.`
     : !hasName
       ? 'Add your brand name.'
-      : 'Add at least one screenshot or recording.'
+      : `Add ${mainMissing}.`
+  const sub =
+    needs === 'screens'
+      ? 'Screenshots and short screen recordings work best.'
+      : needs === 'logo'
+        ? 'Your logo is the star here.'
+        : 'Type what the video should say. Wrenn makes the words move.'
 
   return (
     // One column, top to bottom: forms are easier to follow with one field at a time
     <div className="mx-auto w-full max-w-[640px]">
       <ScreenTitle
         title="Add your stuff"
-        sub="Screenshots and short screen recordings work best."
+        sub={sub}
         step="Step 3 of 3"
         onBack={onBack}
       />
@@ -46,35 +62,61 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           value={draft.brandName}
           onChange={(e) => onChange({ brandName: e.target.value })}
         />
-        <TextArea
-          label="What does it do? (optional)"
-          hint="One or two sentences. Helps Wrenn show the right things."
-          placeholder="e.g. Turns your app screenshots into short videos for social media."
-          maxLength={MAX_ABOUT}
-          value={draft.about}
-          onChange={(e) => onChange({ about: e.target.value })}
-        />
-        <FileDrop
-          label="Photos and screenshots"
-          accept="image/*"
-          multiple
-          files={draft.photos}
-          onFiles={(photos) => onChange({ photos })}
-        />
-        <FileDrop
-          label="Screen recordings (optional)"
-          accept="video/*"
-          multiple
-          files={draft.recordings}
-          onFiles={(recordings) => onChange({ recordings })}
-        />
-        <FileDrop
-          label="Logo (optional)"
-          hint="A PNG with a see-through background looks best."
-          accept="image/*"
-          files={draft.logo}
-          onFiles={(logo) => onChange({ logo })}
-        />
+        {needs === 'words' ? (
+          <TextArea
+            label="Your words"
+            hint="A few short lines. Wrenn keeps your words and makes them move."
+            placeholder="e.g. Stop guessing. Start tracking. Every peso, every day."
+            maxLength={MAX_ABOUT}
+            value={draft.about}
+            onChange={(e) => onChange({ about: e.target.value })}
+          />
+        ) : (
+          <TextArea
+            label="What does it do? (optional)"
+            hint="One or two sentences. Helps Wrenn show the right things."
+            placeholder="e.g. Turns your app screenshots into short videos for social media."
+            maxLength={MAX_ABOUT}
+            value={draft.about}
+            onChange={(e) => onChange({ about: e.target.value })}
+          />
+        )}
+        {needs === 'logo' && (
+          <FileDrop
+            label="Logo"
+            hint="A PNG with a see-through background, or an SVG, looks best."
+            accept="image/*"
+            files={draft.logo}
+            onFiles={(logo) => onChange({ logo })}
+          />
+        )}
+        {needs === 'screens' && (
+          <>
+            <FileDrop
+              label="Photos and screenshots"
+              accept="image/*"
+              multiple
+              files={draft.photos}
+              onFiles={(photos) => onChange({ photos })}
+            />
+            <FileDrop
+              label="Screen recordings (optional)"
+              accept="video/*"
+              multiple
+              files={draft.recordings}
+              onFiles={(recordings) => onChange({ recordings })}
+            />
+          </>
+        )}
+        {needs !== 'logo' && (
+          <FileDrop
+            label="Logo (optional)"
+            hint="A PNG with a see-through background looks best."
+            accept="image/*"
+            files={draft.logo}
+            onFiles={(logo) => onChange({ logo })}
+          />
+        )}
         <FileDrop
           label="Fonts (optional)"
           hint="Your brand's font files. Skip this and Wrenn picks a font for you."

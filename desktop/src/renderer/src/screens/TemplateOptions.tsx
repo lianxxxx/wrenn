@@ -4,6 +4,7 @@ import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { SizePicker } from '../components/SizePicker'
 import { lengths, musicChoices, songTypes, vibes, type TemplateDraft } from '../data'
+import { rulesFor } from '../../../shared/templates'
 
 type Props = {
   draft: TemplateDraft
@@ -20,6 +21,8 @@ export function TemplateOptions({ draft, onChange, hasElevenLabsKey, onOpenSetti
   const needsSong = draft.music === 'own' && draft.musicFile.length === 0
   const needsKey = draft.music === 'elevenlabs' && !hasElevenLabsKey
   const ready = !needsSong && !needsKey
+  // Each template offers its own lengths (a logo reveal is always short)
+  const offered = rulesFor(draft.templateId).lengths
 
   return (
     <div className="mx-auto w-full max-w-[896px]">
@@ -32,7 +35,7 @@ export function TemplateOptions({ draft, onChange, hasElevenLabsKey, onOpenSetti
           name="length"
           value={draft.length}
           onChange={(length) => onChange({ length })}
-          options={lengths}
+          options={lengths.filter((l) => offered.includes(l.id))}
         />
         <ChoiceGroup
           legend="Vibe"

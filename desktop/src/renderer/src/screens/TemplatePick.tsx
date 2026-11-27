@@ -6,7 +6,7 @@ type Props = {
   onPick: (templateId: string) => void
 }
 
-// Step 1 of the template path. Only one template works for now.
+// Step 1 of the template path. Cards with a credit show who inspired them.
 export function TemplatePick({ onBack, onPick }: Props) {
   return (
     <div className="mx-auto w-full max-w-[896px]">
@@ -23,6 +23,7 @@ export function TemplatePick({ onBack, onPick }: Props) {
             >
               <span className="font-display text-[1.875rem] leading-[1.1]">{t.name}</span>
               <span className="mt-sm text-base">{t.description}</span>
+              {t.credit && <span className="mt-xs text-[0.8125rem] font-semibold opacity-80">Inspired by {t.credit}</span>}
             </button>
           ) : (
             <div

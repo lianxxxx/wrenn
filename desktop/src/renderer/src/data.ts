@@ -33,6 +33,8 @@ export type Template = {
   description: string
   available: boolean
   color: string
+  // The creator whose video inspired it, shown on the card. Wrenn's prompts are its own.
+  credit?: string
 }
 
 export const templates: Template[] = [
@@ -44,25 +46,44 @@ export const templates: Template[] = [
     color: 'bg-sky'
   },
   {
+    id: 'logo-reveal',
+    name: 'Logo reveal',
+    description: 'Your logo builds itself, piece by piece.',
+    available: true,
+    color: 'bg-lemon',
+    credit: '@tdinh_me'
+  },
+  {
+    id: 'kinetic-typography',
+    name: 'Moving words',
+    description: 'Your own words, big and on the beat.',
+    available: true,
+    color: 'bg-lime',
+    credit: '@finnardley'
+  },
+  {
     id: 'product-launch',
     name: 'Product launch',
     description: 'A loud, quick hello for something new.',
-    available: false,
-    color: 'bg-lemon'
+    available: true,
+    color: 'bg-orange',
+    credit: '@twoclipping'
   },
   {
-    id: 'before-after',
-    name: 'Before and after',
-    description: 'Show the problem, then your fix.',
-    available: false,
-    color: 'bg-lime'
+    id: 'product-explainer',
+    name: 'Explainer',
+    description: 'How your app works, step by step.',
+    available: true,
+    color: 'bg-lemon',
+    credit: '@finnardley'
   },
   {
-    id: 'customer-love',
-    name: 'Customer love',
-    description: 'Turn happy reviews into a short video.',
-    available: false,
-    color: 'bg-orange'
+    id: 'showreel',
+    name: 'Showreel',
+    description: 'Fast cuts of all your screens, on the beat.',
+    available: true,
+    color: 'bg-sky',
+    credit: '@stephanlivera'
   }
 ]
 

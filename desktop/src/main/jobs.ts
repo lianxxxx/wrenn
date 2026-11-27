@@ -25,6 +25,7 @@ import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
 // "What does it do?" can be a bit longer than the other text: one or two sentences
 import { AUDIO_EXTS, MAX_ABOUT } from '../shared/limits'
+import { rulesFor } from '../shared/templates'
 
 const isWindows = process.platform === 'win32'
 
@@ -141,12 +142,18 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
   }
   if (!SIZES.includes(r.size as SizeId)) throw new Error('Pick a size for your video.')
   if (!LENGTHS.includes(r.length as string)) throw new Error('Pick a length for your video.')
+  const rules = rulesFor(r.templateId)
+  if (!rules.lengths.includes(r.length as JobRequest['length'])) throw new Error('Pick a length for your video.')
   if (!VIBES.includes(r.vibe as string)) throw new Error('Pick a vibe for your video.')
   if (!isText(r.brandName) || r.brandName.trim() === '') throw new Error('Add your brand name.')
   if (!isText(r.endingText)) throw new Error('The ending line is too long.')
   // Optional: older screens don't send it
   if (r.about !== undefined && (typeof r.about !== 'string' || r.about.length > MAX_ABOUT)) {
     throw new Error(`Keep "What does it do?" under ${MAX_ABOUT} letters.`)
+  }
+
+  if (rules.needs === 'words' && (typeof r.about !== 'string' || r.about.trim() === '')) {
+    throw new Error('Add the words for your video.')
   }
 
   if (!Array.isArray(r.files)) throw new Error('Add at least one screenshot or recording.')
@@ -169,9 +176,11 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     files.push({ path: f.path, role: f.role as JobRequest['files'][number]['role'] })
   }
   if (files.filter((f) => f.role === 'logo').length > 1) throw new Error('Add just one logo.')
-  if (!files.some((f) => f.role === 'photo' || f.role === 'recording')) {
+  // What counts as "enough files" depends on the template
+  if (rules.needs === 'screens' && !files.some((f) => f.role === 'photo' || f.role === 'recording')) {
     throw new Error('Add at least one screenshot or recording.')
   }
+  if (rules.needs === 'logo' && !files.some((f) => f.role === 'logo')) throw new Error('Add your logo.')
 
   // Music: Wrenn's own songs when the page doesn't say
   const music: MusicChoice = r.music === undefined ? 'wrenn' : (r.music as MusicChoice)

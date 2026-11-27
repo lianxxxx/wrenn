@@ -27,6 +27,7 @@ import { Setup } from './screens/Setup'
 import { TemplateOptions } from './screens/TemplateOptions'
 import { TemplatePick } from './screens/TemplatePick'
 import { TemplateUpload } from './screens/TemplateUpload'
+import { rulesFor } from '../../shared/templates'
 
 // Every screen in the app. A plain state value picks which one shows (no router package).
 type Screen =
@@ -268,7 +269,12 @@ function App() {
           <TemplatePick
             onBack={() => setScreen('home')}
             onPick={(templateId) => {
-              updateTemplate({ templateId })
+              // Keep the picked length if this template offers it, else its first one
+              const offered = rulesFor(templateId).lengths
+              updateTemplate({
+                templateId,
+                length: offered.includes(templateDraft.length) ? templateDraft.length : offered[0]
+              })
               setScreen('template-options')
             }}
           />
