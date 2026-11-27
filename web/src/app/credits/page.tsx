@@ -135,6 +135,14 @@ export default function CreditsPage() {
           <a href="https://motion-graphics.org/">motion-graphics.org</a>, for ideas on what makes a good showreel
           template. We took inspiration only, not their prompts or designs.
         </li>
+        <li>
+          The templates and the creators whose videos inspired them:{" "}
+          <a href="https://x.com/tdinh_me/status/2103704250329301409">@tdinh_me</a> (Logo reveal),{" "}
+          <a href="https://x.com/finnardley/status/2112859329825009856">@finnardley</a> (Moving words and{" "}
+          <a href="https://x.com/finnardley/status/2114305886420086817">Explainer</a>),{" "}
+          <a href="https://x.com/twoclipping/status/2103835273813496100">@twoclipping</a> (Product launch) and{" "}
+          <a href="https://x.com/stephanlivera/status/2103315922098470926">@stephanlivera</a> (Showreel).
+        </li>
         <li>The Ibong Adarna, from Filipino folklore, for our mascot&apos;s colorful tail.</li>
       </ul>
 

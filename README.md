@@ -98,7 +98,12 @@ More on templates and the scene rules in [desktop/templates/README.md](desktop/t
 
 ## Credits
 
-- **[motion-graphics.org](https://motion-graphics.org/)**: the templates take inspiration from this gallery of Claude-made motion graphics. No prompts were copied. Wrenn's prompts are written from scratch.
+- **[motion-graphics.org](https://motion-graphics.org/)**: the templates take inspiration from this gallery of Claude-made motion graphics. No prompts were copied. Wrenn's prompts are written from scratch. Templates inspired by a creator's video on the site:
+  - Logo reveal: [@tdinh_me](https://x.com/tdinh_me/status/2103704250329301409)
+  - Moving words: [@finnardley](https://x.com/finnardley/status/2112859329825009856)
+  - Product launch: [@twoclipping](https://x.com/twoclipping/status/2103835273813496100)
+  - Explainer: [@finnardley](https://x.com/finnardley/status/2114305886420086817)
+  - Showreel: [@stephanlivera](https://x.com/stephanlivera/status/2103315922098470926)
 - **Music**: CC0 songs from [Free Music Archive](https://freemusicarchive.org/) by HoliznaCC0, Loyalty Freak Music, Komiku, Metre, Ondrosik, John Bartmann and Anonymous420.
 - **Sound effects**: CC0 sounds by [Kenney](https://www.kenney.nl/), plus a few made for Wrenn.
 - Full list of every song and sound, with links: [desktop/resources/CREDITS.md](desktop/resources/CREDITS.md).
