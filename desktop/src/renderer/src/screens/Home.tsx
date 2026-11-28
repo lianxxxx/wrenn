@@ -7,6 +7,7 @@ type Props = {
   onOpenVideo: (video: VideoInfo) => void
   onTemplate: () => void
   onEdit: () => void
+  onSeeAllVideos: () => void
 }
 
 type Path = {
@@ -21,7 +22,7 @@ type Path = {
 
 // Two big ways to start. The cards keep their blob colors at night too,
 // so their text uses "ink" (navy that never swaps).
-export function Home({ videos, onOpenVideo, onTemplate, onEdit }: Props) {
+export function Home({ videos, onOpenVideo, onTemplate, onEdit, onSeeAllVideos }: Props) {
   const paths: Path[] = [
     {
       title: 'Make from a template',
@@ -79,7 +80,8 @@ export function Home({ videos, onOpenVideo, onTemplate, onEdit }: Props) {
         ))}
       </div>
 
-      <VideoList videos={videos} onOpen={onOpenVideo} />
+      {/* Just the newest few here. Your videos in the sidebar shows them all. */}
+      <VideoList videos={videos} onOpen={onOpenVideo} limit={3} onSeeAll={onSeeAllVideos} />
     </div>
   )
 }

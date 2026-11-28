@@ -37,6 +37,33 @@ test('first launch shows the setup screen', async () => {
   await expect(page.getByText('Install Claude Code').first()).toBeVisible()
   await expect(page.getByLabel('ElevenLabs key (optional)')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
+  // No sidebar during setup
+  await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0)
+})
+
+test('the sidebar moves between Home, Templates, Your videos and Settings', async () => {
+  makeVideo(join(dirs.output, 'wrenn square test.mp4'))
+  const page = await openHome()
+  const nav = page.getByRole('navigation', { name: 'Main' })
+  const item = (name: string) => nav.getByRole('button', { name, exact: true })
+
+  await expect(item('Home')).toHaveAttribute('aria-current', 'page')
+
+  await item('Templates').click()
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
+  await expect(item('Templates')).toHaveAttribute('aria-current', 'page')
+  await expect(item('Home')).not.toHaveAttribute('aria-current', 'page')
+
+  await item('Your videos').click()
+  await expect(page.getByRole('heading', { name: 'Your videos', level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Video, / })).toBeVisible()
+
+  await item('Settings').click()
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+  await expect(item('Settings')).toHaveAttribute('aria-current', 'page')
+
+  await item('Home').click()
+  await expect(page.getByRole('heading', { name: /What are we/ })).toBeVisible()
 })
 
 test('Home shows both cards and the videos in the output folder', async () => {
@@ -123,7 +150,7 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
   const key = 'sk_test_wrenn_1234567890abcdef'
   let page = await openHome()
 
-  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
   const field = page.getByLabel('ElevenLabs key (optional)')
   await field.fill(key)
@@ -139,7 +166,7 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
   app = launched.app
   page = launched.page
   await expect(page.getByRole('heading', { name: /What are we/ })).toBeVisible()
-  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' }).click()
   await expect(page.getByLabel('ElevenLabs key (optional)')).toHaveValue(key)
 
   // On disk the key is never plain text when Windows can encrypt it

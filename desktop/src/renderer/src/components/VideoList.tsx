@@ -3,6 +3,11 @@ import { getSize, videoTitle, type VideoInfo } from '../data'
 type Props = {
   videos: VideoInfo[]
   onOpen: (video: VideoInfo) => void
+  // Home shows only the newest few, with a link to see them all
+  limit?: number
+  onSeeAll?: () => void
+  // False on the Your videos screen, which has its own big title
+  showHeading?: boolean
 }
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
@@ -12,19 +17,38 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit'
 })
 
-// "Your videos" on Home: every video made so far, newest first.
-export function VideoList({ videos, onOpen }: Props) {
+// Videos made so far, newest first. On Home (newest few) and the Your videos screen (all).
+export function VideoList({ videos, onOpen, limit, onSeeAll, showHeading = true }: Props) {
+  const shown = limit === undefined ? videos : videos.slice(0, limit)
+  const more = videos.length > shown.length
   return (
-    <section className="mt-3xl text-left" aria-labelledby="your-videos">
-      <h2 id="your-videos" className="font-display text-[2rem] leading-[1.1] text-navy">
-        Your videos
-      </h2>
+    <section
+      className={`text-left ${showHeading ? 'mt-3xl' : ''}`}
+      aria-labelledby={showHeading ? 'your-videos' : undefined}
+      aria-label={showHeading ? undefined : 'Your videos'}
+    >
+      {showHeading && (
+        <div className="flex items-baseline justify-between gap-md">
+          <h2 id="your-videos" className="font-display text-[2rem] leading-[1.1] text-navy">
+            Your videos
+          </h2>
+          {more && onSeeAll && (
+            <button
+              type="button"
+              onClick={onSeeAll}
+              className="cursor-pointer rounded-sm py-xs text-[0.9375rem] font-semibold text-navy hover:underline"
+            >
+              See all {videos.length}
+            </button>
+          )}
+        </div>
+      )}
 
       {videos.length === 0 ? (
-        <p className="mt-sm text-base text-navy-body">Videos you make will show up here.</p>
+        <p className={`text-base text-navy-body ${showHeading ? 'mt-sm' : ''}`}>Videos you make will show up here.</p>
       ) : (
-        <ul className="mt-lg grid grid-cols-3 gap-lg">
-          {videos.map((video) => {
+        <ul className={`grid grid-cols-3 gap-lg ${showHeading ? 'mt-lg' : ''}`}>
+          {shown.map((video) => {
             const size = getSize(video.size)
             return (
               <li key={video.id}>
