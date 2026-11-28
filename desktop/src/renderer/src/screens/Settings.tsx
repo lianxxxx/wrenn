@@ -5,7 +5,7 @@ import { ScreenTitle } from '../components/ScreenTitle'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import { TextField } from '../components/TextField'
 import { keyWarning } from '../elevenlabsKey'
-import { INSTALL_URL, RECHECK_MS } from './Setup'
+import { INSTALL_URL, RECHECK_MS, SIGN_IN_NOTE, WAITING_NOTE } from './Setup'
 
 type Props = {
   voiceoverKey: string
@@ -159,8 +159,8 @@ function ClaudeCheck() {
     checking: 'Checking...',
     ready: `Ready${version ? ` (version ${version})` : ''}. Wrenn uses it to build your videos.`,
     missing: "Not installed. Wrenn can't make videos without it.",
-    'signed-out': 'You need to sign in again.',
-    waiting: 'Finish signing in on the page that opened in your browser. Wrenn will notice on its own.'
+    'signed-out': `You need to sign in again. ${SIGN_IN_NOTE}`,
+    waiting: WAITING_NOTE
   }[state]
 
   return (

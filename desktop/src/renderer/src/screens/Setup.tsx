@@ -26,6 +26,11 @@ export const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
 // How often to check again while waiting for the user to install or sign in
 export const RECHECK_MS = 4000
 
+// Sign-in opens Claude Code in a black command window (it needs one to run), then the browser.
+// We say so up front, so the black window doesn't look like something broke.
+export const SIGN_IN_NOTE = "A black window opens, then your browser. That's normal. Sign in on the browser page, then close the black window."
+export const WAITING_NOTE = "Finish signing in on the page that opened in your browser, then close the black window. Wrenn will notice on its own."
+
 export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
   const [status, setStatus] = useState<Status>('checking')
   const [version, setVersion] = useState<string>()
@@ -117,7 +122,7 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
               <Row
                 icon={<Badge>2</Badge>}
                 title="Sign in to Claude"
-                text="A small window opens, then your browser. Sign in there, then come back."
+                text={SIGN_IN_NOTE}
               />
               <Actions>
                 <Button onClick={signIn}>Sign in</Button>
@@ -130,7 +135,7 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
               <Row
                 icon={<Spinner className="size-8" />}
                 title="Waiting for you to sign in..."
-                text="Finish signing in on the page that opened in your browser. Wrenn will notice on its own."
+                text={WAITING_NOTE}
               />
               <Actions>
                 <Button variant="ghost" onClick={signIn}>

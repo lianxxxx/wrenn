@@ -66,7 +66,10 @@ export async function openClaudeSignIn(): Promise<void> {
   if (!claude) return
 
   if (isWindows) {
-    // "start" opens a new console window, so the user sees Claude Code's own messages
+    // "start" opens a new console window, so the user sees Claude Code's own messages.
+    // We keep it visible on purpose: if the browser can't hand the login back on its own,
+    // Claude Code asks the user to paste a code into this window, and a hidden window
+    // would leave them stuck. The screens warn that a black window opens (SIGN_IN_NOTE).
     spawn('cmd.exe', ['/c', 'start', '"Sign in to Claude"', 'cmd', '/k', `${claude} auth login`], {
       detached: true,
       stdio: 'ignore',
