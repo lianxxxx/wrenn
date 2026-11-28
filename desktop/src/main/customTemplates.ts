@@ -19,16 +19,26 @@ function filePath(): string {
   return join(app.getPath('userData'), 'custom-templates.json')
 }
 
+// A name is one plain line: new lines, tabs and other control characters become spaces.
+// It goes into the job's CLAUDE.md outside the user's tag, so it must not start a new line there.
+function cleanName(text: string): string {
+  // eslint-disable-next-line no-control-regex
+  // (\s also catches the Unicode line and paragraph separators)
+  return text.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
 // Keeps an entry from the file only if every field looks right
 function readEntry(value: unknown): CustomTemplate | null {
   if (!value || typeof value !== 'object') return null
   const e = value as Record<string, unknown>
   if (typeof e.id !== 'string' || !isCustomTemplateId(e.id)) return null
-  if (typeof e.name !== 'string' || !e.name.trim() || e.name.length > MAX_TEMPLATE_NAME) return null
+  if (typeof e.name !== 'string') return null
+  const name = cleanName(e.name)
+  if (!name || name.length > MAX_TEMPLATE_NAME) return null
   if (typeof e.prompt !== 'string' || !e.prompt.trim() || e.prompt.length > MAX_CUSTOM_PROMPT) return null
   if (typeof e.createdAt !== 'string' || isNaN(Date.parse(e.createdAt))) return null
   const credit = typeof e.credit === 'string' && e.credit.trim() ? e.credit.trim().slice(0, MAX_CREDIT) : undefined
-  return { id: e.id, name: e.name, prompt: e.prompt, credit, createdAt: e.createdAt }
+  return { id: e.id, name, prompt: e.prompt, credit, createdAt: e.createdAt }
 }
 
 // Every saved template, oldest first (the order they were made). A missing or broken file is an empty list.
@@ -66,7 +76,7 @@ function queue<T>(run: () => Promise<T>): Promise<T> {
 // Throws an Error with a plain message the screen can show.
 export function saveCustomTemplate(input: unknown): Promise<CustomTemplate> {
   const r = (input ?? {}) as Record<string, unknown>
-  const name = typeof r.name === 'string' ? r.name.trim() : ''
+  const name = typeof r.name === 'string' ? cleanName(r.name) : ''
   const prompt = typeof r.prompt === 'string' ? r.prompt.trim() : ''
   const credit = typeof r.credit === 'string' ? r.credit.trim() : ''
   if (!name) return Promise.reject(new Error('Give your template a name.'))

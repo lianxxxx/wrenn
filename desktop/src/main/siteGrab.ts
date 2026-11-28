@@ -3,7 +3,7 @@
 //
 // 1. Check the address: only http(s), and only public sites (not this computer or the home network).
 // 2. Open it in a hidden, locked-down window: no Node, no preload, no popups, no downloads,
-//    no permission prompts, its own throwaway session (no cookies kept).
+//    no permission prompts, its own in-memory session (wiped before and after each grab).
 // 3. Force light mode, then screenshot each screen-height section at desktop and phone width.
 // 4. Read the logo, fonts and colors from the page, and download the logo and same-site fonts.
 // 5. Save it all in userData/grabs/<id>/. The screen shows the files like normal uploads,
@@ -18,6 +18,7 @@ import { join } from 'path'
 
 import type { GrabbedFile, SiteGrab } from '../preload'
 import { MAX_SITE_URL } from '../shared/limits'
+import { bareHost, cleanSvg, isLocalName, isPrivateIp } from './siteSafety'
 
 // The plain message for anything that goes wrong
 const FAILED = "Couldn't open that page. Check the link, or upload screenshots instead."
@@ -62,26 +63,6 @@ function allowLocal(): boolean {
 // Is this a public address?
 // ---------------------------------------------------------------------------
 
-// True for addresses on this computer or a home/office network
-function isPrivateIp(ip: string): boolean {
-  if (isIP(ip) === 4) {
-    const [a, b] = ip.split('.').map(Number)
-    return (
-      a === 0 ||
-      a === 10 ||
-      a === 127 ||
-      (a === 100 && b >= 64 && b <= 127) ||
-      (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && b === 168) ||
-      a >= 224
-    )
-  }
-  const v6 = ip.toLowerCase()
-  if (v6.startsWith('::ffff:')) return isPrivateIp(v6.slice(7))
-  return v6 === '::' || v6 === '::1' || v6.startsWith('fc') || v6.startsWith('fd') || v6.startsWith('fe80')
-}
-
 // Turns what the user typed into a URL we're willing to open. "mysite.com" becomes "https://mysite.com".
 function parseSiteUrl(input: unknown): URL | null {
   if (typeof input !== 'string') return null
@@ -98,19 +79,30 @@ function parseSiteUrl(input: unknown): URL | null {
   }
 }
 
-// Does this address point at a public site? Looks the name up, so "localhost" and
+// Name lookups for the grab that's running, so each name is only looked up once.
+// Emptied at the start and end of every grab.
+const lookups = new Map<string, Promise<boolean>>()
+
+// Does this name or address lead to a public site? Looks the name up, so "localhost" and
 // names that lead to the home network are turned down too.
+function isPublicHost(hostname: string): Promise<boolean> {
+  const host = bareHost(hostname)
+  if (isLocalName(host)) return Promise.resolve(false)
+  if (isIP(host)) return Promise.resolve(!isPrivateIp(host))
+  let found = lookups.get(host)
+  if (!found) {
+    found = lookup(host, { all: true }).then(
+      (list) => list.length > 0 && list.every((a) => !isPrivateIp(a.address)),
+      () => false
+    )
+    lookups.set(host, found)
+  }
+  return found
+}
+
 async function isPublicUrl(url: URL): Promise<boolean> {
   if (allowLocal()) return true
-  const host = url.hostname.replace(/^\[|\]$/g, '')
-  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) return false
-  if (isIP(host)) return !isPrivateIp(host)
-  try {
-    const found = await lookup(host, { all: true })
-    return found.length > 0 && found.every((a) => !isPrivateIp(a.address))
-  } catch {
-    return false
-  }
+  return isPublicHost(url.hostname)
 }
 
 // ---------------------------------------------------------------------------
@@ -121,27 +113,50 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// A fresh in-memory session for each grab: nothing is kept, nothing can be downloaded or allowed
-function grabSession(id: string): Session {
-  const ses = session.fromPartition(`wrenn-grab-${id}`, { cache: false })
+// One in-memory session for every grab: nothing can be downloaded or allowed, and what
+// the last site left behind (cookies, storage, cache) is wiped before and after each grab.
+let grabSes: Session | undefined
+
+function grabSession(): Session {
+  if (grabSes) return grabSes
+  const ses = session.fromPartition('wrenn-grab', { cache: false })
   ses.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
   ses.setPermissionCheckHandler(() => false)
   ses.on('will-download', (event) => event.preventDefault())
-  // The page can't reach this computer or the home network either (except in the test)
+  // The page can't reach this computer or the home network either (except in the test).
+  // Names are looked up first, so a name that leads to 192.168.x.x is stopped too.
+  // This also covers ses.fetch, which download() uses for the logo and fonts.
   if (!allowLocal()) {
     ses.webRequest.onBeforeRequest((details, callback) => {
+      let u: URL
       try {
-        const u = new URL(details.url)
-        const host = u.hostname.replace(/^\[|\]$/g, '')
-        const local =
-          host === 'localhost' || host.endsWith('.localhost') || (isIP(host) !== 0 && isPrivateIp(host))
-        callback({ cancel: local || (u.protocol !== 'http:' && u.protocol !== 'https:' && u.protocol !== 'data:' && u.protocol !== 'blob:') })
+        u = new URL(details.url)
       } catch {
         callback({ cancel: true })
+        return
       }
+      if (u.protocol === 'data:' || u.protocol === 'blob:') {
+        callback({ cancel: false })
+        return
+      }
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+        callback({ cancel: true })
+        return
+      }
+      isPublicHost(u.hostname).then(
+        (ok) => callback({ cancel: !ok }),
+        () => callback({ cancel: true })
+      )
     })
   }
+  grabSes = ses
   return ses
+}
+
+// Wipes what the last site left in the grab session
+async function wipeSession(ses: Session): Promise<void> {
+  await ses.clearStorageData().catch(() => {})
+  await ses.clearCache().catch(() => {})
 }
 
 function makeHiddenWindow(ses: Session): BrowserWindow {
@@ -399,7 +414,8 @@ async function saveLogo(ses: Session, brand: PageBrand, dir: string): Promise<Gr
   let ext: string | null
   if (brand.logo.kind === 'svg') {
     if (brand.logo.svg.length > MAX_LOGO_BYTES) return undefined
-    data = Buffer.from(brand.logo.svg, 'utf8')
+    // Copied from a stranger's page: take out anything that could run
+    data = Buffer.from(cleanSvg(brand.logo.svg), 'utf8')
     ext = '.svg'
   } else {
     const got = await download(ses, brand.logo.url, MAX_LOGO_BYTES)
@@ -496,14 +512,26 @@ async function runGrab(url: URL, dir: string, ses: Session, wc: WebContents): Pr
 
 export async function grabSite(input: unknown): Promise<SiteGrab> {
   if (busy) throw new Error('Wrenn is already looking at a site. Give it a moment.')
-  const url = parseSiteUrl(input)
-  if (!url) throw new Error('That link doesn\'t look right. Try one like https://yoursite.com.')
-  if (!(await isPublicUrl(url))) throw new Error('Wrenn can only open public websites, not pages on this computer or your home network.')
-
+  // Set before anything waits, so two quick clicks can't both start a grab
   busy = true
+  try {
+    const url = parseSiteUrl(input)
+    if (!url) throw new Error('That link doesn\'t look right. Try one like https://yoursite.com.')
+    lookups.clear()
+    if (!(await isPublicUrl(url))) throw new Error('Wrenn can only open public websites, not pages on this computer or your home network.')
+    return await grabInWindow(url)
+  } finally {
+    busy = false
+    lookups.clear()
+  }
+}
+
+// Opens the hidden window, runs the grab, and always tidies up after
+async function grabInWindow(url: URL): Promise<SiteGrab> {
   const id = `${Date.now()}-${randomBytes(3).toString('hex')}`
   const dir = join(grabsDir(), id)
-  const ses = grabSession(id)
+  const ses = grabSession()
+  await wipeSession(ses)
   const win = makeHiddenWindow(ses)
   const wc = win.webContents
   let timer: NodeJS.Timeout | undefined
@@ -518,14 +546,13 @@ export async function grabSite(input: unknown): Promise<SiteGrab> {
     throw new Error(FAILED)
   } finally {
     clearTimeout(timer)
-    busy = false
     try {
       if (wc.debugger.isAttached()) wc.debugger.detach()
     } catch {
       // Already gone
     }
     if (!win.isDestroyed()) win.destroy()
-    void ses.clearStorageData().catch(() => {})
+    await wipeSession(ses)
   }
 }
 

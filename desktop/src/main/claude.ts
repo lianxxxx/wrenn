@@ -2,7 +2,7 @@
 // Wrenn never reads the user's Claude login files: it only asks Claude Code itself,
 // and only passes "installed / version / signed in" to the screens (no email, no account info).
 
-import { exec, execFile, spawn } from 'child_process'
+import { exec, execFile, spawn, spawnSync } from 'child_process'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
@@ -128,7 +128,14 @@ async function runInstaller(): Promise<InstallResult> {
     child.stdout?.on('data', keep)
     child.stderr?.on('data', keep)
 
-    const timer = setTimeout(() => child.kill(), INSTALL_TIMEOUT_MS)
+    // On Windows the installer starts its own helpers, so stop the whole tree (like jobs.ts does)
+    const timer = setTimeout(() => {
+      if (isWindows && child.pid) {
+        spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 5000 })
+      } else {
+        child.kill()
+      }
+    }, INSTALL_TIMEOUT_MS)
     child.on('error', (error) => {
       clearTimeout(timer)
       console.error('Claude Code install could not start:', error)
