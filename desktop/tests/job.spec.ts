@@ -180,6 +180,11 @@ test('"Making your video" shows a progress bar screen readers can follow', async
   // Screen readers hear the step, not the numbers that change every second
   await expect(page.getByRole('status')).toHaveText('Building your scenes')
 
+  // "Keep going" puts focus back on Cancel, so keyboard users don't lose their place
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await page.getByRole('button', { name: 'Keep going' }).click()
+  await expect(page.getByRole('button', { name: 'Cancel' })).toBeFocused()
+
   await page.getByRole('button', { name: 'Cancel' }).click()
   // Wrenn asks first, then says the files are still there
   await page.getByRole('button', { name: 'Yes, stop' }).click()

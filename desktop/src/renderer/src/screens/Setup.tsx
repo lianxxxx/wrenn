@@ -136,8 +136,8 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
                 </a>
               </Actions>
               {installError && (
-                <div className="mt-md ml-[56px]">
-                  <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
+                <div className="mt-md ml-[56px] rounded-sm border-2 border-red bg-card px-md py-sm">
+                  <p className="font-semibold text-navy" role="alert">
                     {installError}
                   </p>
                   <a

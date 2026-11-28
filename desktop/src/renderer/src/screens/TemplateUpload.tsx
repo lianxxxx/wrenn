@@ -157,7 +157,7 @@ export function TemplateUpload({ draft, onChange, onSiteGrabbed, onBack, onGener
             It opens by itself when there's already text in it, so nothing is hidden by surprise. */}
         <details className="group" open={advancedOpen}>
           <summary className="flex w-fit cursor-pointer list-none items-center gap-xs rounded-sm py-xs pr-sm text-[0.9375rem] font-semibold text-navy hover:underline [&::-webkit-details-marker]:hidden">
-            <svg viewBox="0 0 24 24" className="size-5 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg viewBox="0 0 24 24" className="size-5 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-(--ease-out-strong)" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M9 6l6 6-6 6" />
             </svg>
             Advanced

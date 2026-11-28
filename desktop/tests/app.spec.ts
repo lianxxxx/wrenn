@@ -53,6 +53,8 @@ test('the sidebar moves between Home, Templates, Your videos and Settings', asyn
   await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
   await expect(item('Templates')).toHaveAttribute('aria-current', 'page')
   await expect(item('Home')).not.toHaveAttribute('aria-current', 'page')
+  // Sidebar screens have no Back link: the sidebar is the way around
+  await expect(page.getByRole('button', { name: 'Back' })).toHaveCount(0)
 
   await item('Your videos').click()
   await expect(page.getByRole('heading', { name: 'Your videos', level: 1 })).toBeVisible()
@@ -61,9 +63,20 @@ test('the sidebar moves between Home, Templates, Your videos and Settings', asyn
   await item('Settings').click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
   await expect(item('Settings')).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('button', { name: 'Back' })).toHaveCount(0)
 
   await item('Home').click()
   await expect(page.getByRole('heading', { name: /What are we/ })).toBeVisible()
+})
+
+test('Your videos with no videos yet points to making one', async () => {
+  const page = await openHome()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Your videos', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Your videos', level: 1 })).toBeVisible()
+  await expect(page.getByText('Nothing here yet.')).toBeVisible()
+  await expect(page.getByText('Click one to watch it', { exact: false })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Make a video' }).click()
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
 })
 
 test('Home shows both cards and the videos in the output folder', async () => {
@@ -222,6 +235,11 @@ test('My own prompt: save a template, see its card, pick it, delete it', async (
   await expect(page.getByText('Delete "Neon launch"?')).toBeVisible()
   await page.getByRole('button', { name: 'Keep it' }).click()
   await expect(page.getByRole('button', { name: /Neon launch/ }).first()).toBeVisible()
+  // Focus goes back to the trash button, and Escape works the same way
+  await expect(page.getByRole('button', { name: 'Delete Neon launch' })).toBeFocused()
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Delete Neon launch' })).toBeFocused()
 
   await page.getByRole('button', { name: 'Delete Neon launch' }).click()
   await page.getByRole('button', { name: 'Yes, delete' }).click()

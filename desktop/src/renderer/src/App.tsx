@@ -65,8 +65,6 @@ function App() {
   // Null until the settings file is read, so the wrong first screen never flashes
   const [settings, setSettings] = useState<SettingsData | null>(null)
   const [screen, setScreen] = useState<Screen>('setup')
-  // Where Settings' Back button returns to
-  const [beforeSettings, setBeforeSettings] = useState<Screen>('home')
 
   const [templateDraft, setTemplateDraft] = useState<TemplateDraft>(emptyTemplateDraft)
   const [editDraft, setEditDraft] = useState<EditDraft>(emptyEditDraft)
@@ -244,15 +242,12 @@ function App() {
   }
 
   function openSettings() {
-    setBeforeSettings(screen)
     setScreen('settings')
   }
 
   // A sidebar click. Drafts stay as they are, so going back to Templates keeps the answers.
   function goTo(id: NavId) {
-    if (id === 'settings') {
-      if (screen !== 'settings') openSettings()
-    } else if (id === 'templates') setScreen('template-pick')
+    if (id === 'templates') setScreen('template-pick')
     else setScreen(id)
   }
 
@@ -331,6 +326,7 @@ function App() {
           {screen === 'videos' && (
             <Videos
               videos={videos}
+              onMakeVideo={() => setScreen('template-pick')}
               onOpenVideo={(video) => {
                 setOpenVideo({ video, isNew: false })
                 setScreen('done')
@@ -340,7 +336,6 @@ function App() {
   
           {screen === 'template-pick' && (
             <TemplatePick
-              onBack={() => setScreen('home')}
               onPick={(templateId) => {
                 // Keep the picked length if this template offers it, else its first one
                 const offered = rulesFor(templateId).lengths
@@ -434,7 +429,6 @@ function App() {
               voiceoverKey={settings.voiceoverKey}
               onSaveKey={(voiceoverKey) => saveSettings({ voiceoverKey })}
               outputFolder={outputFolder}
-              onBack={() => setScreen(beforeSettings)}
             />
           )}
         </main>

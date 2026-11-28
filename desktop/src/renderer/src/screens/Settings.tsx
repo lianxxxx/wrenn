@@ -13,7 +13,6 @@ type Props = {
   onSaveKey: (key: string) => Promise<void>
   // Where videos go, e.g. C:\Users\Lian\Videos\Wrenn
   outputFolder: string
-  onBack: () => void
 }
 
 type Theme = 'light' | 'dark'
@@ -28,7 +27,7 @@ function applyTheme(theme: Theme) {
   }
 }
 
-export function Settings({ voiceoverKey, onSaveKey, outputFolder, onBack }: Props) {
+export function Settings({ voiceoverKey, onSaveKey, outputFolder }: Props) {
   const [theme, setTheme] = useState<Theme>(
     document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   )
@@ -48,7 +47,7 @@ export function Settings({ voiceoverKey, onSaveKey, outputFolder, onBack }: Prop
 
   return (
     <div className="mx-auto w-full max-w-[672px]">
-      <ScreenTitle title="Settings" onBack={onBack} />
+      <ScreenTitle title="Settings" />
 
       <div className="flex flex-col gap-xl">
         <ClaudeCheck />
@@ -199,7 +198,10 @@ function ClaudeCheck() {
               <CheckIcon className="size-4" />
             </span>
           ) : (
-            <span className="size-3 rounded-full bg-orange" aria-hidden />
+            // The "!" means it's not just the color that says something needs doing
+            <span className="flex size-5 items-center justify-center rounded-full bg-orange text-[0.75rem] leading-none font-bold text-ink" aria-hidden>
+              !
+            </span>
           )}
         </span>
         <p className="min-w-0 flex-1 text-navy">{text}</p>
@@ -214,8 +216,8 @@ function ClaudeCheck() {
             </Button>
           </div>
           {installError && (
-            <div className="mt-sm">
-              <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
+            <div className="mt-sm rounded-sm border-2 border-red bg-card px-md py-sm">
+              <p className="font-semibold text-navy" role="alert">
                 {installError}
               </p>
               <a

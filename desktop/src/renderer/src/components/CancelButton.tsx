@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
 
 type Props = {
@@ -10,10 +10,22 @@ type Props = {
 // so one wrong click doesn't throw away minutes of work.
 export function CancelButton({ onConfirm }: Props) {
   const [asking, setAsking] = useState(false)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  // True once the question was shown, so focus only goes back after "Keep going" or Escape
+  const asked = useRef(false)
+
+  // The question replaced the Cancel button, so put keyboard focus back on it when it returns
+  useEffect(() => {
+    if (asking) asked.current = true
+    else if (asked.current) {
+      asked.current = false
+      cancelRef.current?.focus()
+    }
+  }, [asking])
 
   if (!asking) {
     return (
-      <Button variant="ghost" onClick={() => setAsking(true)}>
+      <Button ref={cancelRef} variant="ghost" onClick={() => setAsking(true)}>
         Cancel
       </Button>
     )
