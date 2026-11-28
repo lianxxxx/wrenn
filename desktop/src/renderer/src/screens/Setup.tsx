@@ -14,14 +14,19 @@ type Props = {
 
 // Where setup is. People only click buttons here, and Wrenn checks again on its own.
 //   checking    -> asking the computer for Claude Code (first time only)
-//   missing     -> not installed: link to Anthropic's install guide
+//   missing     -> not installed: "Install Claude Code" installs it for them
+//   installing  -> Anthropic's installer runs hidden in the background
 //   signed-out  -> installed, not signed in: "Sign in" opens Claude Code's own sign-in
 //   waiting     -> the sign-in window is open, Wrenn checks until it's done
 //   found       -> all set
-type Status = 'checking' | 'missing' | 'signed-out' | 'waiting' | 'found'
+type Status = 'checking' | 'missing' | 'installing' | 'signed-out' | 'waiting' | 'found'
 
-// Placeholder link: double check the exact Anthropic install page before launch
+// Anthropic's install guide: the fallback if the one-click install doesn't work
 export const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
+
+export const INSTALLING_NOTE = 'Installing Claude Code. This takes about a minute.'
+// Shown if the install call itself breaks (the main process sends its own message otherwise)
+export const INSTALL_ERROR = "Couldn't install Claude Code. Try again, or follow Anthropic's guide."
 
 // How often to check again while waiting for the user to install or sign in
 export const RECHECK_MS = 4000
@@ -34,6 +39,8 @@ export const WAITING_NOTE = "Finish signing in on the page that opened in your b
 export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
   const [status, setStatus] = useState<Status>('checking')
   const [version, setVersion] = useState<string>()
+  // Plain words for why the last install didn't work, or ''
+  const [installError, setInstallError] = useState('')
   // Each check gets a number, so an old, slow answer can't overwrite a newer one
   const latestCheck = useRef(0)
   const [saving, setSaving] = useState(false)
@@ -67,9 +74,10 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
     check()
   }, [check])
 
-  // While someone is installing or signing in, check again every few seconds
+  // While someone is installing or signing in, check again every few seconds.
+  // Not during Wrenn's own install: that one tells us when it's done.
   useEffect(() => {
-    if (status === 'checking' || status === 'found') return
+    if (status === 'checking' || status === 'installing' || status === 'found') return
     const timer = window.setInterval(() => check(status === 'waiting'), RECHECK_MS)
     return () => window.clearInterval(timer)
   }, [status, check])
@@ -77,6 +85,26 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
   function signIn() {
     setStatus('waiting')
     window.api.openClaudeSignIn()
+  }
+
+  async function install() {
+    // Throw away any check still on its way, so it can't flip the screen back to "missing"
+    latestCheck.current++
+    setInstallError('')
+    setStatus('installing')
+    let result
+    try {
+      result = await window.api.installClaude()
+    } catch {
+      result = { ok: false as const, message: INSTALL_ERROR }
+    }
+    if (!result.ok) {
+      setInstallError(result.message)
+      setStatus('missing')
+      return
+    }
+    // Installed: check again, which moves on to signing in
+    check()
   }
 
   return (
@@ -99,22 +127,34 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
               <Row
                 icon={<Badge>1</Badge>}
                 title="Install Claude Code"
-                text="Follow Anthropic's short guide. Wrenn notices on its own when it's done."
+                text="Wrenn installs it for you in the background. No terminal needed."
               />
               <Actions>
-                <a
-                  href={INSTALL_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="press inline-flex items-center rounded-pill bg-navy px-[22px] py-[10px] font-display text-lg leading-none text-bg"
-                >
-                  Open the install guide
-                </a>
+                <Button onClick={install}>Install Claude Code</Button>
                 <a href="https://claude.ai" target="_blank" rel="noreferrer" className="text-[0.9375rem] font-semibold text-navy underline">
                   No Claude plan yet? Get one at claude.ai
                 </a>
               </Actions>
+              {installError && (
+                <div className="mt-md ml-[56px]">
+                  <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
+                    {installError}
+                  </p>
+                  <a
+                    href={INSTALL_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-xs inline-block text-[0.9375rem] font-semibold text-navy underline"
+                  >
+                    Open the install guide
+                  </a>
+                </div>
+              )}
             </>
+          )}
+
+          {status === 'installing' && (
+            <Row icon={<Spinner className="size-8" />} title="Installing Claude Code..." text={INSTALLING_NOTE} />
           )}
 
           {status === 'signed-out' && (
@@ -174,9 +214,9 @@ export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
 
       <div className="mt-xl flex items-center justify-end gap-md">
         {/* Says why Continue is greyed out */}
-        {!saveError && (status === 'missing' || status === 'signed-out' || status === 'waiting') && (
+        {!saveError && status !== 'checking' && status !== 'found' && (
           <p className="text-[0.9375rem] text-navy-body">
-            {status === 'missing' ? 'Install Claude Code first.' : 'Sign in to Claude first.'}
+            {status === 'missing' || status === 'installing' ? 'Install Claude Code first.' : 'Sign in to Claude first.'}
           </p>
         )}
         {saveError && (

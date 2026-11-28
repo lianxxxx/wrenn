@@ -5,7 +5,7 @@ import { ScreenTitle } from '../components/ScreenTitle'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import { TextField } from '../components/TextField'
 import { keyWarning } from '../elevenlabsKey'
-import { INSTALL_URL, RECHECK_MS, SIGN_IN_NOTE, WAITING_NOTE } from './Setup'
+import { INSTALL_ERROR, INSTALL_URL, INSTALLING_NOTE, RECHECK_MS, SIGN_IN_NOTE, WAITING_NOTE } from './Setup'
 
 type Props = {
   voiceoverKey: string
@@ -113,13 +113,16 @@ export function Settings({ voiceoverKey, onSaveKey, outputFolder, onBack }: Prop
 //   checking   -> asking the computer
 //   ready      -> installed and signed in
 //   missing    -> not installed (or it stopped working)
+//   installing -> Anthropic's installer runs hidden in the background
 //   signed-out -> installed, but needs a new sign-in
 //   waiting    -> the sign-in window is open, Wrenn checks until it's done
-type ClaudeState = 'checking' | 'ready' | 'missing' | 'signed-out' | 'waiting'
+type ClaudeState = 'checking' | 'ready' | 'missing' | 'installing' | 'signed-out' | 'waiting'
 
 function ClaudeCheck() {
   const [state, setState] = useState<ClaudeState>('checking')
   const [version, setVersion] = useState<string>()
+  // Plain words for why the last install didn't work, or ''
+  const [installError, setInstallError] = useState('')
   // Each check gets a number, so an old, slow answer can't overwrite a newer one
   const latestCheck = useRef(0)
 
@@ -155,10 +158,31 @@ function ClaudeCheck() {
     window.api.openClaudeSignIn()
   }
 
+  async function install() {
+    // Throw away any check still on its way, so it can't flip this back to "missing"
+    latestCheck.current++
+    setInstallError('')
+    setState('installing')
+    let result
+    try {
+      result = await window.api.installClaude()
+    } catch {
+      result = { ok: false as const, message: INSTALL_ERROR }
+    }
+    if (!result.ok) {
+      setInstallError(result.message)
+      setState('missing')
+      return
+    }
+    // Installed: check again, which moves on to signing in
+    check()
+  }
+
   const text = {
     checking: 'Checking...',
     ready: `Ready${version ? ` (version ${version})` : ''}. Wrenn uses it to build your videos.`,
     missing: "Not installed. Wrenn can't make videos without it.",
+    installing: INSTALLING_NOTE,
     'signed-out': `You need to sign in again. ${SIGN_IN_NOTE}`,
     waiting: WAITING_NOTE
   }[state]
@@ -168,7 +192,7 @@ function ClaudeCheck() {
       <div className="text-[0.9375rem] font-semibold text-navy">Claude Code</div>
       <div className="mt-sm flex items-center gap-md rounded-sm border-2 border-line bg-card px-md py-[10px]" aria-live="polite">
         <span className="flex size-8 shrink-0 items-center justify-center">
-          {state === 'checking' || state === 'waiting' ? (
+          {state === 'checking' || state === 'installing' || state === 'waiting' ? (
             <Spinner className="size-6" />
           ) : state === 'ready' ? (
             <span className="flex size-7 items-center justify-center rounded-full bg-lime text-ink" aria-hidden>
@@ -182,19 +206,29 @@ function ClaudeCheck() {
       </div>
 
       {state === 'missing' && (
-        <div className="mt-sm flex flex-wrap items-center gap-md">
-          <a
-            href={INSTALL_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="press inline-flex items-center rounded-pill bg-navy px-[22px] py-[10px] font-display text-xl leading-none text-bg"
-          >
-            Open the install guide
-          </a>
-          <Button variant="ghost" onClick={() => check()}>
-            Check again
-          </Button>
-        </div>
+        <>
+          <div className="mt-sm flex flex-wrap items-center gap-md">
+            <Button onClick={install}>Install Claude Code</Button>
+            <Button variant="ghost" onClick={() => check()}>
+              Check again
+            </Button>
+          </div>
+          {installError && (
+            <div className="mt-sm">
+              <p className="text-[0.9375rem] font-semibold text-navy" role="alert">
+                {installError}
+              </p>
+              <a
+                href={INSTALL_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-xs inline-block text-[0.9375rem] font-semibold text-navy underline"
+              >
+                Open the install guide
+              </a>
+            </div>
+          )}
+        </>
       )}
       {state === 'signed-out' && (
         <div className="mt-sm flex flex-wrap items-center gap-md">

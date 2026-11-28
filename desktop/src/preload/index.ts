@@ -11,6 +11,9 @@ export type ClaudeStatus = {
   version?: string
 }
 
+// What "Install Claude Code" sends back. message is plain words for the screen.
+export type InstallResult = { ok: true } | { ok: false; message: string }
+
 export type SizeId = 'reels' | 'feed' | 'square' | 'youtube'
 
 // Saved in a settings file on this computer, so they survive closing the app
@@ -93,6 +96,8 @@ const api = {
   checkClaude: (): Promise<ClaudeStatus> => ipcRenderer.invoke('check-claude'),
   // Opens Claude Code's own sign-in window (which opens the browser)
   openClaudeSignIn: (): Promise<void> => ipcRenderer.invoke('open-claude-sign-in'),
+  // Installs Claude Code in the background with Anthropic's own installer (takes about a minute)
+  installClaude: (): Promise<InstallResult> => ipcRenderer.invoke('install-claude'),
 
   // The real path of a file the user dropped or picked (needed to copy it into a job)
   getPathForFile: (file: File): string => webUtils.getPathForFile(file),

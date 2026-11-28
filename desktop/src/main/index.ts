@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { checkClaude, openClaudeSignIn } from './claude'
+import { checkClaude, installClaude, openClaudeSignIn } from './claude'
 import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from './jobs'
 import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
@@ -23,6 +23,8 @@ registerMediaScheme()
 ipcMain.handle('check-claude', () => checkClaude())
 // Opens Claude Code's own sign-in, so the user signs in themselves
 ipcMain.handle('open-claude-sign-in', () => openClaudeSignIn())
+// Installs Claude Code with Anthropic's own installer, hidden. Only one install runs at a time.
+ipcMain.handle('install-claude', () => installClaude())
 
 // Where finished videos go: Videos\Wrenn (outputDir makes it if it's missing), opened in File Explorer.
 // The main process owns this path: the screens never send a path to open.
