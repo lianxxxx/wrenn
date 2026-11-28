@@ -37,17 +37,19 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 
 `start-job.spec.ts` (the main process)
 
-- **startJob turns down bad requests.** Sends broken requests (no brand name, "own" music with no song, unknown music, no files, a "What does it do?" over the limit, a picture sent as a font, a fake template, ElevenLabs with no key) and checks each gets a plain message, and that no job folder was made.
+- **startJob turns down bad requests.** Sends broken requests (no brand name, "own" music with no song, unknown music, no files, a "What does it do?" or extra instructions over the limit, a picture sent as a font, a fake template, ElevenLabs with no key) and checks each gets a plain message, and that no job folder was made.
 - **startJob takes fonts.** WOFF2, WOFF, TTF and OTF files (upper case names too) pass the check.
 
 `upload.spec.ts` (step 3, "Add your stuff")
 
 - **"What does it do?" box.** The counter goes up as you type and typing stops at the limit (300, from `src/shared/limits.ts`).
+- **Advanced.** "Extra instructions" is hidden until you open Advanced, counts letters, and stays open with its text after Back and Next.
 - **Fonts box.** It shows with its hint, turns down a picture with a plain message, takes all four kinds of font, each file has its own x to remove it, and "Remove all" empties it.
 
 `job.spec.ts` (starting a job, with the fake Claude Code)
 
 - **brief.json.** "What does it do?" is saved as `about`, trimmed, and left out when it's empty or only spaces.
+- **Extra instructions.** Typed text is added to the end of the job's CLAUDE.md as a labelled note (a closing tag in it can't end the note early), never in brief.json, and left out when blank.
 - **timings.json.** With no file, a broken file or the wrong shape, the time left is the first-time guess. An older file without the music kind still loads, ElevenLabs runs don't slow down the guess for other music, and broken runs are skipped.
 - **Progress bar.** "Making your video" has a progress bar with its name, 0 to 100 values and a spoken value like "0%, about 8 min left". Screen readers hear the step, not the ticking numbers. Cancel asks first ("Yes, stop"), then goes back to the upload step and says the files are still there.
 - **From the upload screen.** Types the about text, adds a picture and a font, presses "Make my video": the about text is in brief.json and the font is in the job's assets folder.

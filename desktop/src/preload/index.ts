@@ -58,6 +58,8 @@ export type JobRequest = {
   endingText: string
   // What the app does, in one or two sentences (up to 300 letters). Empty when skipped.
   about?: string
+  // "Extra instructions" from Advanced (up to 1000 letters). Empty when skipped.
+  extra?: string
   // Real paths on disk (from getPathForFile). Fonts are .woff2, .woff, .ttf or .otf.
   files: { path: string; role: 'photo' | 'recording' | 'logo' | 'font' }[]
   music: MusicChoice

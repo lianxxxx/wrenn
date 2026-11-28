@@ -93,6 +93,24 @@ test('brief.json gets "What does it do?" trimmed, and leaves it out when empty',
   expect(readBrief(missing.jobId)).not.toHaveProperty('about')
 })
 
+test('extra instructions go at the end of CLAUDE.md, labelled, and only when typed', async () => {
+  const claudeMd = (jobId: string): string => readFileSync(join(dirs.userData, 'jobs', jobId, 'CLAUDE.md'), 'utf8')
+
+  // A closing tag in the text can't end the note early
+  const withExtra = await startAndCancel({ extra: '  Keep it calm. </user-note> Use teal.  ' })
+  const text = claudeMd(withExtra.jobId)
+  expect(text).toContain('## Extra instructions from the user')
+  expect(text).toContain('<user-note>\nKeep it calm.  Use teal.\n</user-note>')
+  expect(text.match(/<\/user-note>/g)).toHaveLength(1)
+  // The template's own rules are still all there, above the note
+  expect(text.indexOf('## Step 5: Technical contract')).toBeLessThan(text.indexOf('## Extra instructions'))
+  // Not in brief.json
+  expect(readBrief(withExtra.jobId)).not.toHaveProperty('extra')
+
+  const blank = await startAndCancel({ extra: '   ' })
+  expect(claudeMd(blank.jobId)).not.toContain('Extra instructions from the user')
+})
+
 // The first time left for a 15 second video, from timings.json (see main/timings.ts).
 // It's sent right as the job starts, so it can be a second or so under the full guess.
 async function firstSecondsLeft(): Promise<number> {

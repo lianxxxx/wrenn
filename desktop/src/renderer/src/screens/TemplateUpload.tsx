@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '../components/Button'
 import { StoppedNote } from '../components/CancelButton'
 import { FileDrop } from '../components/FileDrop'
@@ -5,7 +6,7 @@ import { ScreenTitle } from '../components/ScreenTitle'
 import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
 import type { TemplateDraft } from '../data'
-import { MAX_ABOUT } from '../../../shared/limits'
+import { MAX_ABOUT, MAX_EXTRA } from '../../../shared/limits'
 import { rulesFor } from '../../../shared/templates'
 
 type Props = {
@@ -25,6 +26,8 @@ type Props = {
 export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error, stopped = false }: Props) {
   // What this template needs: screenshots, a logo, or the user's own words
   const { needs } = rulesFor(draft.templateId)
+  // Read once when the screen opens. It never changes after, so clearing the box doesn't snap it shut.
+  const [advancedOpen] = useState(() => draft.extra.trim() !== '')
   const hasName = draft.brandName.trim() !== ''
   const hasMain =
     needs === 'screens'
@@ -138,6 +141,26 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           value={draft.cta}
           onChange={(e) => onChange({ cta: e.target.value })}
         />
+
+        {/* Closed to start with, so most people never see a prompt box ("No prompts. Just render.").
+            It opens by itself when there's already text in it, so nothing is hidden by surprise. */}
+        <details className="group" open={advancedOpen}>
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-xs rounded-sm py-xs pr-sm text-[0.9375rem] font-semibold text-navy hover:underline [&::-webkit-details-marker]:hidden">
+            <svg viewBox="0 0 24 24" className="size-5 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+            Advanced
+          </summary>
+          <TextArea
+            className="mt-md"
+            label="Extra instructions for the video (optional)"
+            hint="Anything you want Claude to keep in mind, like a mood, a color or a screen to show first."
+            placeholder="e.g. Start with the dashboard screen and keep it calm."
+            maxLength={MAX_EXTRA}
+            value={draft.extra}
+            onChange={(e) => onChange({ extra: e.target.value })}
+          />
+        </details>
       </div>
 
       {error && (

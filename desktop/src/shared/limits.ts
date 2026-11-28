@@ -7,3 +7,6 @@ export const MAX_ABOUT = 300
 
 // Sound files Wrenn can mix in: the user's own song, and the songs and effects that ship with Wrenn
 export const AUDIO_EXTS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']
+
+// "Extra instructions" under Advanced: a short note, not a whole prompt
+export const MAX_EXTRA = 1000

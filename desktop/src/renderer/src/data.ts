@@ -138,6 +138,8 @@ export type TemplateDraft = {
   cta: string
   // "What does it do?": one or two sentences
   about: string
+  // "Extra instructions" under Advanced. Optional, empty for most people.
+  extra: string
   music: MusicChoice
   // Only used when music is "own": one song file
   musicFile: File[]
@@ -155,6 +157,7 @@ export const emptyTemplateDraft: TemplateDraft = {
   brandName: '',
   cta: '',
   about: '',
+  extra: '',
   music: 'wrenn',
   musicFile: []
 }

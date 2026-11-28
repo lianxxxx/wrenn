@@ -69,6 +69,7 @@ test('startJob turns down bad requests with plain messages', async () => {
 
   expect(await startJobError(request({ files: [] }))).toContain('Add at least one screenshot or recording.')
   expect(await startJobError(request({ about: 'a'.repeat(301) }))).toContain('Keep "What does it do?" under 300 letters.')
+  expect(await startJobError(request({ extra: 'a'.repeat(1001) }))).toContain('Keep the extra instructions under 1000 letters.')
 
   // A picture can't pass as a font
   expect(await startJobError(request({ files: [{ path: picture, role: 'font' }] }))).toContain(

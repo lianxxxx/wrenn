@@ -167,6 +167,7 @@ function App() {
         brandName: templateDraft.brandName.trim(),
         endingText: templateDraft.cta.trim(),
         about: templateDraft.about.trim(),
+        extra: templateDraft.extra.trim(),
         files: draftFiles(templateDraft),
         ...draftMusic(templateDraft)
       }
