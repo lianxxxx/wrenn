@@ -23,7 +23,17 @@ export const TEMPLATE_RULES: Record<string, TemplateRules> = {
   showreel: { needs: 'screens', lengths: ['15', '30'] }
 }
 
-// Templates not in the list (older ones) work like the feature walkthrough
+// Templates not in the list (older ones, and the user's own prompt templates) work like the
+// feature walkthrough: screenshots needed, every length
 export function rulesFor(templateId: string): TemplateRules {
   return TEMPLATE_RULES[templateId] ?? TEMPLATE_RULES['feature-walkthrough']
+}
+
+// "My own prompt" templates: the user's saved prompt runs on top of this built-in template,
+// which brings the engine rules (seek(time), sizes, fonts, safe area, sound.json, done.json).
+export const CUSTOM_BASE = 'feature-walkthrough'
+
+// Saved templates have ids like "custom-1a2b3c4d5e6f"
+export function isCustomTemplateId(templateId: string): boolean {
+  return /^custom-[0-9a-f]{12}$/.test(templateId)
 }

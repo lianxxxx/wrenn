@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { checkClaude, installClaude, openClaudeSignIn } from './claude'
+import { deleteCustomTemplate, listCustomTemplates, saveCustomTemplate } from './customTemplates'
 import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from './jobs'
 import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
@@ -37,6 +38,11 @@ ipcMain.handle('save-settings', (_event, changes: unknown) => saveSettings(chang
 
 // Every video in Videos\Wrenn, newest first (see library.ts)
 ipcMain.handle('list-videos', () => listVideos())
+
+// "My own prompt" templates (see customTemplates.ts)
+ipcMain.handle('list-custom-templates', () => listCustomTemplates())
+ipcMain.handle('save-custom-template', (_event, template: unknown) => saveCustomTemplate(template))
+ipcMain.handle('delete-custom-template', (_event, id: unknown) => deleteCustomTemplate(id))
 
 // Video jobs (see jobs.ts). Progress goes back to the window that started the job.
 ipcMain.handle('start-job', (event, request: unknown) => startJob(event.sender, request))

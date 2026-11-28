@@ -94,3 +94,10 @@ test('startJob takes WOFF2, WOFF, TTF and OTF fonts', async () => {
   expect(error).toContain("Wrenn can't find Claude Code on this computer.")
   expect(jobFolders()).toEqual([])
 })
+
+test('startJob turns down a My own prompt template that was deleted', async () => {
+  expect(await startJobError(request({ templateId: 'custom-0123456789ab' }))).toContain(
+    "That template doesn't exist anymore. Pick another one."
+  )
+  expect(jobFolders()).toEqual([])
+})

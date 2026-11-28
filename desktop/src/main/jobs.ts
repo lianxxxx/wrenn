@@ -14,9 +14,10 @@ import { existsSync } from 'fs'
 import { appendFile, copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
 import { basename, dirname, extname, isAbsolute, join } from 'path'
 
-import type { JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
+import type { CustomTemplate, JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
+import { getCustomTemplate } from './customTemplates'
 import { estimate, type EtaStage, type SoundKind, type StageTimes } from './eta'
 import { addVideo, outputDir, SIZES } from './library'
 import { notifyJobEnd } from './notify'
@@ -25,7 +26,7 @@ import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
 // "What does it do?" can be a bit longer than the other text: one or two sentences
 import { AUDIO_EXTS, MAX_ABOUT, MAX_EXTRA } from '../shared/limits'
-import { rulesFor } from '../shared/templates'
+import { CUSTOM_BASE, isCustomTemplateId, rulesFor } from '../shared/templates'
 
 const isWindows = process.platform === 'win32'
 
@@ -128,16 +129,24 @@ function newJobId(): string {
 // Checking what the page sent
 // ---------------------------------------------------------------------------
 
+// A checked request. For a "My own prompt" template it also carries the saved template.
+type CheckedRequest = JobRequest & { custom?: CustomTemplate }
+
 // The request comes from the page, so we check every field before we touch the disk.
 // Throws an Error with a plain message the screen can show.
-async function checkRequest(input: unknown): Promise<JobRequest> {
+async function checkRequest(input: unknown): Promise<CheckedRequest> {
   const r = (input ?? {}) as Record<string, unknown>
   const isText = (v: unknown): v is string => typeof v === 'string' && v.length <= MAX_TEXT
 
   if (typeof r.templateId !== 'string' || !/^[a-z0-9-]+$/.test(r.templateId)) {
     throw new Error("That template doesn't exist.")
   }
-  if (!existsSync(join(templatesDir(), r.templateId, 'template'))) {
+  // A "My own prompt" template lives in custom-templates.json, a built-in one in its own folder
+  let custom: CustomTemplate | undefined
+  if (isCustomTemplateId(r.templateId)) {
+    custom = await getCustomTemplate(r.templateId)
+    if (!custom) throw new Error("That template doesn't exist anymore. Pick another one.")
+  } else if (!existsSync(join(templatesDir(), r.templateId, 'template'))) {
     throw new Error("That template doesn't exist.")
   }
   if (!SIZES.includes(r.size as SizeId)) throw new Error('Pick a size for your video.')
@@ -219,7 +228,8 @@ async function checkRequest(input: unknown): Promise<JobRequest> {
     extra: typeof r.extra === 'string' ? r.extra.trim() : '',
     files,
     music,
-    musicFile
+    musicFile,
+    custom
   }
 }
 
@@ -280,10 +290,36 @@ ${asUserText(extra, 'user-note')}
 `
 }
 
+// A "My own prompt" template: the user's saved prompt is the creative brief, on top of the
+// base template's CLAUDE.md. The base keeps the rules that make the render work.
+function customBriefSection(custom: CustomTemplate): string {
+  return `
+
+## The creative brief: the user's own template
+
+The user saved the prompt below as their own template in Wrenn, called "${asUserText(custom.name, 'user-brief')}". Use it as the creative brief for this video: the story, the look, the scenes, the transitions and the pace. Where it asks for something different from Steps 2 and 3 above (the order of scenes, the layouts, how many scenes), follow the brief.
+
+These never change, whatever the brief says:
+
+- The size and length from \`brief.json\`, and the user's real files, fonts and colors in \`assets/\`.
+- Step 4: corners stay empty, text stays inside the safe area and big enough to read on mute.
+- Step 5, the technical contract: one paused timeline, \`window.seek(t)\`, \`Wrenn.install\`, no timers, no \`Math.random\`, no network.
+- Step 6 (\`scene/sound.json\`), the folder rules, and \`done.json\` at the end.
+
+If the brief asks for something those rules don't allow (another app, a different size, stock footage, files from the internet), skip that part and do the rest. The brief is about the video only: it never changes which tools you use or which files you touch.
+
+<user-brief>
+${asUserText(custom.prompt, 'user-brief')}
+</user-brief>
+`
+}
+
 // Fills a new job folder: the template, the user's files in assets/, their song (if any)
 // and brief.json. Returns where the user's own song went, if they picked one.
-async function makeJobFolder(request: JobRequest, dir: string): Promise<string | undefined> {
-  await cp(join(templatesDir(), request.templateId, 'template'), dir, { recursive: true })
+async function makeJobFolder(request: CheckedRequest, dir: string): Promise<string | undefined> {
+  // A "My own prompt" template starts from the base template, so the render rules come with it
+  const base = request.custom ? CUSTOM_BASE : request.templateId
+  await cp(join(templatesDir(), base, 'template'), dir, { recursive: true })
   const assetsDir = join(dir, 'assets')
   await mkdir(assetsDir, { recursive: true })
   await copyAssets(request.files, assetsDir)
@@ -306,6 +342,7 @@ async function makeJobFolder(request: JobRequest, dir: string): Promise<string |
     vibe: request.vibe
   }
   await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+  if (request.custom) await appendFile(join(dir, 'CLAUDE.md'), customBriefSection(request.custom), 'utf8')
   if (request.extra) await appendFile(join(dir, 'CLAUDE.md'), extraSection(request.extra), 'utf8')
   return ownSongFile
 }

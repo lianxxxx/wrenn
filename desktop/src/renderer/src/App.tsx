@@ -5,6 +5,7 @@ import { Sidebar, type NavId } from './components/Sidebar'
 import { UpdateBanner } from './components/UpdateBanner'
 import {
   cleanError,
+  type CustomTemplate,
   draftFiles,
   draftMusic,
   emptyEditDraft,
@@ -18,6 +19,7 @@ import {
   type TemplateDraft,
   type VideoInfo
 } from './data'
+import { CustomTemplateForm } from './screens/CustomTemplateForm'
 import { Done } from './screens/Done'
 import { EditGenerating } from './screens/EditGenerating'
 import { EditUpload } from './screens/EditUpload'
@@ -38,6 +40,7 @@ type Screen =
   | 'template-pick'
   | 'template-options'
   | 'template-upload'
+  | 'template-custom'
   | 'edit-upload'
   | 'generating'
   | 'edit-generating'
@@ -48,7 +51,7 @@ type Screen =
 // Which sidebar item is lit up on each screen
 function navFor(screen: Screen): NavId {
   if (screen === 'settings') return 'settings'
-  if (screen === 'template-pick' || screen === 'template-options' || screen === 'template-upload') return 'templates'
+  if (screen.startsWith('template-')) return 'templates'
   if (screen === 'videos' || screen === 'done') return 'videos'
   return 'home'
 }
@@ -67,6 +70,8 @@ function App() {
   const [editDraft, setEditDraft] = useState<EditDraft>(emptyEditDraft)
   // "Your videos" on Home, newest first, from the Videos\Wrenn folder
   const [videos, setVideos] = useState<VideoInfo[]>([])
+  // "My own prompt" templates saved on this computer
+  const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([])
   // The video the Done screen shows, and whether it was just made
   // note: a short message about the sound, if it didn't go as picked
   const [openVideo, setOpenVideo] = useState<{ video: VideoInfo; isNew: boolean; note?: string } | null>(null)
@@ -120,6 +125,29 @@ function App() {
   useEffect(() => {
     refreshVideos()
   }, [refreshVideos])
+
+  // The user's own saved prompt templates, read once when the app opens
+  useEffect(() => {
+    let alive = true
+    window.api
+      .listCustomTemplates()
+      .then((list) => {
+        if (alive) setCustomTemplates(list)
+      })
+      .catch(() => {
+        // Can't read the file: show none
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  async function deleteCustomTemplate(id: string) {
+    await window.api.deleteCustomTemplate(id)
+    setCustomTemplates((list) => list.filter((t) => t.id !== id))
+    // If it was the picked one, go back to the default so a later job can't ask for it
+    if (templateDraft.templateId === id) updateTemplate({ templateId: emptyTemplateDraft.templateId })
+  }
 
   // React to one event for the current job
   const applyJobEvent = useCallback(
@@ -316,6 +344,20 @@ function App() {
                   length: offered.includes(templateDraft.length) ? templateDraft.length : offered[0]
                 })
                 setScreen('template-options')
+              }}
+              customTemplates={customTemplates}
+              onNewCustom={() => setScreen('template-custom')}
+              onDeleteCustom={deleteCustomTemplate}
+            />
+          )}
+
+          {screen === 'template-custom' && (
+            <CustomTemplateForm
+              onBack={() => setScreen('template-pick')}
+              onSave={async (template) => {
+                const saved = await window.api.saveCustomTemplate(template)
+                setCustomTemplates((list) => [...list, saved])
+                setScreen('template-pick')
               }}
             />
           )}

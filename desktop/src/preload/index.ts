@@ -48,6 +48,22 @@ export type VideoInfo = {
   title?: string
 }
 
+// A "My own prompt" template the user saved (in custom-templates.json on this computer)
+export type CustomTemplate = {
+  // Like "custom-1a2b3c4d5e6f"
+  id: string
+  name: string
+  // The user's prompt: the creative brief for the video
+  prompt: string
+  // "Where it's from": the creator or a link. Shown as "Inspired by ...".
+  credit?: string
+  // ISO date string
+  createdAt: string
+}
+
+// What the "My own prompt" form sends
+export type NewCustomTemplate = { name: string; prompt: string; credit?: string }
+
 // Everything the template path collected
 export type JobRequest = {
   templateId: string
@@ -110,6 +126,12 @@ const api = {
 
   // Every video in Videos\Wrenn, newest first
   listVideos: (): Promise<VideoInfo[]> => ipcRenderer.invoke('list-videos'),
+
+  // "My own prompt" templates saved on this computer
+  listCustomTemplates: (): Promise<CustomTemplate[]> => ipcRenderer.invoke('list-custom-templates'),
+  saveCustomTemplate: (template: NewCustomTemplate): Promise<CustomTemplate> =>
+    ipcRenderer.invoke('save-custom-template', template),
+  deleteCustomTemplate: (id: string): Promise<void> => ipcRenderer.invoke('delete-custom-template', id),
 
   // Makes the job folder, runs Claude Code in it in the background, and starts waiting for it
   startJob: (request: JobRequest): Promise<{ jobId: string }> => ipcRenderer.invoke('start-job', request),

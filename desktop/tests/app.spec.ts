@@ -178,3 +178,53 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
     test.info().annotations.push({ type: 'note', description: 'safeStorage not available, key saved as plain text' })
   }
 })
+
+test('My own prompt: save a template, see its card, pick it, delete it', async () => {
+  let page = await openHome()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Templates', exact: true }).click()
+  await page.getByRole('button', { name: /My own prompt/ }).click()
+  await expect(page.getByRole('heading', { name: 'My own prompt' })).toBeVisible()
+
+  // Save waits for a name and a prompt
+  const save = page.getByRole('button', { name: 'Save template' })
+  await expect(save).toBeDisabled()
+  await page.getByLabel('Template name').fill('Neon launch')
+  await page.getByLabel('Your prompt').fill('Dark and loud. Each screen slams in on the beat.')
+  await page.getByLabel("Where it's from (optional)").fill('@somecreator')
+  await save.click()
+
+  // Back on the pick screen with the new card
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
+  const card = page.getByRole('button', { name: /Neon launch/ }).first()
+  await expect(card).toContainText('Inspired by @somecreator')
+
+  // Saved on disk, so it's still there after closing and opening the app
+  const saved = JSON.parse(readFileSync(join(dirs.userData, 'custom-templates.json'), 'utf8'))
+  expect(saved.templates).toHaveLength(1)
+  expect(saved.templates[0]).toMatchObject({ name: 'Neon launch', credit: '@somecreator' })
+  await app?.close()
+  const launched = await launchApp(dirs)
+  app = launched.app
+  page = launched.page
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Templates', exact: true }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ }).first()).toBeVisible()
+
+  // Picking it goes through the same steps as Wrenn's own templates
+  await page.getByRole('button', { name: /Neon launch/ }).first().click()
+  await expect(page.getByRole('heading', { name: 'How should it look?' })).toBeVisible()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
+  await page.getByRole('button', { name: 'Back' }).click()
+  await page.getByRole('button', { name: 'Back' }).click()
+
+  // Delete asks first, on the card. "Keep it" keeps it.
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await expect(page.getByText('Delete "Neon launch"?')).toBeVisible()
+  await page.getByRole('button', { name: 'Keep it' }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ }).first()).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await page.getByRole('button', { name: 'Yes, delete' }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ })).toHaveCount(0)
+  expect(JSON.parse(readFileSync(join(dirs.userData, 'custom-templates.json'), 'utf8')).templates).toEqual([])
+})

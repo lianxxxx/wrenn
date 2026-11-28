@@ -5,7 +5,7 @@ import { AUDIO_EXTS } from '../../shared/limits'
 // Placeholder video for the fake edit path
 import sampleVideo from './assets/sample.mp4'
 
-export type { JobEvent, JobRequest, MusicChoice, Settings, SizeId, VideoInfo } from '../../preload'
+export type { CustomTemplate, JobEvent, JobRequest, MusicChoice, NewCustomTemplate, Settings, SizeId, VideoInfo } from '../../preload'
 
 export type Size = {
   id: SizeId

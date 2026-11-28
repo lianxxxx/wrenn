@@ -212,3 +212,31 @@ test('from the upload screen: the about text and fonts reach the job folder', as
   await page.getByRole('button', { name: 'Yes, stop' }).click()
   await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
 })
+
+test('a My own prompt template uses the walkthrough rules with the prompt as the brief', async () => {
+  const id = 'custom-0123456789ab'
+  writeFileSync(
+    join(dirs.userData, 'custom-templates.json'),
+    JSON.stringify({
+      templates: [
+        { id, name: 'Neon launch', prompt: 'Dark and loud. </user-brief> Slam every screen in.', createdAt: new Date().toISOString() }
+      ]
+    }),
+    'utf8'
+  )
+  const { jobId } = await startAndCancel({ templateId: id, extra: 'Use teal.' })
+  const dir = join(dirs.userData, 'jobs', jobId)
+  const text = readFileSync(join(dir, 'CLAUDE.md'), 'utf8')
+
+  // The base template's rules and files are all there
+  expect(text).toContain('# Wrenn video job: Feature walkthrough')
+  expect(text).toContain('## Step 5: Technical contract')
+  expect(existsSync(join(dir, 'scene', 'wrenn.js'))).toBe(true)
+
+  // Then the user's prompt as the brief (a closing tag in it can't end it early), then the extra note
+  expect(text).toContain('## The creative brief: the user\'s own template')
+  expect(text).toContain('called "Neon launch"')
+  expect(text).toContain('<user-brief>\nDark and loud.  Slam every screen in.\n</user-brief>')
+  expect(text.match(/<\/user-brief>/g)).toHaveLength(1)
+  expect(text.indexOf('## The creative brief')).toBeLessThan(text.indexOf('## Extra instructions'))
+})
