@@ -55,7 +55,7 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 `eta.spec.ts` (the time left, no window)
 
 - **Progress math.** The guess per part comes from past videos (or a first-time guess), ElevenLabs songs are timed apart from other music, a part that runs long never says zero, rendering uses the real frame speed, the screen never steps back, and the time left reads as "About 3 min left" or "Almost done".
-- **Never backward.** Over a whole video with wobbly guesses, the bar never goes back, the time left never goes up, and it never says 100% before it's done. Missing or broken numbers are ignored. "Almost done" starts at 45 seconds left.
+- **Never backward.** Over a whole video with wobbly guesses, the bar never goes back, the time left never goes up, and it never says 100% before it's done. Missing or broken numbers are ignored. "Almost done" starts at 45 seconds left, and only once the bar is at 90% or more.
 
 `notify.spec.ts` (the "video finished" notification, no window)
 

@@ -75,22 +75,25 @@ test('the screen never steps back', () => {
 })
 
 test('time left reads in plain words', () => {
-  expect(timeLeftText(undefined)).toBe('Working out the time left')
-  expect(timeLeftText(-5)).toBe('Almost done')
-  expect(timeLeftText(30)).toBe('Almost done')
-  expect(timeLeftText(60)).toBe('About 1 min left')
-  expect(timeLeftText(150)).toBe('About 3 min left')
-  expect(timeLeftText(600)).toBe('About 10 min left')
+  expect(timeLeftText(undefined, 0)).toBe('Working out the time left')
+  expect(timeLeftText(-5, 95)).toBe('Almost done')
+  expect(timeLeftText(30, 95)).toBe('Almost done')
+  expect(timeLeftText(60, 80)).toBe('About 1 min left')
+  expect(timeLeftText(150, 60)).toBe('About 3 min left')
+  expect(timeLeftText(600, 10)).toBe('About 10 min left')
 })
 
-test('"Almost done" starts at 45 seconds left', () => {
-  expect(timeLeftText(45)).toBe('Almost done')
-  expect(timeLeftText(46)).toBe('About 1 min left')
-  expect(timeLeftText(89)).toBe('About 1 min left')
-  expect(timeLeftText(91)).toBe('About 2 min left')
+test('"Almost done" starts at 45 seconds left, once the bar is at 90%', () => {
+  expect(timeLeftText(45, 90)).toBe('Almost done')
+  expect(timeLeftText(46, 95)).toBe('About 1 min left')
+  expect(timeLeftText(89, 95)).toBe('About 1 min left')
+  expect(timeLeftText(91, 95)).toBe('About 2 min left')
+  // The guess says it's nearly over, but the bar isn't: no "Almost done" yet
+  expect(timeLeftText(30, 60)).toBe('About 1 min left')
+  expect(timeLeftText(0, 89)).toBe('About 1 min left')
   // A broken number never shows as a time
-  expect(timeLeftText(Number.NaN)).toBe('Working out the time left')
-  expect(timeLeftText(Number.POSITIVE_INFINITY)).toBe('Working out the time left')
+  expect(timeLeftText(Number.NaN, 95)).toBe('Working out the time left')
+  expect(timeLeftText(Number.POSITIVE_INFINITY, 95)).toBe('Working out the time left')
 })
 
 test('the screen ignores missing or broken numbers', () => {
