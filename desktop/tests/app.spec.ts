@@ -37,6 +37,46 @@ test('first launch shows the setup screen', async () => {
   await expect(page.getByText('Install Claude Code').first()).toBeVisible()
   await expect(page.getByLabel('ElevenLabs key (optional)')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
+  // No sidebar during setup
+  await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0)
+})
+
+test('the sidebar moves between Home, Templates, Your videos and Settings', async () => {
+  makeVideo(join(dirs.output, 'wrenn square test.mp4'))
+  const page = await openHome()
+  const nav = page.getByRole('navigation', { name: 'Main' })
+  const item = (name: string) => nav.getByRole('button', { name, exact: true })
+
+  await expect(item('Home')).toHaveAttribute('aria-current', 'page')
+
+  await item('Templates').click()
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
+  await expect(item('Templates')).toHaveAttribute('aria-current', 'page')
+  await expect(item('Home')).not.toHaveAttribute('aria-current', 'page')
+  // Sidebar screens have no Back link: the sidebar is the way around
+  await expect(page.getByRole('button', { name: 'Back' })).toHaveCount(0)
+
+  await item('Your videos').click()
+  await expect(page.getByRole('heading', { name: 'Your videos', level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Video, / })).toBeVisible()
+
+  await item('Settings').click()
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+  await expect(item('Settings')).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('button', { name: 'Back' })).toHaveCount(0)
+
+  await item('Home').click()
+  await expect(page.getByRole('heading', { name: /What are we/ })).toBeVisible()
+})
+
+test('Your videos with no videos yet points to making one', async () => {
+  const page = await openHome()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Your videos', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Your videos', level: 1 })).toBeVisible()
+  await expect(page.getByText('Nothing here yet.')).toBeVisible()
+  await expect(page.getByText('Click one to watch it', { exact: false })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Make a video' }).click()
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
 })
 
 test('Home shows both cards and the videos in the output folder', async () => {
@@ -123,7 +163,7 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
   const key = 'sk_test_wrenn_1234567890abcdef'
   let page = await openHome()
 
-  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' }).click()
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
   const field = page.getByLabel('ElevenLabs key (optional)')
   await field.fill(key)
@@ -139,7 +179,7 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
   app = launched.app
   page = launched.page
   await expect(page.getByRole('heading', { name: /What are we/ })).toBeVisible()
-  await page.getByRole('button', { name: 'Settings' }).click()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Settings' }).click()
   await expect(page.getByLabel('ElevenLabs key (optional)')).toHaveValue(key)
 
   // On disk the key is never plain text when Windows can encrypt it
@@ -150,4 +190,59 @@ test('Settings keeps the ElevenLabs key, encrypted on disk', async () => {
   } else {
     test.info().annotations.push({ type: 'note', description: 'safeStorage not available, key saved as plain text' })
   }
+})
+
+test('My own prompt: save a template, see its card, pick it, delete it', async () => {
+  let page = await openHome()
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Templates', exact: true }).click()
+  await page.getByRole('button', { name: /My own prompt/ }).click()
+  await expect(page.getByRole('heading', { name: 'My own prompt' })).toBeVisible()
+
+  // Save waits for a name and a prompt
+  const save = page.getByRole('button', { name: 'Save template' })
+  await expect(save).toBeDisabled()
+  await page.getByLabel('Template name').fill('Neon launch')
+  await page.getByLabel('Your prompt').fill('Dark and loud. Each screen slams in on the beat.')
+  await page.getByLabel("Where it's from (optional)").fill('@somecreator')
+  await save.click()
+
+  // Back on the pick screen with the new card
+  await expect(page.getByRole('heading', { name: 'Pick a template' })).toBeVisible()
+  const card = page.getByRole('button', { name: /Neon launch/ }).first()
+  await expect(card).toContainText('Inspired by @somecreator')
+
+  // Saved on disk, so it's still there after closing and opening the app
+  const saved = JSON.parse(readFileSync(join(dirs.userData, 'custom-templates.json'), 'utf8'))
+  expect(saved.templates).toHaveLength(1)
+  expect(saved.templates[0]).toMatchObject({ name: 'Neon launch', credit: '@somecreator' })
+  await app?.close()
+  const launched = await launchApp(dirs)
+  app = launched.app
+  page = launched.page
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Templates', exact: true }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ }).first()).toBeVisible()
+
+  // Picking it goes through the same steps as Wrenn's own templates
+  await page.getByRole('button', { name: /Neon launch/ }).first().click()
+  await expect(page.getByRole('heading', { name: 'How should it look?' })).toBeVisible()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
+  await page.getByRole('button', { name: 'Back' }).click()
+  await page.getByRole('button', { name: 'Back' }).click()
+
+  // Delete asks first, on the card. "Keep it" keeps it.
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await expect(page.getByText('Delete "Neon launch"?')).toBeVisible()
+  await page.getByRole('button', { name: 'Keep it' }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ }).first()).toBeVisible()
+  // Focus goes back to the trash button, and Escape works the same way
+  await expect(page.getByRole('button', { name: 'Delete Neon launch' })).toBeFocused()
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Delete Neon launch' })).toBeFocused()
+
+  await page.getByRole('button', { name: 'Delete Neon launch' }).click()
+  await page.getByRole('button', { name: 'Yes, delete' }).click()
+  await expect(page.getByRole('button', { name: /Neon launch/ })).toHaveCount(0)
+  expect(JSON.parse(readFileSync(join(dirs.userData, 'custom-templates.json'), 'utf8')).templates).toEqual([])
 })

@@ -3,7 +3,7 @@
 
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
 import { join } from 'path'
-import { MAX_ABOUT } from '../src/shared/limits'
+import { MAX_ABOUT, MAX_EXTRA } from '../src/shared/limits'
 import { launchApp, makeFontFile, makePicture, makeTempDirs, removeTempDirs, seedSettings, type TestDirs } from './helpers'
 
 let dirs: TestDirs
@@ -70,6 +70,27 @@ test('the fonts box takes font files and turns down the rest', async () => {
   await expect(page.getByText("Wrenn can't use that file type yet. Try a WOFF2, WOFF, TTF or OTF font.")).toBeVisible()
   await expect(chosen.getByRole('listitem')).toHaveCount(5)
 
+  // The x on one file removes only that file
+  await page.getByRole('button', { name: 'Remove Extra.ttf' }).click()
+  await expect(chosen.getByRole('listitem')).toHaveCount(4)
+
   await page.getByRole('button', { name: 'Remove all' }).click()
   await expect(chosen).toHaveCount(0)
+})
+
+test('extra instructions hide under Advanced until it is opened', async () => {
+  const extra = page.getByLabel('Extra instructions for the video (optional)')
+  // Closed to start with: the box is there but not shown
+  await expect(extra).toBeHidden()
+
+  await page.getByText('Advanced', { exact: true }).click()
+  await expect(extra).toBeVisible()
+  await extra.fill('Start with the dashboard.')
+  await expect(page.getByText(`25/${MAX_EXTRA}`, { exact: true })).toBeVisible()
+
+  // Back and forward again: the text is kept, and Advanced opens by itself so it isn't hidden
+  await page.getByRole('button', { name: 'Back' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByLabel('Extra instructions for the video (optional)')).toHaveValue('Start with the dashboard.')
+  await expect(page.getByLabel('Extra instructions for the video (optional)')).toBeVisible()
 })

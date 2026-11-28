@@ -69,6 +69,7 @@ test('startJob turns down bad requests with plain messages', async () => {
 
   expect(await startJobError(request({ files: [] }))).toContain('Add at least one screenshot or recording.')
   expect(await startJobError(request({ about: 'a'.repeat(301) }))).toContain('Keep "What does it do?" under 300 letters.')
+  expect(await startJobError(request({ extra: 'a'.repeat(1001) }))).toContain('Keep the extra instructions under 1000 letters.')
 
   // A picture can't pass as a font
   expect(await startJobError(request({ files: [{ path: picture, role: 'font' }] }))).toContain(
@@ -91,5 +92,12 @@ test('startJob takes WOFF2, WOFF, TTF and OTF fonts', async () => {
   // The fonts pass the check, so the next thing missing is Claude Code (hidden in these tests)
   const error = await startJobError(request({ files: [{ path: picture, role: 'photo' }, ...fonts] }))
   expect(error).toContain("Wrenn can't find Claude Code on this computer.")
+  expect(jobFolders()).toEqual([])
+})
+
+test('startJob turns down a My own prompt template that was deleted', async () => {
+  expect(await startJobError(request({ templateId: 'custom-0123456789ab' }))).toContain(
+    "That template doesn't exist anymore. Pick another one."
+  )
   expect(jobFolders()).toEqual([])
 })

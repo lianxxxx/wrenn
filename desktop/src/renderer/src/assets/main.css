@@ -99,6 +99,12 @@ body::before {
   outline-offset: 3px;
 }
 
+/* Each screen gets focus when it opens (for screen readers). It is not a control,
+   so no ring: next to the sidebar it showed as a teal line down the page. */
+main:focus-visible {
+  outline: none;
+}
+
 /* ---------- Motion (only when the person allows it) ---------- */
 
 @keyframes rise-in {
@@ -138,5 +144,19 @@ body::before {
   }
   .press:active:not(:disabled) {
     transform: translateY(2px);
+  }
+}
+
+/* The sidebar's active blob: a quick pop, no delay, since people click the nav often */
+@keyframes nav-pop {
+  from {
+    scale: 0.85;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-pop {
+    animation: nav-pop 260ms var(--ease-pop) both;
   }
 }

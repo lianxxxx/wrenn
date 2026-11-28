@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
 
 type Props = {
   label: string
@@ -94,23 +94,53 @@ export function FileDrop({ label, hint, accept, multiple = false, files, onFiles
         </p>
       )}
       {files.length > 0 && (
-        <div className="mt-sm flex items-start justify-between gap-md">
-          <ul className="min-w-0 text-[0.8125rem] font-medium text-navy" aria-label={`${label}: chosen files`}>
+        <div className="mt-sm">
+          <ul className="flex flex-col gap-xs text-[0.8125rem] font-medium text-navy" aria-label={`${label}: chosen files`}>
             {files.map((f, i) => (
-              <li key={`${f.name}-${i}`} className="truncate">
-                {f.name}
+              <li key={`${f.name}-${i}`} className="flex items-center gap-sm">
+                {f.type.startsWith('image/') && <Thumb file={f} />}
+                <span className="min-w-0 flex-1 truncate">{f.name}</span>
+                <button
+                  type="button"
+                  onClick={() => onFiles(files.filter((_, j) => j !== i))}
+                  aria-label={`Remove ${f.name}`}
+                  className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-pill text-navy hover:bg-navy/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
+                >
+                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            onClick={() => onFiles([])}
-            className="inline-flex min-h-6 shrink-0 cursor-pointer items-center rounded-sm text-[0.8125rem] font-semibold text-navy underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
-          >
-            {files.length > 1 ? 'Remove all' : 'Remove'}
-          </button>
+          {/* With one file, its x is enough */}
+          {files.length > 1 && (
+            <button
+              type="button"
+              onClick={() => onFiles([])}
+              className="mt-xs inline-flex min-h-6 cursor-pointer items-center rounded-sm text-[0.8125rem] font-semibold text-navy underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal"
+            >
+              Remove all
+            </button>
+          )}
         </div>
       )}
     </div>
+  )
+}
+
+// A small preview of a picked image. The browser makes a short-lived link to the file,
+// and we hand it back when the file goes away so it doesn't hold on to memory.
+function Thumb({ file }: { file: File }) {
+  const [url, setUrl] = useState('')
+  useEffect(() => {
+    const link = URL.createObjectURL(file)
+    setUrl(link)
+    return () => URL.revokeObjectURL(link)
+  }, [file])
+  return (
+    <span className="size-10 shrink-0 overflow-hidden rounded-sm border-2 border-line bg-card" aria-hidden>
+      {url && <img src={url} alt="" className="size-full object-cover" />}
+    </span>
   )
 }

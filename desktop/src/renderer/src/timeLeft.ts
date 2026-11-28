@@ -17,10 +17,15 @@ export function steadyProgress(shown: ShownProgress, next: { progress?: number; 
   return { percent, secondsLeft }
 }
 
+// The bar has to be at least this full before the screen says "Almost done"
+export const ALMOST_DONE_PERCENT = 90
+
 // "About 4 min left", or "Almost done" near the end. Never negative.
-export function timeLeftText(secondsLeft: number | undefined): string {
+// percent is what the bar shows (0 to 100). "Almost done" waits for the bar too,
+// so a short guess early on can't say it while the bar is only half full.
+export function timeLeftText(secondsLeft: number | undefined, percent: number): string {
   if (secondsLeft === undefined || !Number.isFinite(secondsLeft)) return 'Working out the time left'
-  if (secondsLeft <= 45) return 'Almost done'
+  if (secondsLeft <= 45) return percent >= ALMOST_DONE_PERCENT ? 'Almost done' : 'About 1 min left'
   const minutes = Math.max(1, Math.round(secondsLeft / 60))
   return `About ${minutes} min left`
 }

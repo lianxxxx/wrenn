@@ -1,27 +1,36 @@
+import { useState } from 'react'
 import { Button } from '../components/Button'
+import { StoppedNote } from '../components/CancelButton'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
+import { SiteGrabber } from '../components/SiteGrabber'
 import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
-import type { TemplateDraft } from '../data'
-import { MAX_ABOUT } from '../../../shared/limits'
+import type { SiteGrab, TemplateDraft } from '../data'
+import { MAX_ABOUT, MAX_EXTRA } from '../../../shared/limits'
 import { rulesFor } from '../../../shared/templates'
 
 type Props = {
   draft: TemplateDraft
   onChange: (changes: Partial<TemplateDraft>) => void
+  // "Grab from my site" finished: add its files, colors and fonts to the draft
+  onSiteGrabbed: (grab: SiteGrab) => void
   onBack: () => void
   onGenerate: () => void
   // True while Wrenn is setting up the job (before the Generating screen)
   starting: boolean
   // Why the job couldn't start, in plain words. Empty when all is fine.
   error: string
+  // True right after the user stopped a video
+  stopped?: boolean
 }
 
 // Step 3 of the template path: your files and a few words.
-export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error }: Props) {
+export function TemplateUpload({ draft, onChange, onSiteGrabbed, onBack, onGenerate, starting, error, stopped = false }: Props) {
   // What this template needs: screenshots, a logo, or the user's own words
   const { needs } = rulesFor(draft.templateId)
+  // Read once when the screen opens. It never changes after, so clearing the box doesn't snap it shut.
+  const [advancedOpen] = useState(() => draft.extra.trim() !== '')
   const hasName = draft.brandName.trim() !== ''
   const hasMain =
     needs === 'screens'
@@ -55,6 +64,8 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
         onBack={onBack}
       />
 
+      {stopped && <StoppedNote />}
+
       <div className="flex flex-col gap-xl">
         <TextField
           label="Brand name"
@@ -81,6 +92,14 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
             onChange={(e) => onChange({ about: e.target.value })}
           />
         )}
+        <SiteGrabber
+          url={draft.siteUrl}
+          onUrl={(siteUrl) => onChange({ siteUrl })}
+          site={draft.site}
+          withPhotos={needs === 'screens'}
+          onGrabbed={onSiteGrabbed}
+          onClearSite={() => onChange({ site: undefined })}
+        />
         {needs === 'logo' && (
           <FileDrop
             label="Logo"
@@ -133,6 +152,26 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
           value={draft.cta}
           onChange={(e) => onChange({ cta: e.target.value })}
         />
+
+        {/* Closed to start with, so most people never see a prompt box ("No prompts. Just render.").
+            It opens by itself when there's already text in it, so nothing is hidden by surprise. */}
+        <details className="group" open={advancedOpen}>
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-xs rounded-sm py-xs pr-sm text-[0.9375rem] font-semibold text-navy hover:underline [&::-webkit-details-marker]:hidden">
+            <svg viewBox="0 0 24 24" className="size-5 group-open:rotate-90 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-(--ease-out-strong)" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+            Advanced
+          </summary>
+          <TextArea
+            className="mt-md"
+            label="Extra instructions for the video (optional)"
+            hint="Anything you want Claude to keep in mind, like a mood, a color or a screen to show first."
+            placeholder="e.g. Start with the dashboard screen and keep it calm."
+            maxLength={MAX_EXTRA}
+            value={draft.extra}
+            onChange={(e) => onChange({ extra: e.target.value })}
+          />
+        </details>
       </div>
 
       {error && (

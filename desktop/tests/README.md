@@ -33,29 +33,34 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 - **First launch shows the setup screen.** With no settings yet, the setup screen opens. It only checks the screen shows; it never clicks Sign in.
 - **Home.** Both cards show, "Edit my video" can't be clicked and says "Coming soon", and a video placed in the videos folder shows up under "Your videos".
 - **Template path.** Pick a template, then step 2: size, length and vibe can be picked, Wrenn's music is picked to start with. "Your own song" shows the song box and greys out Next until a song is added. "A new song" with no ElevenLabs key asks for the key and greys out Next. "No music" lets you go on. Step 3 shows, and "Make my video" stays greyed out with no files.
+- **My own prompt.** Save a template (name, prompt, credit): its card shows on the Pick screen with "Inspired by ...", it is saved in `custom-templates.json` and still there after reopening the app, picking it goes to the same steps, and Delete asks on the card first ("Keep it" or "Yes, delete").
 - **Settings.** Type an ElevenLabs key, click away, close and reopen the app: the key is still there. On disk the key is encrypted, never plain text (when Windows can encrypt).
 
 `start-job.spec.ts` (the main process)
 
-- **startJob turns down bad requests.** Sends broken requests (no brand name, "own" music with no song, unknown music, no files, a "What does it do?" over the limit, a picture sent as a font, a fake template, ElevenLabs with no key) and checks each gets a plain message, and that no job folder was made.
+- **startJob turns down bad requests.** Sends broken requests (no brand name, "own" music with no song, unknown music, no files, a "What does it do?" or extra instructions over the limit, a picture sent as a font, a fake template, ElevenLabs with no key) and checks each gets a plain message, and that no job folder was made.
+- **A deleted own template.** A request for a "My own prompt" template that is not saved gets a plain message.
 - **startJob takes fonts.** WOFF2, WOFF, TTF and OTF files (upper case names too) pass the check.
 
 `upload.spec.ts` (step 3, "Add your stuff")
 
 - **"What does it do?" box.** The counter goes up as you type and typing stops at the limit (300, from `src/shared/limits.ts`).
-- **Fonts box.** It shows with its hint, turns down a picture with a plain message, takes all four kinds of font, and "Remove all" empties it.
+- **Advanced.** "Extra instructions" is hidden until you open Advanced, counts letters, and stays open with its text after Back and Next.
+- **Fonts box.** It shows with its hint, turns down a picture with a plain message, takes all four kinds of font, each file has its own x to remove it, and "Remove all" empties it.
 
 `job.spec.ts` (starting a job, with the fake Claude Code)
 
 - **brief.json.** "What does it do?" is saved as `about`, trimmed, and left out when it's empty or only spaces.
+- **My own prompt templates.** The job folder is the feature walkthrough (rules, wrenn.js and all), with the saved prompt added to CLAUDE.md as the creative brief, before any extra instructions.
+- **Extra instructions.** Typed text is added to the end of the job's CLAUDE.md as a labelled note (a closing tag in it can't end the note early), never in brief.json, and left out when blank.
 - **timings.json.** With no file, a broken file or the wrong shape, the time left is the first-time guess. An older file without the music kind still loads, ElevenLabs runs don't slow down the guess for other music, and broken runs are skipped.
-- **Progress bar.** "Making your video" has a progress bar with its name, 0 to 100 values and a spoken value like "0%, about 8 min left". Screen readers hear the step, not the ticking numbers. Cancel goes back to the upload step.
+- **Progress bar.** "Making your video" has a progress bar with its name, 0 to 100 values and a spoken value like "0%, about 8 min left". Screen readers hear the step, not the ticking numbers. Cancel asks first ("Yes, stop"), then goes back to the upload step and says the files are still there.
 - **From the upload screen.** Types the about text, adds a picture and a font, presses "Make my video": the about text is in brief.json and the font is in the job's assets folder.
 
 `eta.spec.ts` (the time left, no window)
 
 - **Progress math.** The guess per part comes from past videos (or a first-time guess), ElevenLabs songs are timed apart from other music, a part that runs long never says zero, rendering uses the real frame speed, the screen never steps back, and the time left reads as "About 3 min left" or "Almost done".
-- **Never backward.** Over a whole video with wobbly guesses, the bar never goes back, the time left never goes up, and it never says 100% before it's done. Missing or broken numbers are ignored. "Almost done" starts at 45 seconds left.
+- **Never backward.** Over a whole video with wobbly guesses, the bar never goes back, the time left never goes up, and it never says 100% before it's done. Missing or broken numbers are ignored. "Almost done" starts at 45 seconds left, and only once the bar is at 90% or more.
 
 `notify.spec.ts` (the "video finished" notification, no window)
 
@@ -64,3 +69,9 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 `sound.spec.ts` (the sound engine, no window)
 
 - **Render CLI adds music.** Renders the small test scene (`src/main/render/test-scene`) to an MP4 with Wrenn's playful music, the same way `npm run render` does. Then checks with ffmpeg: the video has sound, the sound is as long as the picture, and it's still loud a second before the end (so the music doesn't run out early). This one is slow, about 15 to 30 seconds.
+
+`site-grab.spec.ts` ("Grab from my site", with a fake Claude Code)
+
+- **Grabs a site.** The test serves its own tiny website on this computer (127.0.0.1, never the internet). Wrenn is allowed to open it only because of a test-only setting, `WRENN_TEST_ALLOW_LOCAL_SITES` (`allowLocalSites` in `helpers.ts`). Checks the desktop and phone screenshots, the logo and the font file show in the upload boxes, the colors and font names show, one screenshot can be removed, and then the files reach the job folder and the colors and fonts reach `brief.json`.
+- **Bad links.** A `file:` link and a page that isn't there both get a plain message, and nothing is left behind.
+- **Pages on this computer.** Without the test setting, a 127.0.0.1 link is turned down.

@@ -18,6 +18,8 @@ How a video gets made:
 - `product-explainer/` ("Explainer"): problem, product, 3 or 4 steps, result, CTA, told with captions. 30 or 60 seconds. Inspired by @finnardley.
 - `showreel/`: fast cuts of every screen on the beat, almost no words. 15 or 30 seconds. Inspired by @stephanlivera.
 
+**My own prompt** (made in the app, saved in `custom-templates.json` in the app's user data folder): the user's saved prompt is added to the end of `feature-walkthrough`'s CLAUDE.md as the creative brief, so the scene contract and render rules stay the same.
+
 What each template needs and which lengths it offers lives in `desktop/src/shared/templates.ts`. Wrenn's prompts are written from scratch; the creators above are credited, not copied.
 
 Each template folder has:

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
+import { CancelButton } from '../components/CancelButton'
 import { ProgressBar } from '../components/ProgressBar'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import type { JobEvent } from '../data'
@@ -51,7 +52,7 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
   const renderPercent =
     rendering && event.total ? Math.min(100, Math.round(((event.frame ?? 0) / event.total) * 100)) : 0
   const overall = Math.round(next.percent)
-  const timeLeft = timeLeftText(next.secondsLeft)
+  const timeLeft = timeLeftText(next.secondsLeft, overall)
   // Screen readers hear only when the step changes, not the numbers that tick every second
   const stepNow = building ? 'Building your scenes' : rendering ? 'Putting your video together' : 'Adding music and sound'
 
@@ -107,9 +108,7 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
       </div>
 
       <div className="mt-xl text-center">
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
+        <CancelButton onConfirm={onCancel} />
       </div>
     </div>
   )

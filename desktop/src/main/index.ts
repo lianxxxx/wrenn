@@ -1,11 +1,13 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { checkClaude, openClaudeSignIn } from './claude'
+import { checkClaude, installClaude, openClaudeSignIn } from './claude'
+import { deleteCustomTemplate, listCustomTemplates, saveCustomTemplate } from './customTemplates'
 import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from './jobs'
 import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
 import { getSettings, saveSettings } from './settings'
+import { cleanOldGrabs, grabSite } from './siteGrab'
 import { startUpdateChecks } from './updates'
 
 // Test-only: Playwright tests point settings at a temp folder, so they never touch real settings
@@ -23,6 +25,8 @@ registerMediaScheme()
 ipcMain.handle('check-claude', () => checkClaude())
 // Opens Claude Code's own sign-in, so the user signs in themselves
 ipcMain.handle('open-claude-sign-in', () => openClaudeSignIn())
+// Installs Claude Code with Anthropic's own installer, hidden. Only one install runs at a time.
+ipcMain.handle('install-claude', () => installClaude())
 
 // Where finished videos go: Videos\Wrenn (outputDir makes it if it's missing), opened in File Explorer.
 // The main process owns this path: the screens never send a path to open.
@@ -35,6 +39,14 @@ ipcMain.handle('save-settings', (_event, changes: unknown) => saveSettings(chang
 
 // Every video in Videos\Wrenn, newest first (see library.ts)
 ipcMain.handle('list-videos', () => listVideos())
+
+// "My own prompt" templates (see customTemplates.ts)
+ipcMain.handle('list-custom-templates', () => listCustomTemplates())
+ipcMain.handle('save-custom-template', (_event, template: unknown) => saveCustomTemplate(template))
+ipcMain.handle('delete-custom-template', (_event, id: unknown) => deleteCustomTemplate(id))
+
+// "Grab from my site": screenshots, logo, colors and fonts from a website (see siteGrab.ts)
+ipcMain.handle('grab-site', (_event, url: unknown) => grabSite(url))
 
 // Video jobs (see jobs.ts). Progress goes back to the window that started the job.
 ipcMain.handle('start-job', (event, request: unknown) => startJob(event.sender, request))
@@ -103,6 +115,7 @@ app.whenReady().then(() => {
 
   // Delete job folders older than a week (in the background, never blocks the app)
   void cleanOldJobs()
+  void cleanOldGrabs()
 
   // F12 opens DevTools in dev, and reload shortcuts are off in the built app
   app.on('browser-window-created', (_, window) => {

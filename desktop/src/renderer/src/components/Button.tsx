@@ -1,6 +1,7 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+// ComponentPropsWithRef so a screen can hand in a ref (for example to put focus back on it)
+type Props = ComponentPropsWithRef<'button'> & {
   variant?: 'primary' | 'ghost'
 }
 

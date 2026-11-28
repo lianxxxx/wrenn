@@ -129,26 +129,26 @@ Release v1 first, then improve with the features below (Lian, 2026-11-08).
 - v3: edit mode (user's own video + Whisper), local TTS (Kokoro)
 - Lian's feature list (2026-11-07), after v1 is final:
   - macOS version: same Electron code, built by GitHub Actions on a Mac (can't build it on Windows). Shared on GitHub only, unsigned, so the README needs a 'how to open on Mac' guide (Privacy & Security, Open Anyway). Signing ($99/yr) not needed
-  - Sidebar in the app: Home, templates, your videos, settings
+  - Done 2026-11-28 (branch feat/first-user-fixes): Sidebar in the app: Home, templates, your videos, settings
   - Choose the AI: Claude Code or GPT (Codex CLI), plus a model picker (for example Opus). Same Option B flow: the user runs it themselves
   - Who it's for (Lian, 2026-11-27): devs, people new to Claude, and vibe coders who want a promo video for what they built. Goal: full features, everything ready. The biggest selling point: a free LLM option included somewhere, so nobody has to pay to try it
   - Template order (Lian, 2026-11-27): replace the 3 Coming soon cards (Product launch, Before and after, Customer love) with 1. Logo reveal, 2. Kinetic typography, 3. Product launch, 4. Product explainer, 5. Showreel. First versions all on 2026-11-27
   - Full features plan (Lian, 2026-11-27). Suggested order:
-    1. Easy install + sign-in for Claude Code: a one-click Install button (Wrenn runs the installer hidden) and a Sign in button that opens the browser. No terminal, no black window
+    1. Done 2026-11-28 (branch feat/first-user-fixes): one-click Install; sign-in warns about the black window instead of hiding it (hiding could block the code paste). Easy install + sign-in for Claude Code: a one-click Install button (Wrenn runs the installer hidden) and a Sign in button that opens the browser. No terminal, no black window
     2. Codex (ChatGPT) support: Codex CLI runs in the background like Claude Code, users sign in with their own ChatGPT account. "Claude or ChatGPT" picker in Settings
     3. Free LLM option: the user pastes a free API key (for example Gemini or OpenRouter free models), Wrenn calls the API directly, nothing to install. Warn users clearly: free models make weaker videos, have daily limits, and some free tiers use your data for training. Check the current free tiers before building
     4. Then the new templates (logo reveal, kinetic typography, product launch, explainer, showreel), inspired by motion-graphics.org. Write Wrenn's own prompts, credit each creator in the README, /credits and the template card ("Inspired by @creator")
-  - Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
-  - Your own templates (Lian, 2026-11-26): a 'My own prompt' card on the Pick a template screen, next to Feature walkthrough. Users paste a prompt they like (for example one they found on TikTok), name it, and it's saved as their own template to reuse with the same size, length, vibe and upload steps. Credit the source when it came from someone else
-  - Make a video from a link (Lian, 2026-11-26): no files needed, the user just pastes their website's URL. Wrenn opens it in a hidden window (Electron can do this, no new package), takes phone and desktop screenshots of each section in light mode, and grabs the logo, the fonts and the colors from the page, the same way the Wrenn, Trackr and G-Track samples were made by hand. Then it carries on like a normal upload. Only public pages; for pages behind a login the user still uploads screenshots
+  - Done 2026-11-28 (branch feat/first-user-fixes): Optional prompt box, hidden under 'Advanced' so 'No prompts. Just render.' stays true for most people
+  - Done 2026-11-28 (branch feat/first-user-fixes): Your own templates (Lian, 2026-11-26): a 'My own prompt' card on the Pick a template screen, next to Feature walkthrough. Users paste a prompt they like (for example one they found on TikTok), name it, and it's saved as their own template to reuse with the same size, length, vibe and upload steps. Credit the source when it came from someone else
+  - Done 2026-11-28 (branch feat/first-user-fixes): Make a video from a link (Lian, 2026-11-26): no files needed, the user just pastes their website's URL. Wrenn opens it in a hidden window (Electron can do this, no new package), takes phone and desktop screenshots of each section in light mode, and grabs the logo, the fonts and the colors from the page, the same way the Wrenn, Trackr and G-Track samples were made by hand. Then it carries on like a normal upload. Only public pages; for pages behind a login the user still uploads screenshots
 - From the first-time user walkthrough (2026-11-26), bigger than a quick fix:
-  - Installing Claude Code still means a terminal (the guide is a page of commands). A guided step in Wrenn, or a one-click install
-  - Sign in opens a black console window. Warn first ("A black window opens, that's normal") or hide it
-  - Cancel has no "are you sure?" and no message after. Add a confirm, then "Stopped. Your files are still here."
-  - Upload screen: remove one file (an x on each) and show thumbnails, not only "Remove all"
-  - Settings: show Claude Code's status (ready / sign in again)
-  - Progress can say "Almost done" too early; make the wording follow the bar
-  - Dark mode: the "Edit my video" coming-soon card looks muddy at 60% opacity
+  - Done 2026-11-28 (branch feat/first-user-fixes): Installing Claude Code still means a terminal (the guide is a page of commands). A guided step in Wrenn, or a one-click install
+  - Done 2026-11-28 (branch feat/first-user-fixes): (warning added) Sign in opens a black console window. Warn first ("A black window opens, that's normal") or hide it
+  - Done 2026-11-28 (branch feat/first-user-fixes): Cancel has no "are you sure?" and no message after. Add a confirm, then "Stopped. Your files are still here."
+  - Done 2026-11-28 (branch feat/first-user-fixes): Upload screen: remove one file (an x on each) and show thumbnails, not only "Remove all"
+  - Done 2026-11-28 (branch feat/first-user-fixes): Settings: show Claude Code's status (ready / sign in again)
+  - Done 2026-11-28 (branch feat/first-user-fixes): Progress can say "Almost done" too early; make the wording follow the bar
+  - Done 2026-11-28 (branch feat/first-user-fixes): Dark mode: the "Edit my video" coming-soon card looks muddy at 60% opacity
   - Video editor with a timeline (layout like CapCut, Wrenn's own design): cut and trim, music track, voiceover, volume. Start simple, no effects, masks or stickers at first
 - Music made for the video (Lian, 2026-11-20, after comparing with the Moondance showreel): A (default) Claude Code composes the music in code for each video, 120 BPM, every hit and section change on the video's own cuts (how Moondance was made). B (with an ElevenLabs key) send ElevenLabs Music a composition plan with sections timed to the scene changes. Plan together with the voiceover. NEXT (Lian, 2026-11-27, after the 5 new templates): the free songs and ElevenLabs songs both feel flat. She wants modern beat music that hits on the cuts, synced to the video. The videos themselves are ok, only the music needs work
 - Done 2026-11-21: Waiting screen (Lian, 2026-11-20): a real progress bar with an estimated time left, instead of only a spinner (base it on how long past videos took per length). Plus a Windows notification when the video is done, so people can leave Wrenn while waiting
