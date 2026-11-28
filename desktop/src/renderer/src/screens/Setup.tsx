@@ -21,10 +21,10 @@ type Props = {
 type Status = 'checking' | 'missing' | 'signed-out' | 'waiting' | 'found'
 
 // Placeholder link: double check the exact Anthropic install page before launch
-const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
+export const INSTALL_URL = 'https://code.claude.com/docs/en/setup'
 
 // How often to check again while waiting for the user to install or sign in
-const RECHECK_MS = 4000
+export const RECHECK_MS = 4000
 
 export function Setup({ voiceoverKey, onKeyChange, onContinue }: Props) {
   const [status, setStatus] = useState<Status>('checking')
