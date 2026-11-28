@@ -57,12 +57,14 @@ export function Home({ videos, onOpenVideo, onTemplate, onEdit }: Props) {
             type="button"
             onClick={p.onClick}
             disabled={p.soon}
-            className={`group flex min-h-64 flex-col items-start justify-end rounded-lg px-[22px] py-[28px] text-left text-ink shadow-[0_10px_30px_rgba(0,0,0,0.08)] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[var(--ease-out-strong)] ${p.soon ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:rotate-0 hover:-translate-y-1 active:translate-y-0'} ${p.color} ${p.tilt}`}
+            // Not ready yet: a plain card with a dashed edge and quiet text, instead of see-through
+            // (see-through lemon on the dark page turns a muddy green)
+            className={`group flex min-h-64 flex-col items-start justify-end rounded-lg px-[22px] py-[28px] text-left motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-[var(--ease-out-strong)] ${p.soon ? 'cursor-not-allowed border-2 border-dashed border-line bg-card text-navy-body' : `cursor-pointer text-ink shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:rotate-0 hover:-translate-y-1 active:translate-y-0 ${p.color}`} ${p.tilt}`}
           >
             <span className="font-display text-[1.875rem] leading-[1.1]">{p.title}</span>
             <span className="mt-sm text-base leading-[1.55]">{p.text}</span>
             {p.soon ? (
-              <span className="mt-lg inline-flex items-center rounded-pill border-2 border-ink px-[16px] py-[6px] font-display text-lg leading-none">
+              <span className="mt-lg inline-flex items-center rounded-pill border-2 border-navy-body px-[16px] py-[6px] font-display text-lg leading-none">
                 Coming soon
               </span>
             ) : (
