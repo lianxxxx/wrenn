@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button } from '../components/Button'
+import { CancelButton } from '../components/CancelButton'
 import { ProgressBar } from '../components/ProgressBar'
 import { CheckIcon, Spinner } from '../components/Spinner'
 
@@ -61,9 +61,7 @@ export function EditGenerating({ onDone, onCancel }: Props) {
       </ol>
 
       <div className="mt-xl">
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
+        <CancelButton onConfirm={onCancel} />
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
+import { CancelButton } from '../components/CancelButton'
 import { ProgressBar } from '../components/ProgressBar'
 import { CheckIcon, Spinner } from '../components/Spinner'
 import type { JobEvent } from '../data'
@@ -107,9 +108,7 @@ function Progress({ event, onCancel }: { event: JobEvent; onCancel: () => void }
       </div>
 
       <div className="mt-xl text-center">
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
+        <CancelButton onConfirm={onCancel} />
       </div>
     </div>
   )

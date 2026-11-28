@@ -162,7 +162,10 @@ test('"Making your video" shows a progress bar screen readers can follow', async
   await expect(page.getByRole('status')).toHaveText('Building your scenes')
 
   await page.getByRole('button', { name: 'Cancel' }).click()
+  // Wrenn asks first, then says the files are still there
+  await page.getByRole('button', { name: 'Yes, stop' }).click()
   await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
+  await expect(page.getByText('Stopped. Your files are still here.')).toBeVisible()
 })
 
 test('from the upload screen: the about text and fonts reach the job folder', async () => {
@@ -187,5 +190,7 @@ test('from the upload screen: the about text and fonts reach the job folder', as
 
   // Cancel stops the fake Claude Code and goes back to the upload step
   await page.getByRole('button', { name: 'Cancel' }).click()
+  // Wrenn asks first, then says the files are still there
+  await page.getByRole('button', { name: 'Yes, stop' }).click()
   await expect(page.getByRole('heading', { name: 'Add your stuff' })).toBeVisible()
 })

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
 import { ChoiceGroup } from '../components/ChoiceGroup'
+import { StoppedNote } from '../components/CancelButton'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { SizePicker } from '../components/SizePicker'
@@ -12,10 +13,12 @@ type Props = {
   onChange: (changes: Partial<EditDraft>) => void
   onBack: () => void
   onMake: () => void
+  // True right after the user stopped a video
+  stopped?: boolean
 }
 
 // The edit path: one video in. Wrenn decides everything unless you open Customize.
-export function EditUpload({ draft, onChange, onBack, onMake }: Props) {
+export function EditUpload({ draft, onChange, onBack, onMake, stopped = false }: Props) {
   const [open, setOpen] = useState(false)
   const ready = draft.video.length > 0
 
@@ -26,6 +29,8 @@ export function EditUpload({ draft, onChange, onBack, onMake }: Props) {
         sub="Wrenn adds subtitles, cuts the long pauses, zooms in on the good parts and fixes the colors."
         onBack={onBack}
       />
+
+      {stopped && <StoppedNote />}
 
       <FileDrop
         big

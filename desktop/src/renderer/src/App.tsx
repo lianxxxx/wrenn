@@ -69,6 +69,10 @@ function App() {
   const startingRef = useRef(false)
   // Events that arrive before startJob answers with the job id
   const earlyEvents = useRef(new Map<string, JobEvent>())
+  // True right after the user stops a video: the upload screen says "Stopped" once.
+  // Cleared as soon as they go anywhere else (adjusted while rendering, like Generating does).
+  const [stopped, setStopped] = useState(false)
+  if (stopped && screen !== 'template-upload' && screen !== 'edit-upload') setStopped(false)
 
   // A newer Wrenn is downloaded and ready (installed app only). Null until then.
   const [updateVersion, setUpdateVersion] = useState<string | null>(null)
@@ -119,6 +123,7 @@ function App() {
         setJobEvent({ ...event, stage: 'failed', message: "Your video was made, but Wrenn couldn't find it. Look in your Videos\\Wrenn folder." })
       } else if (event.stage === 'cancelled') {
         jobIdRef.current = null
+        setStopped(true)
         setScreen('template-upload')
       } else {
         setJobEvent(event)
@@ -180,6 +185,7 @@ function App() {
     const id = jobIdRef.current
     if (id) window.api.cancelJob(id).catch(() => {})
     leaveJob()
+    setStopped(true)
   }
 
   // FAKE: the edit path isn't built yet. Stable function, so the fake timer doesn't restart.
@@ -299,6 +305,7 @@ function App() {
             onGenerate={startTemplateJob}
             starting={starting}
             error={startError}
+            stopped={stopped}
           />
         )}
 
@@ -308,6 +315,7 @@ function App() {
             onChange={updateEdit}
             onBack={() => setScreen('home')}
             onMake={() => setScreen('edit-generating')}
+            stopped={stopped}
           />
         )}
 
@@ -320,7 +328,13 @@ function App() {
         )}
 
         {screen === 'edit-generating' && (
-          <EditGenerating onDone={finishFakeEdit} onCancel={() => setScreen('edit-upload')} />
+          <EditGenerating
+            onDone={finishFakeEdit}
+            onCancel={() => {
+              setStopped(true)
+              setScreen('edit-upload')
+            }}
+          />
         )}
 
         {screen === 'done' && openVideo && (

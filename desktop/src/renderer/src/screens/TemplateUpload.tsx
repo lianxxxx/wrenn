@@ -1,4 +1,5 @@
 import { Button } from '../components/Button'
+import { StoppedNote } from '../components/CancelButton'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
 import { TextArea } from '../components/TextArea'
@@ -16,10 +17,12 @@ type Props = {
   starting: boolean
   // Why the job couldn't start, in plain words. Empty when all is fine.
   error: string
+  // True right after the user stopped a video
+  stopped?: boolean
 }
 
 // Step 3 of the template path: your files and a few words.
-export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error }: Props) {
+export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error, stopped = false }: Props) {
   // What this template needs: screenshots, a logo, or the user's own words
   const { needs } = rulesFor(draft.templateId)
   const hasName = draft.brandName.trim() !== ''
@@ -54,6 +57,8 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
         step="Step 3 of 3"
         onBack={onBack}
       />
+
+      {stopped && <StoppedNote />}
 
       <div className="flex flex-col gap-xl">
         <TextField

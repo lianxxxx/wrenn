@@ -49,7 +49,7 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 
 - **brief.json.** "What does it do?" is saved as `about`, trimmed, and left out when it's empty or only spaces.
 - **timings.json.** With no file, a broken file or the wrong shape, the time left is the first-time guess. An older file without the music kind still loads, ElevenLabs runs don't slow down the guess for other music, and broken runs are skipped.
-- **Progress bar.** "Making your video" has a progress bar with its name, 0 to 100 values and a spoken value like "0%, about 8 min left". Screen readers hear the step, not the ticking numbers. Cancel goes back to the upload step.
+- **Progress bar.** "Making your video" has a progress bar with its name, 0 to 100 values and a spoken value like "0%, about 8 min left". Screen readers hear the step, not the ticking numbers. Cancel asks first ("Yes, stop"), then goes back to the upload step and says the files are still there.
 - **From the upload screen.** Types the about text, adds a picture and a font, presses "Make my video": the about text is in brief.json and the font is in the job's assets folder.
 
 `eta.spec.ts` (the time left, no window)
