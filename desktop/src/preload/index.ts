@@ -64,6 +64,27 @@ export type CustomTemplate = {
 // What the "My own prompt" form sends
 export type NewCustomTemplate = { name: string; prompt: string; credit?: string }
 
+// A file "Grab from my site" saved on this computer. data is the file itself, so the
+// screen can show it (and a thumbnail) like a normal upload.
+export type GrabbedFile = { path: string; name: string; type: string; data: Uint8Array }
+
+// What "Grab from my site" found on the user's website
+export type SiteGrab = {
+  url: string
+  // Screenshots: desktop width first, then phone width
+  photos: GrabbedFile[]
+  logo?: GrabbedFile
+  // Font files from the site itself, named like "Inter-700.woff2"
+  fonts: GrabbedFile[]
+  // Main colors as hex, like "#219EBC"
+  colors: string[]
+  // Font names from the headline and body text, like "Inter"
+  fontFamilies: string[]
+}
+
+// The brand bits from the user's website that go into brief.json
+export type SiteBrand = { url: string; colors: string[]; fonts: string[] }
+
 // Everything the template path collected
 export type JobRequest = {
   templateId: string
@@ -81,6 +102,8 @@ export type JobRequest = {
   music: MusicChoice
   // Only when music is "own": real path of the song (.mp3, .wav, .m4a, .aac, .ogg, .flac)
   musicFile?: string
+  // Colors and font names from "Grab from my site". Missing when the user didn't use it.
+  site?: SiteBrand
 }
 
 // Sent by the main process while a video is being made
@@ -132,6 +155,10 @@ const api = {
   saveCustomTemplate: (template: NewCustomTemplate): Promise<CustomTemplate> =>
     ipcRenderer.invoke('save-custom-template', template),
   deleteCustomTemplate: (id: string): Promise<void> => ipcRenderer.invoke('delete-custom-template', id),
+
+  // Opens the user's website in a hidden window: screenshots, logo, colors and fonts.
+  // Takes about 20 seconds. One at a time.
+  grabSite: (url: string): Promise<SiteGrab> => ipcRenderer.invoke('grab-site', url),
 
   // Makes the job folder, runs Claude Code in it in the background, and starts waiting for it
   startJob: (request: JobRequest): Promise<{ jobId: string }> => ipcRenderer.invoke('start-job', request),

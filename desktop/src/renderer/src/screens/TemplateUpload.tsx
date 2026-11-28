@@ -3,15 +3,18 @@ import { Button } from '../components/Button'
 import { StoppedNote } from '../components/CancelButton'
 import { FileDrop } from '../components/FileDrop'
 import { ScreenTitle } from '../components/ScreenTitle'
+import { SiteGrabber } from '../components/SiteGrabber'
 import { TextArea } from '../components/TextArea'
 import { TextField } from '../components/TextField'
-import type { TemplateDraft } from '../data'
+import type { SiteGrab, TemplateDraft } from '../data'
 import { MAX_ABOUT, MAX_EXTRA } from '../../../shared/limits'
 import { rulesFor } from '../../../shared/templates'
 
 type Props = {
   draft: TemplateDraft
   onChange: (changes: Partial<TemplateDraft>) => void
+  // "Grab from my site" finished: add its files, colors and fonts to the draft
+  onSiteGrabbed: (grab: SiteGrab) => void
   onBack: () => void
   onGenerate: () => void
   // True while Wrenn is setting up the job (before the Generating screen)
@@ -23,7 +26,7 @@ type Props = {
 }
 
 // Step 3 of the template path: your files and a few words.
-export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, error, stopped = false }: Props) {
+export function TemplateUpload({ draft, onChange, onSiteGrabbed, onBack, onGenerate, starting, error, stopped = false }: Props) {
   // What this template needs: screenshots, a logo, or the user's own words
   const { needs } = rulesFor(draft.templateId)
   // Read once when the screen opens. It never changes after, so clearing the box doesn't snap it shut.
@@ -89,6 +92,14 @@ export function TemplateUpload({ draft, onChange, onBack, onGenerate, starting, 
             onChange={(e) => onChange({ about: e.target.value })}
           />
         )}
+        <SiteGrabber
+          url={draft.siteUrl}
+          onUrl={(siteUrl) => onChange({ siteUrl })}
+          site={draft.site}
+          withPhotos={needs === 'screens'}
+          onGrabbed={onSiteGrabbed}
+          onClearSite={() => onChange({ site: undefined })}
+        />
         {needs === 'logo' && (
           <FileDrop
             label="Logo"

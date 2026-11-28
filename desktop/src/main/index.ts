@@ -7,6 +7,7 @@ import { cancelJob, cleanOldJobs, openClaudeInJob, startJob, stopAllJobs } from 
 import { outputDir, listVideos } from './library'
 import { registerMediaHandler, registerMediaScheme } from './media'
 import { getSettings, saveSettings } from './settings'
+import { cleanOldGrabs, grabSite } from './siteGrab'
 import { startUpdateChecks } from './updates'
 
 // Test-only: Playwright tests point settings at a temp folder, so they never touch real settings
@@ -43,6 +44,9 @@ ipcMain.handle('list-videos', () => listVideos())
 ipcMain.handle('list-custom-templates', () => listCustomTemplates())
 ipcMain.handle('save-custom-template', (_event, template: unknown) => saveCustomTemplate(template))
 ipcMain.handle('delete-custom-template', (_event, id: unknown) => deleteCustomTemplate(id))
+
+// "Grab from my site": screenshots, logo, colors and fonts from a website (see siteGrab.ts)
+ipcMain.handle('grab-site', (_event, url: unknown) => grabSite(url))
 
 // Video jobs (see jobs.ts). Progress goes back to the window that started the job.
 ipcMain.handle('start-job', (event, request: unknown) => startJob(event.sender, request))
@@ -111,6 +115,7 @@ app.whenReady().then(() => {
 
   // Delete job folders older than a week (in the background, never blocks the app)
   void cleanOldJobs()
+  void cleanOldGrabs()
 
   // F12 opens DevTools in dev, and reload shortcuts are off in the built app
   app.on('browser-window-created', (_, window) => {

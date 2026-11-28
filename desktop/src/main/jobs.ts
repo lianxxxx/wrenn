@@ -14,7 +14,7 @@ import { existsSync } from 'fs'
 import { appendFile, copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'fs/promises'
 import { basename, dirname, extname, isAbsolute, join } from 'path'
 
-import type { CustomTemplate, JobEvent, JobRequest, MusicChoice, SizeId } from '../preload'
+import type { CustomTemplate, JobEvent, JobRequest, MusicChoice, SiteBrand, SizeId } from '../preload'
 import { addSound } from './audio'
 import { findClaude } from './claude'
 import { getCustomTemplate } from './customTemplates'
@@ -25,7 +25,7 @@ import { renderScene } from './render/render'
 import { getSettings } from './settings'
 import { expectedTimes, recordRun } from './timings'
 // "What does it do?" can be a bit longer than the other text: one or two sentences
-import { AUDIO_EXTS, MAX_ABOUT, MAX_EXTRA } from '../shared/limits'
+import { AUDIO_EXTS, MAX_ABOUT, MAX_EXTRA, MAX_SITE_URL } from '../shared/limits'
 import { CUSTOM_BASE, isCustomTemplateId, rulesFor } from '../shared/templates'
 
 const isWindows = process.platform === 'win32'
@@ -217,6 +217,19 @@ async function checkRequest(input: unknown): Promise<CheckedRequest> {
     throw new Error('Add your ElevenLabs key in Settings first, or pick another music option.')
   }
 
+  // Optional, from "Grab from my site": only hex colors and plain font names get through
+  let site: SiteBrand | undefined
+  if (r.site !== undefined) {
+    const s = (r.site ?? {}) as Record<string, unknown>
+    const list = (v: unknown): unknown[] => (Array.isArray(v) ? v.slice(0, 8) : [])
+    const colors = list(s.colors).filter((c): c is string => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c))
+    const fonts = list(s.fonts).filter(
+      (f): f is string => typeof f === 'string' && f.length <= 60 && /^[\w .-]+$/.test(f)
+    )
+    const url = typeof s.url === 'string' && s.url.length <= MAX_SITE_URL && /^https?:\/\//i.test(s.url) ? s.url : ''
+    if (colors.length > 0 || fonts.length > 0) site = { url, colors, fonts }
+  }
+
   return {
     templateId: r.templateId,
     size: r.size as SizeId,
@@ -229,6 +242,7 @@ async function checkRequest(input: unknown): Promise<CheckedRequest> {
     files,
     music,
     musicFile,
+    site,
     custom
   }
 }
@@ -290,6 +304,20 @@ ${asUserText(extra, 'user-note')}
 `
 }
 
+// "Grab from my site": Wrenn read the colors and fonts from the user's website.
+// The values live in brief.json (checked: hex colors and plain font names only).
+function siteSection(): string {
+  return `
+
+## Colors and fonts from the user's website
+
+\`brief.json\` has a \`site\` field: Wrenn opened the user's website and read the colors (\`site.colors\`, hex, roughly in order: page background, text, header, headline, buttons, links) and the font names (\`site.fonts\`, headline font first) it really uses. The screenshots in \`assets/\` named like \`<site>-desktop-1.jpg\` and \`<site>-phone-1.jpg\` are that website, top to bottom.
+
+- **Colors:** build the palette from \`site.colors\` instead of guessing from the logo. Pick the main brand color (usually a button or headline color, not plain white, black or grey), an accent, and a background. Still check text contrast.
+- **Fonts:** font files in \`assets/\` named like \`<Font>-<weight>.woff2\` come from the website: add them with \`@font-face\` and use them. If a font in \`site.fonts\` has no file, use Figtree for it.
+`
+}
+
 // A "My own prompt" template: the user's saved prompt is the creative brief, on top of the
 // base template's CLAUDE.md. The base keeps the rules that make the render work.
 function customBriefSection(custom: CustomTemplate): string {
@@ -339,9 +367,12 @@ async function makeJobFolder(request: CheckedRequest, dir: string): Promise<stri
     ...(request.about ? { about: request.about } : {}),
     size: request.size,
     length: request.length,
-    vibe: request.vibe
+    vibe: request.vibe,
+    // From "Grab from my site": the colors and fonts the user's website really uses
+    ...(request.site ? { site: request.site } : {})
   }
   await writeFile(join(dir, 'brief.json'), JSON.stringify(brief, null, 2) + '\n', 'utf8')
+  if (request.site) await appendFile(join(dir, 'CLAUDE.md'), siteSection(), 'utf8')
   if (request.custom) await appendFile(join(dir, 'CLAUDE.md'), customBriefSection(request.custom), 'utf8')
   if (request.extra) await appendFile(join(dir, 'CLAUDE.md'), extraSection(request.extra), 'utf8')
   return ownSongFile

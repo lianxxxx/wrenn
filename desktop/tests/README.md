@@ -69,3 +69,9 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 `sound.spec.ts` (the sound engine, no window)
 
 - **Render CLI adds music.** Renders the small test scene (`src/main/render/test-scene`) to an MP4 with Wrenn's playful music, the same way `npm run render` does. Then checks with ffmpeg: the video has sound, the sound is as long as the picture, and it's still loud a second before the end (so the music doesn't run out early). This one is slow, about 15 to 30 seconds.
+
+`site-grab.spec.ts` ("Grab from my site", with a fake Claude Code)
+
+- **Grabs a site.** The test serves its own tiny website on this computer (127.0.0.1, never the internet). Wrenn is allowed to open it only because of a test-only setting, `WRENN_TEST_ALLOW_LOCAL_SITES` (`allowLocalSites` in `helpers.ts`). Checks the desktop and phone screenshots, the logo and the font file show in the upload boxes, the colors and font names show, one screenshot can be removed, and then the files reach the job folder and the colors and fonts reach `brief.json`.
+- **Bad links.** A `file:` link and a page that isn't there both get a plain message, and nothing is left behind.
+- **Pages on this computer.** Without the test setting, a 127.0.0.1 link is turned down.

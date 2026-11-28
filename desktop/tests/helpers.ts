@@ -47,9 +47,10 @@ export function seedSettings(dirs: TestDirs, settings: { setupDone: boolean }): 
 // options.fakeClaude: hides the real Claude Code too, and puts a fake "claude" in its place.
 // The fake only waits (it calls no one and uses no tokens), so a video job can start and
 // sit on "Making your video". Call stopFakeClaude before closing the app.
+// options.allowLocalSites: "Grab from my site" may open 127.0.0.1, so a test can serve its own page.
 export async function launchApp(
   dirs: TestDirs,
-  options: { hideClaude?: boolean; fakeClaude?: boolean } = {}
+  options: { hideClaude?: boolean; fakeClaude?: boolean; allowLocalSites?: boolean } = {}
 ): Promise<{ app: ElectronApplication; page: Page }> {
   if (!existsSync(APP_ENTRY)) throw new Error(`Built app not found at ${APP_ENTRY}. Run "npm test" (it builds first).`)
 
@@ -59,6 +60,9 @@ export async function launchApp(
   delete env.ELECTRON_RENDERER_URL
   env.WRENN_TEST_USER_DATA = dirs.userData
   env.WRENN_TEST_OUTPUT_DIR = dirs.output
+  // "Grab from my site" may open pages on this computer (the test serves one on 127.0.0.1)
+  if (options.allowLocalSites) env.WRENN_TEST_ALLOW_LOCAL_SITES = '1'
+  else delete env.WRENN_TEST_ALLOW_LOCAL_SITES
 
   if (options.hideClaude || options.fakeClaude) {
     // Drop every PATH folder that has Claude Code in it ("Path" on Windows, "PATH" elsewhere)

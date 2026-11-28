@@ -1,11 +1,12 @@
 // Shared types and the fixed lists the screens use (sizes, templates, vibes).
 // Types the main process also uses come from the preload (the contract), so both sides agree.
-import type { JobRequest, MusicChoice, SizeId, VideoInfo } from '../../preload'
+import type { GrabbedFile, JobRequest, MusicChoice, SiteBrand, SiteGrab, SizeId, VideoInfo } from '../../preload'
 import { AUDIO_EXTS } from '../../shared/limits'
+import { rulesFor } from '../../shared/templates'
 // Placeholder video for the fake edit path
 import sampleVideo from './assets/sample.mp4'
 
-export type { CustomTemplate, JobEvent, JobRequest, MusicChoice, NewCustomTemplate, Settings, SizeId, VideoInfo } from '../../preload'
+export type { CustomTemplate, JobEvent, JobRequest, MusicChoice, NewCustomTemplate, Settings, SiteBrand, SiteGrab, SizeId, VideoInfo } from '../../preload'
 
 export type Size = {
   id: SizeId
@@ -143,6 +144,9 @@ export type TemplateDraft = {
   music: MusicChoice
   // Only used when music is "own": one song file
   musicFile: File[]
+  // The address typed in "Grab from my site", and the colors and fonts it found
+  siteUrl: string
+  site?: SiteBrand
 }
 
 export const emptyTemplateDraft: TemplateDraft = {
@@ -159,7 +163,8 @@ export const emptyTemplateDraft: TemplateDraft = {
   about: '',
   extra: '',
   music: 'wrenn',
-  musicFile: []
+  musicFile: [],
+  siteUrl: ''
 }
 
 // Everything picked on the edit path. Automatic is the default.
@@ -195,10 +200,48 @@ export function fakeEditVideo(size: SizeId, now = new Date()): VideoInfo {
   }
 }
 
+// Files from "Grab from my site" aren't picked from the disk, so the browser doesn't know
+// their path. We remember it here, next to the File the screen shows.
+const grabbedPaths = new WeakMap<File, string>()
+
+// Turns a file "Grab from my site" saved into a File the upload boxes can show
+export function fileFromGrab(grabbed: GrabbedFile): File {
+  const file = new File([grabbed.data as Uint8Array<ArrayBuffer>], grabbed.name, { type: grabbed.type })
+  grabbedPaths.set(file, grabbed.path)
+  return file
+}
+
+// True for files that came from "Grab from my site"
+export function isGrabbed(file: File): boolean {
+  return grabbedPaths.has(file)
+}
+
+// Puts what "Grab from my site" found into the draft. A new grab replaces the files from
+// the last one, but never the user's own uploads (their own logo stays too).
+// Screenshots only go in when the template has a screenshots box.
+export function applyGrab(draft: TemplateDraft, grab: SiteGrab): TemplateDraft {
+  const own = (files: File[]) => files.filter((f) => !isGrabbed(f))
+  const photos =
+    rulesFor(draft.templateId).needs === 'screens'
+      ? [...own(draft.photos), ...grab.photos.map(fileFromGrab)]
+      : draft.photos
+  const keepOwnLogo = draft.logo.length > 0 && !isGrabbed(draft.logo[0])
+  const logo = keepOwnLogo ? draft.logo : grab.logo ? [fileFromGrab(grab.logo)] : own(draft.logo)
+  const fonts = [...own(draft.fonts), ...grab.fonts.map(fileFromGrab)]
+  const found = grab.colors.length > 0 || grab.fontFamilies.length > 0
+  return {
+    ...draft,
+    photos,
+    logo,
+    fonts,
+    site: found ? { url: grab.url, colors: grab.colors, fonts: grab.fontFamilies } : undefined
+  }
+}
+
 // The picked files as real paths on disk, each with its role, for startJob
 export function draftFiles(draft: TemplateDraft): JobRequest['files'] {
   const toPaths = (files: File[], role: JobRequest['files'][number]['role']) =>
-    files.map((file) => ({ path: window.api.getPathForFile(file), role }))
+    files.map((file) => ({ path: grabbedPaths.get(file) ?? window.api.getPathForFile(file), role }))
   return [
     ...toPaths(draft.photos, 'photo'),
     ...toPaths(draft.recordings, 'recording'),

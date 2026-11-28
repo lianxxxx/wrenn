@@ -18,3 +18,6 @@ export const MAX_CUSTOM_PROMPT = 4000
 export const MAX_CREDIT = 200
 // How many saved templates Wrenn keeps
 export const MAX_CUSTOM_TEMPLATES = 50
+
+// "Grab from my site": the website address the user pastes
+export const MAX_SITE_URL = 500

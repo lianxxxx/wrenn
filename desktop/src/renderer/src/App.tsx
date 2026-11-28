@@ -4,6 +4,7 @@ import { Header } from './components/Header'
 import { Sidebar, type NavId } from './components/Sidebar'
 import { UpdateBanner } from './components/UpdateBanner'
 import {
+  applyGrab,
   cleanError,
   type CustomTemplate,
   draftFiles,
@@ -16,6 +17,7 @@ import {
   type JobEvent,
   type JobRequest,
   type Settings as SettingsData,
+  type SiteGrab,
   type TemplateDraft,
   type VideoInfo
 } from './data'
@@ -96,7 +98,9 @@ function App() {
   useEffect(() => window.api.onUpdateReady(setUpdateVersion), [])
 
   const updateTemplate = (changes: Partial<TemplateDraft>) => setTemplateDraft((d) => ({ ...d, ...changes }))
-  const updateEdit = (changes: Partial<EditDraft>) => setEditDraft((d) => ({ ...d, ...changes }))
+  // "Grab from my site" finished. Uses the newest draft, since the grab takes a while.
+  const applySiteGrab = (grab: SiteGrab) => setTemplateDraft((d) => applyGrab(d, grab))
+  const updateEdit =(changes: Partial<EditDraft>) => setEditDraft((d) => ({ ...d, ...changes }))
 
   // Read the settings file once, then pick the first screen
   useEffect(() => {
@@ -197,7 +201,8 @@ function App() {
         about: templateDraft.about.trim(),
         extra: templateDraft.extra.trim(),
         files: draftFiles(templateDraft),
-        ...draftMusic(templateDraft)
+        ...draftMusic(templateDraft),
+        ...(templateDraft.site ? { site: templateDraft.site } : {})
       }
       const { jobId } = await window.api.startJob(request)
       jobIdRef.current = jobId
@@ -377,6 +382,7 @@ function App() {
             <TemplateUpload
               draft={templateDraft}
               onChange={updateTemplate}
+              onSiteGrabbed={applySiteGrab}
               onBack={() => setScreen('template-options')}
               onGenerate={startTemplateJob}
               starting={starting}
