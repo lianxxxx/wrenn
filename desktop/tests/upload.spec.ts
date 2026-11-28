@@ -70,6 +70,10 @@ test('the fonts box takes font files and turns down the rest', async () => {
   await expect(page.getByText("Wrenn can't use that file type yet. Try a WOFF2, WOFF, TTF or OTF font.")).toBeVisible()
   await expect(chosen.getByRole('listitem')).toHaveCount(5)
 
+  // The x on one file removes only that file
+  await page.getByRole('button', { name: 'Remove Extra.ttf' }).click()
+  await expect(chosen.getByRole('listitem')).toHaveCount(4)
+
   await page.getByRole('button', { name: 'Remove all' }).click()
   await expect(chosen).toHaveCount(0)
 })

@@ -43,7 +43,7 @@ If a test fails, Playwright tries it once more. A test that passes on the second
 `upload.spec.ts` (step 3, "Add your stuff")
 
 - **"What does it do?" box.** The counter goes up as you type and typing stops at the limit (300, from `src/shared/limits.ts`).
-- **Fonts box.** It shows with its hint, turns down a picture with a plain message, takes all four kinds of font, and "Remove all" empties it.
+- **Fonts box.** It shows with its hint, turns down a picture with a plain message, takes all four kinds of font, each file has its own x to remove it, and "Remove all" empties it.
 
 `job.spec.ts` (starting a job, with the fake Claude Code)
 
